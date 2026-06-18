@@ -8,7 +8,7 @@ const ZONE_FOUR_FILL = 0x5c1a1a
 const DASH_WIDTH = 1
 const DASH_LENGTH_METERS = 3
 const GAP_LENGTH_METERS = 2
-const LABEL_OFFSET_PX = 6
+const LABEL_OFFSET_PX = 8
 
 function drawDashedBoundary(
   gfx: Graphics,
@@ -43,13 +43,14 @@ function addZoneLabel(
     text: label,
     style: {
       fill: AMBER,
-      fontSize: 11,
+      fontSize: 9,
       fontFamily: 'Arial',
     },
   })
 
+  text.alpha = 0.55
   text.anchor.set(0, 0.5)
-  text.position.set(labelPosition.sx + LABEL_OFFSET_PX, labelPosition.sy)
+  text.position.set(labelPosition.sx + LABEL_OFFSET_PX, labelPosition.sy - 8)
   container.addChild(text)
 }
 

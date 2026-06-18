@@ -3,8 +3,8 @@ import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import type { ScenarioMarker, ScenarioMarkerTone } from '../../../domain/scenarios/scenarioTypes'
 
 const MARKER_RADIUS = 8
-const LABEL_OFFSET_X = 10
-const LABEL_OFFSET_Y = -10
+const LABEL_OFFSET_X = 14
+const LABEL_OFFSET_Y = -16
 
 const MARKER_COLORS: Record<ScenarioMarkerTone, number> = {
   primary: 0x22d3ee,
@@ -35,15 +35,16 @@ export function drawScenarioMarkers(
       style: {
         fill: 0xffffff,
         fontFamily: 'Arial',
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 'bold',
       },
     })
 
     ring.circle(0, 0, MARKER_RADIUS)
-    ring.fill({ color, alpha: 0.22 })
-    ring.stroke({ color, width: 2, alpha: 0.9 })
+    ring.fill({ color, alpha: 0.16 })
+    ring.stroke({ color, width: 1.5, alpha: 0.78 })
 
+    label.alpha = 0.8
     label.position.set(LABEL_OFFSET_X, LABEL_OFFSET_Y)
 
     markerContainer.position.set(point.sx, point.sy)

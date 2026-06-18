@@ -65,49 +65,50 @@ export function buildScenarioAnimator({
     initialPositions.set(token, { x: token.position.x, y: token.position.y })
   }
 
-  if (scenario.id === 'build-through-wide-channels') {
-    scenario.arrows?.forEach((arrow) => {
-      const end = pitchToScreen(arrow.to.x, arrow.to.y, canvasW, canvasH, padding)
+  scenario.arrows?.forEach((arrow) => {
+    const end = pitchToScreen(arrow.to.x, arrow.to.y, canvasW, canvasH, padding)
 
-      if (isBallArrow(arrow)) {
-        if (!ballToken) {
-          return
-        }
-
-        const start = pitchToScreen(arrow.from.x, arrow.from.y, canvasW, canvasH, padding)
-
-        rememberInitialPosition(ballToken)
-        timeline.set(ballToken.position, { x: start.sx, y: start.sy })
-        timeline.to(ballToken.position, {
-          x: end.sx,
-          y: end.sy,
-          duration: arrow.type === 'dribble' ? 0.6 : 0.5,
-          ease: 'power1.inOut',
-        })
+    if (isBallArrow(arrow)) {
+      if (!ballToken) {
         return
       }
 
-      if (isPlayerArrow(arrow)) {
-        if (!arrow.playerNumber) {
-          return
-        }
+      const start = pitchToScreen(arrow.from.x, arrow.from.y, canvasW, canvasH, padding)
 
-        const playerToken = playerTokens.get(arrow.playerNumber)
+      rememberInitialPosition(ballToken)
+      timeline.set(ballToken.position, { x: start.sx, y: start.sy })
+      timeline.to(ballToken.position, {
+        x: end.sx,
+        y: end.sy,
+        duration: arrow.type === 'dribble' ? 0.6 : 0.5,
+        ease: 'power1.inOut',
+      })
+      return
+    }
 
-        if (!playerToken) {
-          return
-        }
-
-        rememberInitialPosition(playerToken)
-        timeline.to(playerToken.position, {
-          x: end.sx,
-          y: end.sy,
-          duration: 0.8,
-          ease: 'power2.inOut',
-        })
+    if (isPlayerArrow(arrow)) {
+      if (!arrow.playerNumber) {
+        return
       }
-    })
-  }
+
+      const playerToken = playerTokens.get(arrow.playerNumber)
+
+      if (!playerToken) {
+        return
+      }
+
+      const start = pitchToScreen(arrow.from.x, arrow.from.y, canvasW, canvasH, padding)
+
+      rememberInitialPosition(playerToken)
+      timeline.set(playerToken.position, { x: start.sx, y: start.sy })
+      timeline.to(playerToken.position, {
+        x: end.sx,
+        y: end.sy,
+        duration: 0.8,
+        ease: 'power2.inOut',
+      })
+    }
+  })
 
   const setState = (nextState: AnimatorState) => {
     state = nextState

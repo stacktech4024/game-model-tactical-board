@@ -259,6 +259,7 @@ function App() {
             />
           </div>
           <TimelineScrubber
+            key={selectedScenario.id}
             animatorRef={animatorRef}
             playState={playState}
             onPause={handleScrubberPause}

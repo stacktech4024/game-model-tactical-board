@@ -16,7 +16,7 @@ import { drawMarkings } from './layers/MarkingsLayer'
 import { drawScenarioMarkers } from './layers/MarkerLayer'
 import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
-import { DEFENSIVE_4231_POSITIONS, FORMATION_POSITIONS, type FormationPositionMap } from '../../data/formations'
+import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
@@ -52,15 +52,6 @@ type PixiCanvasProps = {
   showBall?: boolean
   onAnimatorReady?: (animator: ScenarioAnimator) => void
   onStateChange?: (state: AnimatorState) => void
-}
-
-function mirrorFormationY(positions: FormationPositionMap): FormationPositionMap {
-  return Object.fromEntries(
-    Object.entries(positions).map(([number, position]) => [
-      Number(number),
-      { x: position.x, y: PITCH.LENGTH - position.y },
-    ]),
-  )
 }
 
 export function PixiCanvas({
@@ -137,7 +128,7 @@ export function PixiCanvas({
       const debugLayer = new Graphics()
       const stage: Container = app.stage
       const activePositions = FORMATION_POSITIONS[selectedFormation]
-      const awayPositions = mirrorFormationY(DEFENSIVE_4231_POSITIONS)
+      const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
 
       stage.addChild(grassLayer)
