@@ -22,6 +22,7 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
     let cancelled = false
     let initialized = false
     let destroyed = false
+    const pitchPadding = 32
 
     const destroyApp = () => {
       if (destroyed) {
@@ -51,8 +52,8 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       const grassLayer = new Graphics()
       const markingsLayer = new Graphics()
 
-      drawGrass(grassLayer, width, height, 0)
-      drawMarkings(markingsLayer, width, height, 0)
+      drawGrass(grassLayer, width, height, pitchPadding)
+      drawMarkings(markingsLayer, width, height, pitchPadding)
 
       container.textContent = ''
       container.appendChild(app.canvas)

@@ -37,7 +37,10 @@ function drawArc(
   const center = pitchToScreen(x, y, canvasW, canvasH, padding)
   const edge = pitchToScreen(x + radius, y, canvasW, canvasH, padding)
   const screenRadius = Math.abs(edge.sx - center.sx)
+  const startX = center.sx + screenRadius * Math.cos(startAngle)
+  const startY = center.sy + screenRadius * Math.sin(startAngle)
 
+  gfx.moveTo(startX, startY)
   gfx.arc(center.sx, center.sy, screenRadius, startAngle, endAngle)
   gfx.stroke({ color: LINE_COLOR, width: LINE_WIDTH })
 }
