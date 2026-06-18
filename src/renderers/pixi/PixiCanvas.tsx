@@ -1,12 +1,14 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
 import { useEffect, useRef } from 'react'
 import { drawAnnotations } from './layers/AnnotationLayer'
+import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
 import { drawChannels } from './layers/ChannelLayer'
 import { drawDebug } from './layers/DebugLayer'
 import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
+import { drawScenarioMarkers } from './layers/MarkerLayer'
 import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
 import { DEFENSIVE_4231_POSITIONS, FORMATION_POSITIONS, type FormationPositionMap } from '../../data/formations'
@@ -14,7 +16,12 @@ import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
-import type { ScenarioAnnotations, ScenarioFormationMode } from '../../domain/scenarios/scenarioTypes'
+import type {
+  ScenarioAnnotations,
+  ScenarioArrow,
+  ScenarioFormationMode,
+  ScenarioMarker,
+} from '../../domain/scenarios/scenarioTypes'
 
 type BallStart = {
   x: number
@@ -28,6 +35,13 @@ type PixiCanvasProps = {
   selectedFormation: ScenarioFormationMode
   selectedBallStart?: BallStart
   selectedAnnotations?: ScenarioAnnotations
+  selectedArrows?: ScenarioArrow[]
+  selectedMarkers?: ScenarioMarker[]
+  showAnnotations?: boolean
+  showArrows?: boolean
+  showMarkers?: boolean
+  showOpposition?: boolean
+  showBall?: boolean
 }
 
 function mirrorFormationY(positions: FormationPositionMap): FormationPositionMap {
@@ -46,6 +60,13 @@ export function PixiCanvas({
   selectedFormation,
   selectedBallStart,
   selectedAnnotations,
+  selectedArrows,
+  selectedMarkers,
+  showAnnotations = true,
+  showArrows = true,
+  showMarkers = true,
+  showOpposition = true,
+  showBall = true,
 }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -94,8 +115,10 @@ export function PixiCanvas({
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const arrowLayer = new Graphics()
       const awayPlayerLayer = new Container()
       const playerLayer = new Container()
+      const markerLayer = new Container()
       const ballLayer = new Graphics()
       const debugLayer = new Graphics()
       const stage: Container = app.stage
@@ -108,8 +131,10 @@ export function PixiCanvas({
       stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
+      stage.addChild(arrowLayer)
       stage.addChild(awayPlayerLayer)
       stage.addChild(playerLayer)
+      stage.addChild(markerLayer)
       stage.addChild(ballLayer)
       stage.addChild(debugLayer)
 
@@ -118,13 +143,21 @@ export function PixiCanvas({
 
       drawGrass(grassLayer, width, height, pitchPadding)
       drawZones(zonesLayer, stage, width, height, pitchPadding)
-      drawAnnotations(annotationLayer, selectedAnnotations, width, height, pitchPadding)
+      drawAnnotations(annotationLayer, showAnnotations ? selectedAnnotations : undefined, width, height, pitchPadding)
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
-      drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
+      drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding)
+
+      if (showOpposition) {
+        drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
+      } else {
+        awayPlayerLayer.removeChildren()
+      }
+
       drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding)
-      drawBall(ballLayer, selectedBallStart, width, height, pitchPadding)
+      drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
+      drawBall(ballLayer, showBall ? selectedBallStart : undefined, width, height, pitchPadding)
 
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
@@ -181,7 +214,21 @@ export function PixiCanvas({
 
       destroyApp()
     }
-  }, [debugMode, height, selectedAnnotations, selectedBallStart, selectedFormation, width])
+  }, [
+    debugMode,
+    height,
+    selectedAnnotations,
+    selectedArrows,
+    selectedBallStart,
+    selectedFormation,
+    selectedMarkers,
+    showAnnotations,
+    showArrows,
+    showBall,
+    showMarkers,
+    showOpposition,
+    width,
+  ])
 
   return <div ref={containerRef} className="pixi-canvas" />
 }

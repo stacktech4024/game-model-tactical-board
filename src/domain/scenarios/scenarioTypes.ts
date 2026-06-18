@@ -27,6 +27,39 @@ export type ScenarioAnnotations = {
   highlightChannels?: HighlightChannel[]
 }
 
+export type PitchPoint = {
+  x: number
+  y: number
+}
+
+export type ScenarioArrowType =
+  | 'pass'
+  | 'run'
+  | 'dribble'
+  | 'press'
+  | 'recovery'
+
+export type ScenarioArrow = {
+  id: string
+  type: ScenarioArrowType
+  from: PitchPoint
+  to: PitchPoint
+  label?: string
+  playerNumber?: number
+}
+
+export type ScenarioMarkerTone =
+  | 'primary'
+  | 'warning'
+  | 'success'
+
+export type ScenarioMarker = {
+  id: string
+  point: PitchPoint
+  label: string
+  tone?: ScenarioMarkerTone
+}
+
 export type ScenarioDefinition = {
   id: string
   title: string
@@ -40,4 +73,6 @@ export type ScenarioDefinition = {
     y: number
   }
   annotations?: ScenarioAnnotations
+  arrows?: ScenarioArrow[]
+  markers?: ScenarioMarker[]
 }

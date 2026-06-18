@@ -20,6 +20,11 @@ function App() {
   })
   const [selectedFormation, setSelectedFormation] = useState<ScenarioFormationMode>('attacking-442')
   const [debugMode, setDebugMode] = useState(false)
+  const [showAnnotations, setShowAnnotations] = useState(true)
+  const [showArrows, setShowArrows] = useState(true)
+  const [showMarkers, setShowMarkers] = useState(true)
+  const [showOpposition, setShowOpposition] = useState(true)
+  const [showBall, setShowBall] = useState(true)
   const [selectedScenarioId, setSelectedScenarioId] = useState(SCENARIOS[0].id)
   const pitchHostRef = useRef<HTMLDivElement | null>(null)
 
@@ -96,6 +101,49 @@ function App() {
             />
             <span>Debug overlay</span>
           </label>
+          <div className="layer-controls" role="group" aria-label="Layer controls">
+            <span className="layer-controls__label">Layers</span>
+            <label className="layer-toggle">
+              <input
+                type="checkbox"
+                checked={showAnnotations}
+                onChange={(event) => setShowAnnotations(event.target.checked)}
+              />
+              <span>Highlights</span>
+            </label>
+            <label className="layer-toggle">
+              <input
+                type="checkbox"
+                checked={showArrows}
+                onChange={(event) => setShowArrows(event.target.checked)}
+              />
+              <span>Arrows</span>
+            </label>
+            <label className="layer-toggle">
+              <input
+                type="checkbox"
+                checked={showMarkers}
+                onChange={(event) => setShowMarkers(event.target.checked)}
+              />
+              <span>Markers</span>
+            </label>
+            <label className="layer-toggle">
+              <input
+                type="checkbox"
+                checked={showOpposition}
+                onChange={(event) => setShowOpposition(event.target.checked)}
+              />
+              <span>Opposition</span>
+            </label>
+            <label className="layer-toggle">
+              <input
+                type="checkbox"
+                checked={showBall}
+                onChange={(event) => setShowBall(event.target.checked)}
+              />
+              <span>Ball</span>
+            </label>
+          </div>
         </div>
       </header>
 
@@ -142,6 +190,13 @@ function App() {
               selectedFormation={selectedFormation}
               selectedBallStart={selectedScenario.ballStart}
               selectedAnnotations={selectedScenario.annotations}
+              selectedArrows={selectedScenario.arrows}
+              selectedMarkers={selectedScenario.markers}
+              showAnnotations={showAnnotations}
+              showArrows={showArrows}
+              showMarkers={showMarkers}
+              showOpposition={showOpposition}
+              showBall={showBall}
             />
           </div>
         </section>

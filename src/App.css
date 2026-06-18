@@ -81,6 +81,29 @@ h2 {
   font-size: 0.92rem;
 }
 
+.layer-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.86rem;
+}
+
+.layer-controls__label {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.layer-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .app-grid {
   display: grid;
   grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
