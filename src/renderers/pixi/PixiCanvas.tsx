@@ -1,6 +1,7 @@
 import { Application, Graphics } from 'pixi.js'
 import { useEffect, useRef } from 'react'
 import { drawGrass } from './layers/GrassLayer'
+import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 
 type PixiCanvasProps = {
@@ -51,14 +52,18 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
 
       const grassLayer = new Graphics()
       const markingsLayer = new Graphics()
+      const goalsLayer = new Graphics()
 
-      drawGrass(grassLayer, width, height, pitchPadding)
-      drawMarkings(markingsLayer, width, height, pitchPadding)
+      app.stage.addChild(grassLayer)
+      app.stage.addChild(markingsLayer)
+      app.stage.addChild(goalsLayer)
 
       container.textContent = ''
       container.appendChild(app.canvas)
-      app.stage.addChild(grassLayer)
-      app.stage.addChild(markingsLayer)
+
+      drawGrass(grassLayer, width, height, pitchPadding)
+      drawMarkings(markingsLayer, width, height, pitchPadding)
+      drawGoals(goalsLayer, width, height, pitchPadding)
     }
 
     void mount()
