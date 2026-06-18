@@ -5,7 +5,10 @@ import { drawDebug } from './layers/DebugLayer'
 import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
+import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
+import { ATTACKING_442_POSITIONS } from '../../data/formations'
+import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
 
@@ -62,6 +65,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const playerLayer = new Container()
       const debugLayer = new Graphics()
       const stage: Container = app.stage
 
@@ -70,6 +74,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
+      stage.addChild(playerLayer)
       stage.addChild(debugLayer)
 
       container.textContent = ''
@@ -80,6 +85,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
+      drawPlayers(playerLayer, PICKERING_SQUAD, ATTACKING_442_POSITIONS, width, height, pitchPadding)
 
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
