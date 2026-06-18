@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FORMATION_LABELS } from './data/formations'
 import { SCENARIOS } from './data/scenarios'
 import type { ScenarioFormationMode } from './domain/scenarios/scenarioTypes'
@@ -14,27 +14,45 @@ const FORMATION_OPTIONS: ScenarioFormationMode[] = [
 ]
 
 function App() {
-  const [viewport, setViewport] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+  const [pitchSize, setPitchSize] = useState({
+    width: 900,
+    height: 700,
   })
   const [selectedFormation, setSelectedFormation] = useState<ScenarioFormationMode>('attacking-442')
   const [debugMode, setDebugMode] = useState(false)
   const [selectedScenarioId, setSelectedScenarioId] = useState(SCENARIOS[0].id)
+  const pitchHostRef = useRef<HTMLDivElement | null>(null)
 
   const selectedScenario = useMemo(() => {
     return SCENARIOS.find((scenario) => scenario.id === selectedScenarioId) ?? SCENARIOS[0]
   }, [selectedScenarioId])
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewport({ width: window.innerWidth, height: window.innerHeight })
+    const host = pitchHostRef.current
+
+    if (!host) {
+      return undefined
     }
 
-    window.addEventListener('resize', handleResize)
+    const updateSize = () => {
+      const { width, height } = host.getBoundingClientRect()
+
+      setPitchSize({
+        width: Math.max(1, Math.round(width)),
+        height: Math.max(1, Math.round(height)),
+      })
+    }
+
+    updateSize()
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateSize()
+    })
+
+    resizeObserver.observe(host)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      resizeObserver.disconnect()
     }
   }, [])
 
@@ -116,12 +134,14 @@ function App() {
         </aside>
 
         <section className="pitch-panel" aria-label="Pitch visualization">
-          <PixiCanvas
-            width={viewport.width}
-            height={viewport.height}
-            debugMode={debugMode}
-            selectedFormation={selectedFormation}
-          />
+          <div ref={pitchHostRef} className="pitch-canvas-host">
+            <PixiCanvas
+              width={pitchSize.width}
+              height={pitchSize.height}
+              debugMode={debugMode}
+              selectedFormation={selectedFormation}
+            />
+          </div>
         </section>
       </section>
     </main>

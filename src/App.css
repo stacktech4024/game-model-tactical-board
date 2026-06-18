@@ -1,5 +1,7 @@
 .app-shell {
   min-height: 100svh;
+  max-width: 1560px;
+  margin: 0 auto;
   padding: 20px;
   background: #0b1220;
   color: #e5eef9;
@@ -7,10 +9,10 @@
 
 .app-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .eyebrow {
@@ -43,8 +45,9 @@ h2 {
 .formation-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .control-button,
@@ -56,8 +59,9 @@ h2 {
 }
 
 .control-button {
-  padding: 10px 14px;
+  padding: 8px 12px;
   cursor: pointer;
+  font-size: 0.92rem;
 }
 
 .control-button.is-active,
@@ -70,16 +74,18 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 12px;
   background: rgba(15, 23, 42, 0.9);
+  font-size: 0.92rem;
 }
 
 .app-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
   gap: 16px;
+  align-items: start;
 }
 
 .scenario-panel,
@@ -92,6 +98,8 @@ h2 {
 
 .scenario-panel {
   padding: 16px;
+  max-height: calc(100svh - 110px);
+  overflow-y: auto;
 }
 
 .scenario-list {
@@ -124,6 +132,7 @@ h2 {
 
 .info-panel {
   padding: 14px;
+  margin-top: 12px;
 }
 
 .info-panel__description {
@@ -143,7 +152,17 @@ h2 {
 
 .pitch-panel {
   overflow: hidden;
-  min-height: calc(100svh - 100px);
+  min-height: 620px;
+  height: min(78vh, 820px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pitch-canvas-host {
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
 }
 
 .pixi-canvas {
@@ -152,10 +171,10 @@ h2 {
 }
 
 @media (max-width: 980px) {
-  .app-header,
-  .app-grid {
-    grid-template-columns: 1fr;
+  .app-header {
     display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .app-header {
@@ -166,7 +185,20 @@ h2 {
     justify-content: flex-start;
   }
 
+  .app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-panel {
+    max-height: none;
+  }
+
   .pitch-panel {
-    min-height: 70svh;
+    height: min(62svh, 640px);
+    min-height: 520px;
+  }
+
+  .pitch-canvas-host {
+    min-height: 520px;
   }
 }
