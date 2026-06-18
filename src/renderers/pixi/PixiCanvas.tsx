@@ -1,4 +1,4 @@
-import { Application, Container, Graphics } from 'pixi.js'
+import { Application, Container, Graphics, Text } from 'pixi.js'
 import { useEffect, useRef } from 'react'
 import { drawChannels } from './layers/ChannelLayer'
 import { drawDebug } from './layers/DebugLayer'
@@ -6,6 +6,8 @@ import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 import { drawZones } from './layers/ZoneLayer'
+import { PITCH } from '../../domain/pitch/pitchConstants'
+import { screenToPitch } from '../../domain/pitch/coordTransforms'
 
 type PixiCanvasProps = {
   width: number
@@ -28,6 +30,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
     let initialized = false
     let destroyed = false
     const pitchPadding = 32
+    let removePointerMoveListener: (() => void) | undefined
 
     const destroyApp = () => {
       if (destroyed) {
@@ -81,12 +84,47 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
       }
+
+      if (debugMode) {
+        const readoutText = new Text({
+          text: 'outside pitch',
+          style: {
+            fill: 0xf59e0b,
+            fontSize: 12,
+            fontFamily: 'Arial',
+          },
+        })
+
+        readoutText.position.set(12, 10)
+        stage.addChild(readoutText)
+
+        const handlePointerMove = (event: PointerEvent) => {
+          const rect = app.canvas.getBoundingClientRect()
+          const sx = ((event.clientX - rect.left) / rect.width) * width
+          const sy = ((event.clientY - rect.top) / rect.height) * height
+          const { x, y } = screenToPitch(sx, sy, width, height, pitchPadding)
+          const insidePitch =
+            x >= 0 && x <= PITCH.WIDTH && y >= 0 && y <= PITCH.LENGTH
+
+          readoutText.text = insidePitch
+            ? `x: ${x.toFixed(2)}m, y: ${y.toFixed(2)}m`
+            : 'outside pitch'
+        }
+
+        app.canvas.addEventListener('pointermove', handlePointerMove)
+        removePointerMoveListener = () => {
+          app.canvas.removeEventListener('pointermove', handlePointerMove)
+        }
+      }
     }
 
     void mount()
 
     return () => {
       cancelled = true
+
+      removePointerMoveListener?.()
+      removePointerMoveListener = undefined
 
       if (!initialized) {
         return
