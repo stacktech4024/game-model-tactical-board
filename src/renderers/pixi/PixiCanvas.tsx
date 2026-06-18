@@ -1,8 +1,9 @@
-import { Application, Graphics } from 'pixi.js'
+import { Application, Container, Graphics } from 'pixi.js'
 import { useEffect, useRef } from 'react'
 import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
+import { drawZones } from './layers/ZoneLayer'
 
 type PixiCanvasProps = {
   width: number
@@ -51,17 +52,21 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       }
 
       const grassLayer = new Graphics()
+      const zonesLayer = new Graphics()
       const markingsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const stage: Container = app.stage
 
-      app.stage.addChild(grassLayer)
-      app.stage.addChild(markingsLayer)
-      app.stage.addChild(goalsLayer)
+      stage.addChild(grassLayer)
+      stage.addChild(zonesLayer)
+      stage.addChild(markingsLayer)
+      stage.addChild(goalsLayer)
 
       container.textContent = ''
       container.appendChild(app.canvas)
 
       drawGrass(grassLayer, width, height, pitchPadding)
+      drawZones(zonesLayer, stage, width, height, pitchPadding)
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
     }
