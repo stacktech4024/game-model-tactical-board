@@ -1,5 +1,6 @@
 import { Application, Container, Graphics } from 'pixi.js'
 import { useEffect, useRef } from 'react'
+import { drawChannels } from './layers/ChannelLayer'
 import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
@@ -54,12 +55,14 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       const grassLayer = new Graphics()
       const zonesLayer = new Graphics()
       const markingsLayer = new Graphics()
+      const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
       const stage: Container = app.stage
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
       stage.addChild(markingsLayer)
+      stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
 
       container.textContent = ''
@@ -68,6 +71,7 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       drawGrass(grassLayer, width, height, pitchPadding)
       drawZones(zonesLayer, stage, width, height, pitchPadding)
       drawMarkings(markingsLayer, width, height, pitchPadding)
+      drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
     }
 
