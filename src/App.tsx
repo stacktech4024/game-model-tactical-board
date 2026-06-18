@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { TimelineScrubber } from './editor/TimelineScrubber'
 import { FORMATION_LABELS } from './data/formations'
 import { SCENARIOS } from './data/scenarios'
 import type { ScenarioFormationMode } from './domain/scenarios/scenarioTypes'
+import type { AnimatorState, ScenarioAnimator } from './renderers/pixi/animation/scenarioAnimator'
 import { PixiCanvas } from './renderers/pixi/PixiCanvas'
 import './App.css'
 
@@ -25,8 +27,10 @@ function App() {
   const [showMarkers, setShowMarkers] = useState(true)
   const [showOpposition, setShowOpposition] = useState(true)
   const [showBall, setShowBall] = useState(true)
+  const [playState, setPlayState] = useState<AnimatorState>('idle')
   const [selectedScenarioId, setSelectedScenarioId] = useState(SCENARIOS[0].id)
   const pitchHostRef = useRef<HTMLDivElement | null>(null)
+  const animatorRef = useRef<ScenarioAnimator | null>(null)
 
   const selectedScenario = useMemo(() => {
     return SCENARIOS.find((scenario) => scenario.id === selectedScenarioId) ?? SCENARIOS[0]
@@ -70,6 +74,36 @@ function App() {
 
     setSelectedScenarioId(scenario.id)
     setSelectedFormation(scenario.formationMode)
+    animatorRef.current?.reset()
+    setPlayState('idle')
+  }
+
+  const handleAnimatorReady = useCallback((animator: ScenarioAnimator) => {
+    animatorRef.current = animator
+    setPlayState('idle')
+  }, [])
+
+  const handleAnimatorStateChange = useCallback((state: AnimatorState) => {
+    setPlayState(state)
+  }, [])
+
+  const handleScrubberPause = useCallback(() => {
+    setPlayState('paused')
+  }, [])
+
+  const handlePlay = () => {
+    animatorRef.current?.play()
+    setPlayState('playing')
+  }
+
+  const handlePause = () => {
+    animatorRef.current?.pause()
+    setPlayState('paused')
+  }
+
+  const handleReset = () => {
+    animatorRef.current?.reset()
+    setPlayState('idle')
   }
 
   const currentFormationLabel = FORMATION_LABELS[selectedFormation]
@@ -144,6 +178,28 @@ function App() {
               <span>Ball</span>
             </label>
           </div>
+          <div className="playback-controls" role="group" aria-label="Playback controls">
+            <span className="playback-controls__label">Playback: {playState}</span>
+            <button
+              type="button"
+              className="control-button"
+              disabled={playState === 'playing'}
+              onClick={handlePlay}
+            >
+              Play
+            </button>
+            <button
+              type="button"
+              className="control-button"
+              disabled={playState === 'idle' || playState === 'complete'}
+              onClick={handlePause}
+            >
+              Pause
+            </button>
+            <button type="button" className="control-button" onClick={handleReset}>
+              Reset
+            </button>
+          </div>
         </div>
       </header>
 
@@ -188,6 +244,7 @@ function App() {
               height={pitchSize.height}
               debugMode={debugMode}
               selectedFormation={selectedFormation}
+              selectedScenario={selectedScenario}
               selectedBallStart={selectedScenario.ballStart}
               selectedAnnotations={selectedScenario.annotations}
               selectedArrows={selectedScenario.arrows}
@@ -197,8 +254,15 @@ function App() {
               showMarkers={showMarkers}
               showOpposition={showOpposition}
               showBall={showBall}
+              onAnimatorReady={handleAnimatorReady}
+              onStateChange={handleAnimatorStateChange}
             />
           </div>
+          <TimelineScrubber
+            animatorRef={animatorRef}
+            playState={playState}
+            onPause={handleScrubberPause}
+          />
         </section>
       </section>
     </main>

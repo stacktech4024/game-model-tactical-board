@@ -104,6 +104,24 @@ h2 {
   gap: 5px;
 }
 
+.playback-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.86rem;
+}
+
+.playback-controls__label {
+  color: #93c5fd;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
 .app-grid {
   display: grid;
   grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
@@ -178,19 +196,44 @@ h2 {
   min-height: 620px;
   height: min(78vh, 820px);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .pitch-canvas-host {
+  flex: 1;
   width: 100%;
-  height: 100%;
-  min-height: 620px;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .pixi-canvas {
+  flex: 1;
   width: 100%;
   height: 100%;
+}
+
+.timeline-scrubber {
+  flex: 0 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 14px;
+}
+
+.timeline-scrubber input {
+  width: 100%;
+}
+
+.timeline-scrubber span {
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.86rem;
+  text-align: right;
 }
 
 @media (max-width: 980px) {
@@ -218,10 +261,6 @@ h2 {
 
   .pitch-panel {
     height: min(62svh, 640px);
-    min-height: 520px;
-  }
-
-  .pitch-canvas-host {
     min-height: 520px;
   }
 }

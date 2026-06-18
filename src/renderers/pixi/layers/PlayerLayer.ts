@@ -42,6 +42,7 @@ function addToken(
   canvasW: number,
   canvasH: number,
   padding: number,
+  tokenRefs?: Map<number, Container>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
   const tokenContainer = new Container()
@@ -67,6 +68,7 @@ function addToken(
   tokenContainer.addChild(tokenFill)
   tokenContainer.addChild(numberText)
   container.addChild(tokenContainer)
+  tokenRefs?.set(player.number, tokenContainer)
 }
 
 export function drawPlayers(
@@ -76,8 +78,10 @@ export function drawPlayers(
   canvasW: number,
   canvasH: number,
   padding: number,
+  tokenRefs?: Map<number, Container>,
 ): void {
   container.removeChildren()
+  tokenRefs?.clear()
 
   players.forEach((player) => {
     const position = positions[player.number]
@@ -86,6 +90,6 @@ export function drawPlayers(
       return
     }
 
-    addToken(container, player, position, canvasW, canvasH, padding)
+    addToken(container, player, position, canvasW, canvasH, padding, tokenRefs)
   })
 }

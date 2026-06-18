@@ -1,5 +1,10 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
 import { useEffect, useRef } from 'react'
+import {
+  buildScenarioAnimator,
+  type AnimatorState,
+  type ScenarioAnimator,
+} from './animation/scenarioAnimator'
 import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
@@ -19,6 +24,7 @@ import { screenToPitch } from '../../domain/pitch/coordTransforms'
 import type {
   ScenarioAnnotations,
   ScenarioArrow,
+  ScenarioDefinition,
   ScenarioFormationMode,
   ScenarioMarker,
 } from '../../domain/scenarios/scenarioTypes'
@@ -33,6 +39,8 @@ type PixiCanvasProps = {
   height: number
   debugMode?: boolean
   selectedFormation: ScenarioFormationMode
+  // TODO CP29: consolidate scenario-derived props so PixiCanvas receives either selectedScenario or derived render props, not both.
+  selectedScenario: ScenarioDefinition
   selectedBallStart?: BallStart
   selectedAnnotations?: ScenarioAnnotations
   selectedArrows?: ScenarioArrow[]
@@ -42,6 +50,8 @@ type PixiCanvasProps = {
   showMarkers?: boolean
   showOpposition?: boolean
   showBall?: boolean
+  onAnimatorReady?: (animator: ScenarioAnimator) => void
+  onStateChange?: (state: AnimatorState) => void
 }
 
 function mirrorFormationY(positions: FormationPositionMap): FormationPositionMap {
@@ -58,6 +68,7 @@ export function PixiCanvas({
   height,
   debugMode = false,
   selectedFormation,
+  selectedScenario,
   selectedBallStart,
   selectedAnnotations,
   selectedArrows,
@@ -67,6 +78,8 @@ export function PixiCanvas({
   showMarkers = true,
   showOpposition = true,
   showBall = true,
+  onAnimatorReady,
+  onStateChange,
 }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -83,6 +96,7 @@ export function PixiCanvas({
     let destroyed = false
     const pitchPadding = 32
     let removePointerMoveListener: (() => void) | undefined
+    let scenarioAnimator: ScenarioAnimator | undefined
 
     const destroyApp = () => {
       if (destroyed) {
@@ -119,11 +133,12 @@ export function PixiCanvas({
       const awayPlayerLayer = new Container()
       const playerLayer = new Container()
       const markerLayer = new Container()
-      const ballLayer = new Graphics()
+      const ballLayer = new Container()
       const debugLayer = new Graphics()
       const stage: Container = app.stage
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = mirrorFormationY(DEFENSIVE_4231_POSITIONS)
+      const homePlayerTokenRefs = new Map<number, Container>()
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -155,9 +170,20 @@ export function PixiCanvas({
         awayPlayerLayer.removeChildren()
       }
 
-      drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding)
+      drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding, homePlayerTokenRefs)
       drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
-      drawBall(ballLayer, showBall ? selectedBallStart : undefined, width, height, pitchPadding)
+      const ballToken = drawBall(ballLayer, showBall ? selectedBallStart : undefined, width, height, pitchPadding)
+
+      scenarioAnimator = buildScenarioAnimator({
+        scenario: selectedScenario,
+        playerTokens: homePlayerTokenRefs,
+        ballToken,
+        canvasW: width,
+        canvasH: height,
+        padding: pitchPadding,
+        onStateChange,
+      })
+      onAnimatorReady?.(scenarioAnimator)
 
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
@@ -203,6 +229,8 @@ export function PixiCanvas({
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
+      scenarioAnimator?.destroy()
+      scenarioAnimator = undefined
 
       if (!initialized) {
         return
@@ -221,7 +249,10 @@ export function PixiCanvas({
     selectedArrows,
     selectedBallStart,
     selectedFormation,
+    selectedScenario,
     selectedMarkers,
+    onAnimatorReady,
+    onStateChange,
     showAnnotations,
     showArrows,
     showBall,
