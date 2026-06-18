@@ -141,6 +141,7 @@ function App() {
               debugMode={debugMode}
               selectedFormation={selectedFormation}
               selectedBallStart={selectedScenario.ballStart}
+              selectedAnnotations={selectedScenario.annotations}
             />
           </div>
         </section>

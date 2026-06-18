@@ -1,5 +1,6 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
 import { useEffect, useRef } from 'react'
+import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawBall } from './layers/BallLayer'
 import { drawChannels } from './layers/ChannelLayer'
 import { drawDebug } from './layers/DebugLayer'
@@ -13,7 +14,7 @@ import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
-import type { ScenarioFormationMode } from '../../domain/scenarios/scenarioTypes'
+import type { ScenarioAnnotations, ScenarioFormationMode } from '../../domain/scenarios/scenarioTypes'
 
 type BallStart = {
   x: number
@@ -26,6 +27,7 @@ type PixiCanvasProps = {
   debugMode?: boolean
   selectedFormation: ScenarioFormationMode
   selectedBallStart?: BallStart
+  selectedAnnotations?: ScenarioAnnotations
 }
 
 function mirrorFormationY(positions: FormationPositionMap): FormationPositionMap {
@@ -43,6 +45,7 @@ export function PixiCanvas({
   debugMode = false,
   selectedFormation,
   selectedBallStart,
+  selectedAnnotations,
 }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -87,6 +90,7 @@ export function PixiCanvas({
 
       const grassLayer = new Graphics()
       const zonesLayer = new Graphics()
+      const annotationLayer = new Graphics()
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
@@ -100,6 +104,7 @@ export function PixiCanvas({
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
+      stage.addChild(annotationLayer)
       stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
@@ -113,6 +118,7 @@ export function PixiCanvas({
 
       drawGrass(grassLayer, width, height, pitchPadding)
       drawZones(zonesLayer, stage, width, height, pitchPadding)
+      drawAnnotations(annotationLayer, selectedAnnotations, width, height, pitchPadding)
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
@@ -175,7 +181,7 @@ export function PixiCanvas({
 
       destroyApp()
     }
-  }, [debugMode, height, selectedBallStart, selectedFormation, width])
+  }, [debugMode, height, selectedAnnotations, selectedBallStart, selectedFormation, width])
 
   return <div ref={containerRef} className="pixi-canvas" />
 }

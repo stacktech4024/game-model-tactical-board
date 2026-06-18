@@ -8,6 +8,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'attacking-442',
     zoneFocus: 'Zone 1 to Zone 3',
     ballStart: { x: 12, y: 24 },
+    annotations: {
+      highlightZones: [1, 2, 3],
+      highlightChannels: ['wide-left', 'wide-right'],
+    },
     description: 'Calm possession, use width, and advance with controlled support.',
     coachingPoints: [
       'Calm in possession',
@@ -22,6 +26,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'attacking-433',
     zoneFocus: 'Zone 2 to Zone 4',
     ballStart: { x: 34, y: 50 },
+    annotations: {
+      highlightZones: [2, 3, 4],
+      highlightChannels: ['central-left', 'central-right'],
+    },
     description: 'First look forward after a regain and find the striker early.',
     coachingPoints: [
       'First pass forward if possible',
@@ -36,6 +44,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'defensive-4231',
     zoneFocus: 'Zone 2',
     ballStart: { x: 52, y: 45 },
+    annotations: {
+      highlightZones: [2],
+      highlightChannels: ['central-left', 'central-right', 'half-space-left', 'half-space-right'],
+    },
     description: 'Stay compact, protect the middle, and force play wide.',
     coachingPoints: ['Stay compact', 'Force opponent wide', 'Protect central channel'],
   },
@@ -46,6 +58,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'defensive-532',
     zoneFocus: 'Zone 1 to Zone 2',
     ballStart: { x: 50, y: 32 },
+    annotations: {
+      highlightZones: [1, 2],
+      highlightChannels: ['central-left', 'central-right'],
+    },
     description: 'Drop into a back five, protect central spaces, and counter through two forwards.',
     coachingPoints: [
       'Wing-backs recover into the back line',
@@ -60,6 +76,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'attacking-352',
     zoneFocus: 'Zone 2 to Zone 4',
     ballStart: { x: 12, y: 58 },
+    annotations: {
+      highlightZones: [2, 3, 4],
+      highlightChannels: ['wide-left', 'wide-right'],
+    },
     description: 'Build with three centre-backs, release wing-backs high, and support two forwards centrally.',
     coachingPoints: [
       'Back three secure rest defence',

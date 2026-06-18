@@ -12,6 +12,21 @@ export type ScenarioFormationMode =
   | 'defensive-532'
   | 'attacking-352'
 
+export type HighlightZone = 1 | 2 | 3 | 4
+
+export type HighlightChannel =
+  | 'wide-left'
+  | 'half-space-left'
+  | 'central-left'
+  | 'central-right'
+  | 'half-space-right'
+  | 'wide-right'
+
+export type ScenarioAnnotations = {
+  highlightZones?: HighlightZone[]
+  highlightChannels?: HighlightChannel[]
+}
+
 export type ScenarioDefinition = {
   id: string
   title: string
@@ -24,4 +39,5 @@ export type ScenarioDefinition = {
     x: number
     y: number
   }
+  annotations?: ScenarioAnnotations
 }
