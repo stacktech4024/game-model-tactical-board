@@ -43,9 +43,12 @@ export type ScenarioArrow = {
   id: string
   type: ScenarioArrowType
   from: PitchPoint
+  via?: PitchPoint
   to: PitchPoint
   label?: string
   playerNumber?: number
+  order?: number
+  delay?: number
 }
 
 export type ScenarioMarkerTone =
