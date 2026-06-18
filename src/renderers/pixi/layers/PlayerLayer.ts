@@ -14,8 +14,26 @@ const TOKEN_STROKE_COLOR = 0xffffff
 const TOKEN_STROKE_WIDTH = 1
 const GK_FILL = 0xf2c94c
 const OUTFIELD_FILL = 0xc0392b
+const AWAY_GK_FILL = 0x2dd4bf
+const AWAY_OUTFIELD_FILL = 0x2f3437
 const GK_NUMBER_COLOR = 0x111111
 const OUTFIELD_NUMBER_COLOR = 0xffffff
+
+function getTokenFill(player: SquadPlayer): number {
+  if (player.side === 'away') {
+    return player.isGoalkeeper ? AWAY_GK_FILL : AWAY_OUTFIELD_FILL
+  }
+
+  return player.isGoalkeeper ? GK_FILL : OUTFIELD_FILL
+}
+
+function getNumberColor(player: SquadPlayer): number {
+  if (player.side === 'away' && player.isGoalkeeper) {
+    return GK_NUMBER_COLOR
+  }
+
+  return player.isGoalkeeper ? GK_NUMBER_COLOR : OUTFIELD_NUMBER_COLOR
+}
 
 function addToken(
   container: Container,
@@ -31,7 +49,7 @@ function addToken(
   const numberText = new Text({
     text: String(player.number),
     style: {
-      fill: player.isGoalkeeper ? GK_NUMBER_COLOR : OUTFIELD_NUMBER_COLOR,
+      fill: getNumberColor(player),
       fontFamily: 'Arial',
       fontSize: 12,
       fontWeight: 'bold',
@@ -39,7 +57,7 @@ function addToken(
   })
 
   tokenFill.circle(0, 0, TOKEN_RADIUS)
-  tokenFill.fill({ color: player.isGoalkeeper ? GK_FILL : OUTFIELD_FILL })
+  tokenFill.fill({ color: getTokenFill(player) })
   tokenFill.stroke({ color: TOKEN_STROKE_COLOR, width: TOKEN_STROKE_WIDTH, alpha: 0.7 })
 
   numberText.anchor.set(0.5)

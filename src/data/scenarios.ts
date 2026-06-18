@@ -7,6 +7,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Attacking Organization',
     formationMode: 'attacking-442',
     zoneFocus: 'Zone 1 to Zone 3',
+    ballStart: { x: 12, y: 24 },
     description: 'Calm possession, use width, and advance with controlled support.',
     coachingPoints: [
       'Calm in possession',
@@ -20,6 +21,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Attacking Transition',
     formationMode: 'attacking-433',
     zoneFocus: 'Zone 2 to Zone 4',
+    ballStart: { x: 34, y: 50 },
     description: 'First look forward after a regain and find the striker early.',
     coachingPoints: [
       'First pass forward if possible',
@@ -33,6 +35,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Defensive Organization',
     formationMode: 'defensive-4231',
     zoneFocus: 'Zone 2',
+    ballStart: { x: 52, y: 45 },
     description: 'Stay compact, protect the middle, and force play wide.',
     coachingPoints: ['Stay compact', 'Force opponent wide', 'Protect central channel'],
   },
@@ -42,6 +45,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Defensive Organization',
     formationMode: 'defensive-532',
     zoneFocus: 'Zone 1 to Zone 2',
+    ballStart: { x: 50, y: 32 },
     description: 'Drop into a back five, protect central spaces, and counter through two forwards.',
     coachingPoints: [
       'Wing-backs recover into the back line',
@@ -55,6 +59,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Attacking Organization',
     formationMode: 'attacking-352',
     zoneFocus: 'Zone 2 to Zone 4',
+    ballStart: { x: 12, y: 58 },
     description: 'Build with three centre-backs, release wing-backs high, and support two forwards centrally.',
     coachingPoints: [
       'Back three secure rest defence',

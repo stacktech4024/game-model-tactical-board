@@ -20,4 +20,8 @@ export type ScenarioDefinition = {
   zoneFocus: string
   description: string
   coachingPoints: string[]
+  ballStart?: {
+    x: number
+    y: number
+  }
 }

@@ -1,5 +1,6 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
 import { useEffect, useRef } from 'react'
+import { drawBall } from './layers/BallLayer'
 import { drawChannels } from './layers/ChannelLayer'
 import { drawDebug } from './layers/DebugLayer'
 import { drawGrass } from './layers/GrassLayer'
@@ -7,20 +8,42 @@ import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
-import { FORMATION_POSITIONS } from '../../data/formations'
+import { DEFENSIVE_4231_POSITIONS, FORMATION_POSITIONS, type FormationPositionMap } from '../../data/formations'
+import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
 import type { ScenarioFormationMode } from '../../domain/scenarios/scenarioTypes'
+
+type BallStart = {
+  x: number
+  y: number
+}
 
 type PixiCanvasProps = {
   width: number
   height: number
   debugMode?: boolean
   selectedFormation: ScenarioFormationMode
+  selectedBallStart?: BallStart
 }
 
-export function PixiCanvas({ width, height, debugMode = false, selectedFormation }: PixiCanvasProps) {
+function mirrorFormationY(positions: FormationPositionMap): FormationPositionMap {
+  return Object.fromEntries(
+    Object.entries(positions).map(([number, position]) => [
+      Number(number),
+      { x: position.x, y: PITCH.LENGTH - position.y },
+    ]),
+  )
+}
+
+export function PixiCanvas({
+  width,
+  height,
+  debugMode = false,
+  selectedFormation,
+  selectedBallStart,
+}: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -67,17 +90,22 @@ export function PixiCanvas({ width, height, debugMode = false, selectedFormation
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const awayPlayerLayer = new Container()
       const playerLayer = new Container()
+      const ballLayer = new Graphics()
       const debugLayer = new Graphics()
       const stage: Container = app.stage
       const activePositions = FORMATION_POSITIONS[selectedFormation]
+      const awayPositions = mirrorFormationY(DEFENSIVE_4231_POSITIONS)
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
       stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
+      stage.addChild(awayPlayerLayer)
       stage.addChild(playerLayer)
+      stage.addChild(ballLayer)
       stage.addChild(debugLayer)
 
       container.textContent = ''
@@ -88,7 +116,9 @@ export function PixiCanvas({ width, height, debugMode = false, selectedFormation
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
+      drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
       drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding)
+      drawBall(ballLayer, selectedBallStart, width, height, pitchPadding)
 
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
@@ -145,7 +175,7 @@ export function PixiCanvas({ width, height, debugMode = false, selectedFormation
 
       destroyApp()
     }
-  }, [debugMode, height, selectedFormation, width])
+  }, [debugMode, height, selectedBallStart, selectedFormation, width])
 
   return <div ref={containerRef} className="pixi-canvas" />
 }

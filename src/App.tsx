@@ -140,6 +140,7 @@ function App() {
               height={pitchSize.height}
               debugMode={debugMode}
               selectedFormation={selectedFormation}
+              selectedBallStart={selectedScenario.ballStart}
             />
           </div>
         </section>
