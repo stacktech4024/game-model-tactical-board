@@ -1,6 +1,7 @@
 import { Application, Container, Graphics } from 'pixi.js'
 import { useEffect, useRef } from 'react'
 import { drawChannels } from './layers/ChannelLayer'
+import { drawDebug } from './layers/DebugLayer'
 import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
@@ -9,9 +10,10 @@ import { drawZones } from './layers/ZoneLayer'
 type PixiCanvasProps = {
   width: number
   height: number
+  debugMode?: boolean
 }
 
-export function PixiCanvas({ width, height }: PixiCanvasProps) {
+export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const debugLayer = new Graphics()
       const stage: Container = app.stage
 
       stage.addChild(grassLayer)
@@ -64,6 +67,7 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
       stage.addChild(goalsLayer)
+      stage.addChild(debugLayer)
 
       container.textContent = ''
       container.appendChild(app.canvas)
@@ -73,6 +77,10 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
+
+      if (debugMode) {
+        drawDebug(debugLayer, app.stage, width, height, pitchPadding)
+      }
     }
 
     void mount()
@@ -90,7 +98,7 @@ export function PixiCanvas({ width, height }: PixiCanvasProps) {
 
       destroyApp()
     }
-  }, [height, width])
+  }, [debugMode, height, width])
 
   return <div ref={containerRef} className="pixi-canvas" />
 }
