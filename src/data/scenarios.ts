@@ -1,0 +1,65 @@
+import type { ScenarioDefinition } from '../domain/scenarios/scenarioTypes'
+
+export const SCENARIOS: ScenarioDefinition[] = [
+  {
+    id: 'build-through-wide-channels',
+    title: 'Build through wide channels',
+    moment: 'Attacking Organization',
+    formationMode: 'attacking-442',
+    zoneFocus: 'Zone 1 to Zone 3',
+    description: 'Calm possession, use width, and advance with controlled support.',
+    coachingPoints: [
+      'Calm in possession',
+      'Full backs join attack early',
+      'Create width before playing forward',
+    ],
+  },
+  {
+    id: 'counter-quickly-on-turnover',
+    title: 'Counter quickly on turnover',
+    moment: 'Attacking Transition',
+    formationMode: 'attacking-433',
+    zoneFocus: 'Zone 2 to Zone 4',
+    description: 'First look forward after a regain and find the striker early.',
+    coachingPoints: [
+      'First pass forward if possible',
+      'Find striker in central position',
+      'Support underneath for second ball',
+    ],
+  },
+  {
+    id: 'compact-defensive-block',
+    title: 'Compact defensive block',
+    moment: 'Defensive Organization',
+    formationMode: 'defensive-4231',
+    zoneFocus: 'Zone 2',
+    description: 'Stay compact, protect the middle, and force play wide.',
+    coachingPoints: ['Stay compact', 'Force opponent wide', 'Protect central channel'],
+  },
+  {
+    id: 'protect-lead-in-back-five',
+    title: 'Protect lead in back five',
+    moment: 'Defensive Organization',
+    formationMode: 'defensive-532',
+    zoneFocus: 'Zone 1 to Zone 2',
+    description: 'Drop into a back five, protect central spaces, and counter through two forwards.',
+    coachingPoints: [
+      'Wing-backs recover into the back line',
+      'Three central players protect Zone 2',
+      'First forward pass looks for the two strikers',
+    ],
+  },
+  {
+    id: 'back-five-to-wing-back-attack',
+    title: 'Back-five to wing-back attack',
+    moment: 'Attacking Organization',
+    formationMode: 'attacking-352',
+    zoneFocus: 'Zone 2 to Zone 4',
+    description: 'Build with three centre-backs, release wing-backs high, and support two forwards centrally.',
+    coachingPoints: [
+      'Back three secure rest defence',
+      'Wing-backs provide width',
+      'Two forwards stay connected for combinations',
+    ],
+  },
+]

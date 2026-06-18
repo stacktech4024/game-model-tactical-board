@@ -7,18 +7,20 @@ import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
-import { ATTACKING_442_POSITIONS } from '../../data/formations'
+import { FORMATION_POSITIONS } from '../../data/formations'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
+import type { ScenarioFormationMode } from '../../domain/scenarios/scenarioTypes'
 
 type PixiCanvasProps = {
   width: number
   height: number
   debugMode?: boolean
+  selectedFormation: ScenarioFormationMode
 }
 
-export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps) {
+export function PixiCanvas({ width, height, debugMode = false, selectedFormation }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       const playerLayer = new Container()
       const debugLayer = new Graphics()
       const stage: Container = app.stage
+      const activePositions = FORMATION_POSITIONS[selectedFormation]
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -85,7 +88,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
-      drawPlayers(playerLayer, PICKERING_SQUAD, ATTACKING_442_POSITIONS, width, height, pitchPadding)
+      drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding)
 
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
@@ -142,7 +145,7 @@ export function PixiCanvas({ width, height, debugMode = false }: PixiCanvasProps
 
       destroyApp()
     }
-  }, [debugMode, height, width])
+  }, [debugMode, height, selectedFormation, width])
 
   return <div ref={containerRef} className="pixi-canvas" />
 }
