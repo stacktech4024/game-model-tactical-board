@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PresentationLayout } from '../PresentationLayout'
 import { POSITIONAL_PROFILES } from '../data/positionalProfiles'
+import { FullbackSkillScenario } from '../components/FullbackSkillScenario'
 
 const FULLBACK_TABS = [
   {
@@ -41,31 +42,7 @@ export function SkillsPage() {
 
       <section className="skill-lab">
         <div className="fullback-visual-card" aria-label="Fullback role visual">
-          <div className="mini-pitch">
-            <div className="mini-pitch__zone mini-pitch__zone--wide" aria-hidden="true" />
-            <div className="mini-pitch__zone-label mini-pitch__zone-label--one">Zone 1: Build Up</div>
-            <div className="mini-pitch__zone-label mini-pitch__zone-label--two">Zone 2: Unbalance</div>
-            <div className="mini-pitch__zone-label mini-pitch__zone-label--three">Zone 3: Supply</div>
-            <div className="mini-pitch__zone-label mini-pitch__zone-label--four">Zone 4: Penetrate</div>
-            <div className="mini-pitch__channel-label mini-pitch__channel-label--wide">Channel 1: Wide</div>
-            <div className="mini-pitch__channel-label mini-pitch__channel-label--half">Channel 2: Half Space</div>
-            <div className="mini-pitch__channel-label mini-pitch__channel-label--central">Channel 3: Central</div>
-            <div className="mini-pitch__action mini-pitch__action--pass mini-pitch__action--six-ten" aria-label="Pass from 6 to 10" />
-            <div className="mini-pitch__action mini-pitch__action--pass mini-pitch__action--ten-winger" aria-label="Pass from 10 to 7 or 11" />
-            <div className="mini-pitch__action mini-pitch__action--pass mini-pitch__action--winger-fullback" aria-label="Wide-channel pass from 7 or 11 to 2 or 3" />
-            <div className="mini-pitch__action mini-pitch__action--run mini-pitch__action--overlap" aria-label="Overlapping or underlapping fullback run" />
-            <div className="mini-pitch__action mini-pitch__action--cross mini-pitch__action--final-ball" aria-label="Final ball from wide channel to 9" />
-            <div className="mini-pitch__token mini-pitch__token--fullback">2/3</div>
-            <div className="mini-pitch__token mini-pitch__token--winger">7/11</div>
-            <div className="mini-pitch__token mini-pitch__token--ten">10</div>
-            <div className="mini-pitch__token mini-pitch__token--six">6</div>
-            <div className="mini-pitch__token mini-pitch__token--nine">9</div>
-            <div className="mini-pitch__legend" aria-label="Diagram key">
-              <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />Pass</span>
-              <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />Player run</span>
-              <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--cross" />Cross or cutback</span>
-            </div>
-          </div>
+          <FullbackSkillScenario />
           <div>
             <span className="skill-role-label">{fullbackProfile?.fullName ?? 'Full back'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
             <h2>{activeTab.headline}</h2>
