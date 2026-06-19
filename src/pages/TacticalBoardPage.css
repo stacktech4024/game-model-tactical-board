@@ -363,9 +363,13 @@ h2 {
 }
 
 .pitch-canvas-host {
-  flex: 1;
-  width: 100%;
+  flex: 1 1 auto;
+  aspect-ratio: 68 / 105;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   min-height: 0;
+  align-self: center;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -385,6 +389,7 @@ h2 {
 
 .timeline-scrubber {
   flex: 0 0 auto;
+  align-self: stretch;
   width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
