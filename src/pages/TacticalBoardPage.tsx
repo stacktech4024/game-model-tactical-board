@@ -21,12 +21,8 @@ type TacticalBoardPageProps = {
   embedded?: boolean
 }
 
-const EMBEDDED_PITCH_SIZE = { width: 820, height: 640 }
-
 function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoardPageProps) {
-  const [pitchSize, setPitchSize] = useState(
-    embedded ? EMBEDDED_PITCH_SIZE : { width: 900, height: 700 },
-  )
+  const [pitchSize, setPitchSize] = useState({ width: 900, height: 700 })
   const [selectedFormation, setSelectedFormation] = useState<ScenarioFormationMode>('attacking-442')
   const [debugMode, setDebugMode] = useState(false)
   const [showAnnotations, setShowAnnotations] = useState(true)
@@ -35,6 +31,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
   const [showOpposition, setShowOpposition] = useState(true)
   const [showBall, setShowBall] = useState(true)
   const [playState, setPlayState] = useState<AnimatorState>('idle')
+  const [activePhaseStepIndex, setActivePhaseStepIndex] = useState(0)
   const [selectedScenarioId, setSelectedScenarioId] = useState(
     initialScenarioId && SCENARIOS.some((scenario) => scenario.id === initialScenarioId)
       ? initialScenarioId
@@ -47,11 +44,10 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
     return SCENARIOS.find((scenario) => scenario.id === selectedScenarioId) ?? SCENARIOS[0]
   }, [selectedScenarioId])
 
-  useEffect(() => {
-    if (embedded) {
-      return undefined
-    }
+  const activePhaseStep =
+    selectedScenario.phaseSteps[activePhaseStepIndex] ?? selectedScenario.phaseSteps[0]
 
+  useEffect(() => {
     const host = pitchHostRef.current
 
     if (!host) {
@@ -89,6 +85,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
     setSelectedScenarioId(scenario.id)
     setSelectedFormation(scenario.formationMode)
+    setActivePhaseStepIndex(0)
     animatorRef.current?.reset()
     setPlayState('idle')
   }
@@ -118,7 +115,24 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
   const handleReset = () => {
     animatorRef.current?.reset()
+    setActivePhaseStepIndex(0)
     setPlayState('idle')
+  }
+
+  const handlePhaseStepChange = (nextIndex: number) => {
+    const clampedIndex = Math.min(
+      Math.max(nextIndex, 0),
+      Math.max(selectedScenario.phaseSteps.length - 1, 0),
+    )
+    const progress =
+      selectedScenario.phaseSteps.length > 1
+        ? clampedIndex / (selectedScenario.phaseSteps.length - 1)
+        : 0
+
+    setActivePhaseStepIndex(clampedIndex)
+    animatorRef.current?.pause()
+    animatorRef.current?.setProgress(progress)
+    setPlayState(clampedIndex === 0 ? 'idle' : 'paused')
   }
 
   const currentFormationLabel = FORMATION_LABELS[selectedFormation]
@@ -222,6 +236,32 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
       <section className="app-grid">
         <aside className="scenario-panel">
+          {embedded && (
+            <div className="embedded-board-controls">
+              <div className="playback-controls" role="group" aria-label="Playback controls">
+                <span className="playback-controls__label">Playback: {playState}</span>
+                <button
+                  type="button"
+                  className="control-button"
+                  disabled={playState === 'playing'}
+                  onClick={handlePlay}
+                >
+                  Play
+                </button>
+                <button
+                  type="button"
+                  className="control-button"
+                  disabled={playState === 'idle' || playState === 'complete'}
+                  onClick={handlePause}
+                >
+                  Pause
+                </button>
+                <button type="button" className="control-button" onClick={handleReset}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          )}
           <h2>Scenarios</h2>
           <div className="scenario-list">
             {SCENARIOS.map((scenario) => (
@@ -232,28 +272,81 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
                 onClick={() => handleScenarioSelect(scenario.id)}
               >
                 <span className="scenario-card__title">{scenario.title}</span>
-                <span className="scenario-card__meta">{scenario.moment}</span>
+                <span className="scenario-card__meta">{scenario.momentOfGame}</span>
               </button>
             ))}
           </div>
 
           <div className="info-panel">
             <h2>{selectedScenario.title}</h2>
-            <p className="info-panel__meta">{selectedScenario.moment}</p>
-            <p className="info-panel__meta">Zone focus: {selectedScenario.zoneFocus}</p>
+            <p className="info-panel__meta">Moment of the Game: {selectedScenario.momentOfGame}</p>
+            <p className="info-panel__meta">System: {selectedScenario.system}</p>
+            <p className="info-panel__meta">
+              Field geography: {selectedScenario.fieldGeography.zones.join(', ')} ·{' '}
+              {selectedScenario.fieldGeography.channels.join(', ')}
+            </p>
+            {selectedScenario.setPieceType && (
+              <p className="info-panel__meta">Set piece type: {selectedScenario.setPieceType}</p>
+            )}
             <p className="info-panel__description">{selectedScenario.description}</p>
             <div className="info-panel__section">
-              <h3>Coaching points</h3>
-              <ul>
-                {selectedScenario.coachingPoints.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
+              <h3>Strategy</h3>
+              <p className="info-panel__description">{selectedScenario.strategy}</p>
             </div>
+            <div className="info-panel__section">
+              <h3>Tactics</h3>
+              <div className="info-chip-list">
+                {selectedScenario.tactics.map((tactic) => (
+                  <span key={tactic}>{tactic}</span>
+                ))}
+              </div>
+            </div>
+            <div className="info-panel__section">
+              <h3>Skill Set</h3>
+              <div className="info-chip-list">
+                {selectedScenario.skillSet.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+            </div>
+            {activePhaseStep && (
+              <div className="phase-panel">
+                <div className="phase-panel__header">
+                  <h3>Active phase step</h3>
+                  <span>
+                    {activePhaseStepIndex + 1}/{selectedScenario.phaseSteps.length}
+                  </span>
+                </div>
+                <strong>{activePhaseStep.label}</strong>
+                <p>{activePhaseStep.coachingCue}</p>
+                <p className="info-panel__meta">
+                  Key players: {activePhaseStep.keyPlayers.join(', ')}
+                </p>
+                <p className="info-panel__meta">{activePhaseStep.zoneChannelFocus}</p>
+                <div className="phase-controls" role="group" aria-label="Phase step controls">
+                  <button
+                    type="button"
+                    className="control-button"
+                    disabled={activePhaseStepIndex === 0}
+                    onClick={() => handlePhaseStepChange(activePhaseStepIndex - 1)}
+                  >
+                    Previous step
+                  </button>
+                  <button
+                    type="button"
+                    className="control-button"
+                    disabled={activePhaseStepIndex >= selectedScenario.phaseSteps.length - 1}
+                    onClick={() => handlePhaseStepChange(activePhaseStepIndex + 1)}
+                  >
+                    Next step
+                  </button>
+                </div>
+              </div>
+            )}
             <p className="info-panel__meta">Current formation: {currentFormationLabel}</p>
           </div>
 
-          <VideoReferencePanel />
+          {!embedded && <VideoReferencePanel />}
         </aside>
 
         <section className="pitch-panel" aria-label="Pitch visualization">

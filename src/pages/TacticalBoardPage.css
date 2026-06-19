@@ -16,16 +16,41 @@
 }
 
 .app-shell--embedded .app-grid {
-  min-height: 680px;
+  grid-template-columns: minmax(250px, 30%) minmax(0, 70%);
+  min-height: min(78svh, 760px);
+  align-items: stretch;
 }
 
 .app-shell--embedded .pitch-panel {
-  height: 680px;
-  min-height: 680px;
+  height: min(78svh, 760px);
+  min-height: 640px;
 }
 
 .app-shell--embedded .pitch-canvas-host {
-  overflow: auto;
+  overflow: hidden;
+}
+
+.app-shell--embedded .scenario-panel {
+  max-height: min(78svh, 760px);
+}
+
+.app-shell--embedded .scenario-card {
+  padding: 9px 10px;
+}
+
+.app-shell--embedded .scenario-card__meta,
+.app-shell--embedded .info-panel__meta,
+.app-shell--embedded .info-panel__description,
+.app-shell--embedded .info-panel li {
+  font-size: 0.82rem;
+}
+
+.app-shell--embedded .info-panel {
+  padding: 12px;
+}
+
+.embedded-board-controls {
+  margin-bottom: 12px;
 }
 
 .app-header {
@@ -145,7 +170,7 @@ h2 {
 
 .app-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
+  grid-template-columns: clamp(300px, 28vw, 380px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -213,6 +238,60 @@ h2 {
   gap: 6px;
 }
 
+.info-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.info-chip-list span {
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.66);
+  color: rgba(191, 219, 254, 0.92);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 5px 8px;
+}
+
+.phase-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.26);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+  padding: 12px;
+}
+
+.phase-panel__header,
+.phase-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.phase-panel__header h3 {
+  margin: 0;
+}
+
+.phase-panel__header span,
+.phase-panel p {
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.82rem;
+}
+
+.phase-panel strong {
+  color: #f8fafc;
+}
+
+.phase-controls {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
 .video-reference-panel {
   padding: 14px;
   margin-top: 12px;
@@ -275,8 +354,8 @@ h2 {
 
 .pitch-panel {
   overflow: hidden;
-  min-height: 620px;
-  height: min(78vh, 820px);
+  min-height: 680px;
+  height: min(82vh, 900px);
   display: flex;
   flex-direction: column;
   align-items: stretch;

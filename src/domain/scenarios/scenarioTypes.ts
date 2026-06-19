@@ -63,12 +63,33 @@ export type ScenarioMarker = {
   tone?: ScenarioMarkerTone
 }
 
+export type ScenarioFieldGeography = {
+  zones: string[]
+  channels: string[]
+}
+
+export type ScenarioPhaseStep = {
+  label: string
+  coachingCue: string
+  keyPlayers: string[]
+  zoneChannelFocus: string
+  arrowIds?: string[]
+}
+
 export type ScenarioDefinition = {
   id: string
   title: string
   moment: ScenarioMoment
+  momentOfGame: ScenarioMoment
   formationMode: ScenarioFormationMode
   zoneFocus: string
+  fieldGeography: ScenarioFieldGeography
+  system: string
+  strategy: string
+  tactics: string[]
+  skillSet: string[]
+  phaseSteps: ScenarioPhaseStep[]
+  setPieceType?: string
   description: string
   coachingPoints: string[]
   ballStart?: {

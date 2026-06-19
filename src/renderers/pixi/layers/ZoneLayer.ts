@@ -103,6 +103,7 @@ function drawZoneBoundaries(
 }
 
 function drawZoneLabels(
+  zonesLayer: Graphics,
   stage: Container,
   canvasW: number,
   canvasH: number,
@@ -137,7 +138,8 @@ function drawZoneLabels(
     labelContainer.addChild(label)
   })
 
-  stage.addChild(labelContainer)
+  const zoneLayerIndex = stage.getChildIndex(zonesLayer)
+  stage.addChildAt(labelContainer, Math.min(zoneLayerIndex + 1, stage.children.length))
 }
 
 export function drawZones(
@@ -151,5 +153,5 @@ export function drawZones(
 
   drawZoneFills(zonesLayer, canvasW, canvasH, padding)
   drawZoneBoundaries(zonesLayer, canvasW, canvasH, padding)
-  drawZoneLabels(stage, canvasW, canvasH, padding)
+  drawZoneLabels(zonesLayer, stage, canvasW, canvasH, padding)
 }

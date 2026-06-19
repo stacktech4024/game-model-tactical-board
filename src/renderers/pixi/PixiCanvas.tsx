@@ -130,18 +130,23 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
+      const focusedPlayerNumbers = new Set(
+        selectedScenario.arrows
+          ?.map((arrow) => arrow.playerNumber)
+          .filter((playerNumber): playerNumber is number => typeof playerNumber === 'number') ?? [],
+      )
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
-      stage.addChild(annotationLayer)
-      stage.addChild(markingsLayer)
       stage.addChild(channelsLayer)
+      stage.addChild(markingsLayer)
       stage.addChild(goalsLayer)
+      stage.addChild(annotationLayer)
       stage.addChild(arrowLayer)
-      stage.addChild(awayPlayerLayer)
-      stage.addChild(playerLayer)
       stage.addChild(markerLayer)
       stage.addChild(ballLayer)
+      stage.addChild(awayPlayerLayer)
+      stage.addChild(playerLayer)
       stage.addChild(debugLayer)
 
       container.textContent = ''
@@ -149,10 +154,10 @@ export function PixiCanvas({
 
       drawGrass(grassLayer, width, height, pitchPadding)
       drawZones(zonesLayer, stage, width, height, pitchPadding)
-      drawAnnotations(annotationLayer, showAnnotations ? selectedAnnotations : undefined, width, height, pitchPadding)
-      drawMarkings(markingsLayer, width, height, pitchPadding)
       drawChannels(channelsLayer, width, height, pitchPadding)
+      drawMarkings(markingsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
+      drawAnnotations(annotationLayer, showAnnotations ? selectedAnnotations : undefined, width, height, pitchPadding)
       drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding)
 
       if (showOpposition) {
@@ -161,7 +166,16 @@ export function PixiCanvas({
         awayPlayerLayer.removeChildren()
       }
 
-      drawPlayers(playerLayer, PICKERING_SQUAD, activePositions, width, height, pitchPadding, homePlayerTokenRefs)
+      drawPlayers(
+        playerLayer,
+        PICKERING_SQUAD,
+        activePositions,
+        width,
+        height,
+        pitchPadding,
+        focusedPlayerNumbers,
+        homePlayerTokenRefs,
+      )
       drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
       const ballToken = drawBall(ballLayer, showBall ? selectedBallStart : undefined, width, height, pitchPadding)
 

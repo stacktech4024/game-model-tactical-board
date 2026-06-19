@@ -1,5 +1,5 @@
 import { PresentationLayout } from '../PresentationLayout'
-import clubLogo from '../../assets/club-logo.jpg'
+import clubLogo from '../../assets/club-logo-transparent.png'
 
 export function ClosingPage() {
   return (
@@ -13,7 +13,7 @@ export function ClosingPage() {
       <div className="presentation-grid">
         <div className="presentation-card">
           <h3>Game &amp; Training Model</h3>
-          <p>Full written detail of philosophy, system-strategy-tactics, and positional profiles.</p>
+          <p>Full written detail of philosophy, System, Strategy, Tactics, Skill Set, and positional profiles.</p>
         </div>
         <div className="presentation-card">
           <h3>Emergency Action Plan</h3>

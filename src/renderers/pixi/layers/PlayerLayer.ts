@@ -25,6 +25,8 @@ const SHADOW_ALPHA = 0.22
 const SHADOW_OFFSET_RATIO = 0.7
 const SHADOW_RADIUS_X_RATIO = 0.85
 const SHADOW_RADIUS_Y_RATIO = 0.3
+const FOCUS_RING_COLOR = 0xfbbf24
+const FOCUS_RING_ALPHA = 0.88
 
 function getTokenFill(player: SquadPlayer): number {
   if (player.side === 'away') {
@@ -64,6 +66,14 @@ function addShadow(tokenContainer: Container, tokenRadius: number): void {
   tokenContainer.addChild(shadow)
 }
 
+function addFocusRing(tokenContainer: Container, tokenRadius: number): void {
+  const ring = new Graphics()
+
+  ring.circle(0, 0, tokenRadius + 5)
+  ring.stroke({ color: FOCUS_RING_COLOR, width: 2.5, alpha: FOCUS_RING_ALPHA })
+  tokenContainer.addChild(ring)
+}
+
 function addToken(
   container: Container,
   player: SquadPlayer,
@@ -71,6 +81,7 @@ function addToken(
   canvasW: number,
   canvasH: number,
   padding: number,
+  focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
@@ -88,6 +99,10 @@ function addToken(
   })
 
   addShadow(tokenContainer, tokenRadius)
+
+  if (player.side !== 'away' && focusedPlayerNumbers?.has(player.number)) {
+    addFocusRing(tokenContainer, tokenRadius)
+  }
 
   tokenFill.circle(0, 0, tokenRadius)
   tokenFill.fill({ color: getTokenFill(player), alpha: player.side === 'away' ? 0.72 : 1 })
@@ -110,6 +125,7 @@ export function drawPlayers(
   canvasW: number,
   canvasH: number,
   padding: number,
+  focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
 ): void {
   container.removeChildren()
@@ -122,6 +138,6 @@ export function drawPlayers(
       return
     }
 
-    addToken(container, player, position, canvasW, canvasH, padding, tokenRefs)
+    addToken(container, player, position, canvasW, canvasH, padding, focusedPlayerNumbers, tokenRefs)
   })
 }

@@ -3,12 +3,12 @@ import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import { PITCH } from '../../../domain/pitch/pitchConstants'
 
 const LINE_COLOR = 0xffffff
-const NET_LINE_ALPHA = 0.28
-const DEPTH_LINE_ALPHA = 0.42
+const NET_LINE_ALPHA = 0.34
+const DEPTH_LINE_ALPHA = 0.56
 const NET_LINE_WIDTH = 1
-const DEPTH_LINE_WIDTH = 1.5
-const POST_WIDTH = 2.5
-const CROSSBAR_WIDTH = 2.5
+const DEPTH_LINE_WIDTH = 1.75
+const POST_WIDTH = 3
+const CROSSBAR_WIDTH = 3
 const NET_GRID_DIVISIONS = 6
 
 function drawGoal(
