@@ -1,5 +1,6 @@
 import { Container, Graphics, Text } from 'pixi.js'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { getZoneNumberForY } from '../../../domain/pitch/pitchConstants'
 import type { SquadPlayer } from '../../../domain/players/playerTypes'
 
 type FormationPosition = {
@@ -87,6 +88,7 @@ function addToken(
   padding: number,
   focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
+  activeZones?: Set<number>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
   const tokenContainer = new Container()
@@ -103,8 +105,12 @@ function addToken(
   })
   const hasActiveFocus = player.side !== 'away' && Boolean(focusedPlayerNumbers?.size)
   const isFocused = player.side !== 'away' && (focusedPlayerNumbers?.has(player.number) ?? false)
-  const tokenAlpha = player.side === 'away' ? 0.58 : hasActiveFocus && !isFocused ? 0.48 : 1
-  const strokeAlpha = player.side === 'away' ? 0.34 : hasActiveFocus && !isFocused ? 0.34 : 0.78
+  const isOutOfActiveZone = Boolean(activeZones?.size) && !activeZones?.has(getZoneNumberForY(position.y))
+  const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
+  const tokenAlpha =
+    (player.side === 'away' ? 0.58 : hasActiveFocus && !isFocused ? 0.48 : 1) * zoneDimFactor
+  const strokeAlpha =
+    (player.side === 'away' ? 0.34 : hasActiveFocus && !isFocused ? 0.34 : 0.78) * zoneDimFactor
 
   addShadow(tokenContainer, tokenRadius)
 
@@ -116,7 +122,7 @@ function addToken(
   tokenFill.fill({ color: getTokenFill(player), alpha: tokenAlpha })
   tokenFill.stroke({ color: TOKEN_STROKE_COLOR, width: TOKEN_STROKE_WIDTH, alpha: strokeAlpha })
 
-  numberText.alpha = hasActiveFocus && !isFocused ? 0.55 : 1
+  numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
 
   numberText.anchor.set(0.5)
   numberText.position.set(0, 0)
@@ -137,6 +143,7 @@ export function drawPlayers(
   padding: number,
   focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
+  activeZones?: Set<number>,
 ): void {
   container.removeChildren()
   tokenRefs?.clear()
@@ -148,6 +155,6 @@ export function drawPlayers(
       return
     }
 
-    addToken(container, player, position, canvasW, canvasH, padding, focusedPlayerNumbers, tokenRefs)
+    addToken(container, player, position, canvasW, canvasH, padding, focusedPlayerNumbers, tokenRefs, activeZones)
   })
 }

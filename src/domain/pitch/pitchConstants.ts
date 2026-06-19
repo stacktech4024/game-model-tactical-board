@@ -83,3 +83,9 @@ export const PITCH = {
     } satisfies PitchChannel,
   ],
 } as const
+
+export function getZoneNumberForY(y: number): number {
+  const zoneIndex = PITCH.ZONES.findIndex((zone) => y >= zone.startY && y <= zone.endY)
+
+  return zoneIndex === -1 ? 1 : zoneIndex + 1
+}

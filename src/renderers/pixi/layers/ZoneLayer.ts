@@ -45,6 +45,7 @@ function drawZoneFills(
   canvasW: number,
   canvasH: number,
   padding: number,
+  activeZones?: Set<number>,
 ): void {
   PITCH.ZONES.forEach((zone, index) => {
     const colorConfig = ZONE_COLORS_BY_INDEX[index]
@@ -53,10 +54,14 @@ function drawZoneFills(
       return
     }
 
+    const isOutOfActiveZone = Boolean(activeZones?.size) && !activeZones?.has(index + 1)
     const rect = zoneToScreenRect(zone.startY, zone.endY, canvasW, canvasH, padding)
 
     zonesLayer.rect(rect.x, rect.y, rect.width, rect.height)
-    zonesLayer.fill({ color: colorConfig.fill, alpha: colorConfig.alpha })
+    zonesLayer.fill({
+      color: colorConfig.fill,
+      alpha: isOutOfActiveZone ? colorConfig.alpha * 0.4 : colorConfig.alpha,
+    })
   })
 }
 
@@ -108,6 +113,7 @@ function drawZoneLabels(
   canvasW: number,
   canvasH: number,
   padding: number,
+  activeZones?: Set<number>,
 ): void {
   const existing = stage.children.find((child) => child.name === ZONE_LABEL_CONTAINER_NAME)
 
@@ -120,6 +126,7 @@ function drawZoneLabels(
   labelContainer.name = ZONE_LABEL_CONTAINER_NAME
 
   PITCH.ZONES.forEach((zone, index) => {
+    const isOutOfActiveZone = Boolean(activeZones?.size) && !activeZones?.has(index + 1)
     const rect = zoneToScreenRect(zone.startY, zone.endY, canvasW, canvasH, padding)
     const labelColor = ZONE_LABEL_COLORS_BY_INDEX[index] ?? 0xffffff
     const label = new Text({
@@ -132,7 +139,7 @@ function drawZoneLabels(
       },
     })
 
-    label.alpha = 0.55
+    label.alpha = isOutOfActiveZone ? 0.22 : 0.55
     label.anchor.set(0, 0)
     label.position.set(rect.x + 8, rect.y + 8)
     labelContainer.addChild(label)
@@ -148,10 +155,11 @@ export function drawZones(
   canvasW: number,
   canvasH: number,
   padding: number,
+  activeZones?: Set<number>,
 ): void {
   zonesLayer.clear()
 
-  drawZoneFills(zonesLayer, canvasW, canvasH, padding)
+  drawZoneFills(zonesLayer, canvasW, canvasH, padding, activeZones)
   drawZoneBoundaries(zonesLayer, canvasW, canvasH, padding)
-  drawZoneLabels(zonesLayer, stage, canvasW, canvasH, padding)
+  drawZoneLabels(zonesLayer, stage, canvasW, canvasH, padding, activeZones)
 }
