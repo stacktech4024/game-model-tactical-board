@@ -12,12 +12,20 @@
   max-width: 100%;
   padding: 0;
   border-radius: 16px;
-  overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .app-shell--embedded .app-grid {
-  min-height: 560px;
+  min-height: 680px;
+}
+
+.app-shell--embedded .pitch-panel {
+  height: 680px;
+  min-height: 680px;
+}
+
+.app-shell--embedded .pitch-canvas-host {
+  overflow: auto;
 }
 
 .app-header {

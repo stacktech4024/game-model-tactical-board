@@ -21,11 +21,12 @@ type TacticalBoardPageProps = {
   embedded?: boolean
 }
 
+const EMBEDDED_PITCH_SIZE = { width: 820, height: 640 }
+
 function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoardPageProps) {
-  const [pitchSize, setPitchSize] = useState({
-    width: 900,
-    height: 700,
-  })
+  const [pitchSize, setPitchSize] = useState(
+    embedded ? EMBEDDED_PITCH_SIZE : { width: 900, height: 700 },
+  )
   const [selectedFormation, setSelectedFormation] = useState<ScenarioFormationMode>('attacking-442')
   const [debugMode, setDebugMode] = useState(false)
   const [showAnnotations, setShowAnnotations] = useState(true)
@@ -47,6 +48,10 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
   }, [selectedScenarioId])
 
   useEffect(() => {
+    if (embedded) {
+      return undefined
+    }
+
     const host = pitchHostRef.current
 
     if (!host) {
