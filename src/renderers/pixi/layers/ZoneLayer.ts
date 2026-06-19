@@ -1,86 +1,155 @@
 import { Container, Graphics, Text } from 'pixi.js'
-import { PITCH } from '../../../domain/pitch/pitchConstants'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { PITCH } from '../../../domain/pitch/pitchConstants'
 
-const AMBER = 0xf59e0b
-const ZONE_ONE_FILL = 0x1a3a5c
-const ZONE_FOUR_FILL = 0x5c1a1a
-const DASH_WIDTH = 1
-const DASH_LENGTH_METERS = 3
-const GAP_LENGTH_METERS = 2
-const LABEL_OFFSET_PX = 8
+type ZoneColorConfig = {
+  fill: number
+  alpha: number
+}
 
-function drawDashedBoundary(
-  gfx: Graphics,
-  y: number,
+const ZONE_COLORS_BY_INDEX: ZoneColorConfig[] = [
+  { fill: 0x4a90d9, alpha: 0.1 },
+  { fill: 0xf5a623, alpha: 0.07 },
+  { fill: 0x7ed321, alpha: 0.07 },
+  { fill: 0xe24b4a, alpha: 0.08 },
+]
+
+const ZONE_LABEL_COLORS_BY_INDEX = [0x4a90d9, 0xf5a623, 0x7ed321, 0xe24b4a]
+const BOUNDARY_COLOR = 0xf5a623
+const BOUNDARY_ALPHA = 0.5
+const BOUNDARY_WIDTH = 1
+const BOUNDARY_DASH = 6
+const BOUNDARY_GAP = 4
+const ZONE_LABEL_CONTAINER_NAME = '__zoneLabels'
+
+function zoneToScreenRect(
+  startY: number,
+  endY: number,
   canvasW: number,
   canvasH: number,
   padding: number,
-): void {
-  for (let startX = 0; startX < PITCH.WIDTH; startX += DASH_LENGTH_METERS + GAP_LENGTH_METERS) {
-    const endX = Math.min(startX + DASH_LENGTH_METERS, PITCH.WIDTH)
-    const start = pitchToScreen(startX, y, canvasW, canvasH, padding)
-    const end = pitchToScreen(endX, y, canvasW, canvasH, padding)
+): { x: number; y: number; width: number; height: number } {
+  const corner1 = pitchToScreen(0, startY, canvasW, canvasH, padding)
+  const corner2 = pitchToScreen(PITCH.WIDTH, endY, canvasW, canvasH, padding)
 
-    gfx.moveTo(start.sx, start.sy)
-    gfx.lineTo(end.sx, end.sy)
-    gfx.stroke({ color: AMBER, width: DASH_WIDTH, alpha: 1 })
+  return {
+    x: Math.min(corner1.sx, corner2.sx),
+    y: Math.min(corner1.sy, corner2.sy),
+    width: Math.abs(corner2.sx - corner1.sx),
+    height: Math.abs(corner2.sy - corner1.sy),
   }
 }
 
-function addZoneLabel(
-  container: Container,
-  label: string,
-  zoneStartY: number,
-  zoneEndY: number,
+function drawZoneFills(
+  zonesLayer: Graphics,
   canvasW: number,
   canvasH: number,
   padding: number,
 ): void {
-  const centerY = zoneStartY + (zoneEndY - zoneStartY) / 2
-  const labelPosition = pitchToScreen(0, centerY, canvasW, canvasH, padding)
-  const text = new Text({
-    text: label,
-    style: {
-      fill: AMBER,
-      fontSize: 9,
-      fontFamily: 'Arial',
-    },
+  PITCH.ZONES.forEach((zone, index) => {
+    const colorConfig = ZONE_COLORS_BY_INDEX[index]
+
+    if (!colorConfig) {
+      return
+    }
+
+    const rect = zoneToScreenRect(zone.startY, zone.endY, canvasW, canvasH, padding)
+
+    zonesLayer.rect(rect.x, rect.y, rect.width, rect.height)
+    zonesLayer.fill({ color: colorConfig.fill, alpha: colorConfig.alpha })
+  })
+}
+
+function drawDashedLine(
+  zonesLayer: Graphics,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): void {
+  const totalLength = Math.hypot(x2 - x1, y2 - y1)
+  const dashCycle = BOUNDARY_DASH + BOUNDARY_GAP
+  const dashCount = Math.floor(totalLength / dashCycle)
+  const dirX = (x2 - x1) / totalLength
+  const dirY = (y2 - y1) / totalLength
+
+  for (let i = 0; i < dashCount; i += 1) {
+    const startDist = i * dashCycle
+    const endDist = Math.min(startDist + BOUNDARY_DASH, totalLength)
+
+    zonesLayer.moveTo(x1 + dirX * startDist, y1 + dirY * startDist)
+    zonesLayer.lineTo(x1 + dirX * endDist, y1 + dirY * endDist)
+  }
+
+  zonesLayer.stroke({ color: BOUNDARY_COLOR, width: BOUNDARY_WIDTH, alpha: BOUNDARY_ALPHA })
+}
+
+function drawZoneBoundaries(
+  zonesLayer: Graphics,
+  canvasW: number,
+  canvasH: number,
+  padding: number,
+): void {
+  const internalBoundaryYs = PITCH.ZONES.map((zone) => zone.endY).filter(
+    (y) => y > 0 && y < PITCH.LENGTH,
+  )
+
+  internalBoundaryYs.forEach((y) => {
+    const left = pitchToScreen(0, y, canvasW, canvasH, padding)
+    const right = pitchToScreen(PITCH.WIDTH, y, canvasW, canvasH, padding)
+
+    drawDashedLine(zonesLayer, left.sx, left.sy, right.sx, right.sy)
+  })
+}
+
+function drawZoneLabels(
+  stage: Container,
+  canvasW: number,
+  canvasH: number,
+  padding: number,
+): void {
+  const existing = stage.children.find((child) => child.name === ZONE_LABEL_CONTAINER_NAME)
+
+  if (existing) {
+    stage.removeChild(existing)
+    existing.destroy({ children: true })
+  }
+
+  const labelContainer = new Container()
+  labelContainer.name = ZONE_LABEL_CONTAINER_NAME
+
+  PITCH.ZONES.forEach((zone, index) => {
+    const rect = zoneToScreenRect(zone.startY, zone.endY, canvasW, canvasH, padding)
+    const labelColor = ZONE_LABEL_COLORS_BY_INDEX[index] ?? 0xffffff
+    const label = new Text({
+      text: zone.label,
+      style: {
+        fill: labelColor,
+        fontFamily: 'Arial',
+        fontSize: 10,
+        fontWeight: '600',
+      },
+    })
+
+    label.alpha = 0.55
+    label.anchor.set(0, 0)
+    label.position.set(rect.x + 8, rect.y + 8)
+    labelContainer.addChild(label)
   })
 
-  text.alpha = 0.55
-  text.anchor.set(0, 0.5)
-  text.position.set(labelPosition.sx + LABEL_OFFSET_PX, labelPosition.sy - 8)
-  container.addChild(text)
+  stage.addChild(labelContainer)
 }
 
 export function drawZones(
-  gfx: Graphics,
-  container: Container,
+  zonesLayer: Graphics,
+  stage: Container,
   canvasW: number,
   canvasH: number,
   padding: number,
 ): void {
-  const zones = PITCH.ZONES
+  zonesLayer.clear()
 
-  zones.forEach((zone, index) => {
-    if (index === 0 || index === zones.length - 1) {
-      const zoneTopLeft = pitchToScreen(0, zone.endY, canvasW, canvasH, padding)
-      const zoneBottomRight = pitchToScreen(PITCH.WIDTH, zone.startY, canvasW, canvasH, padding)
-
-      gfx.rect(
-        zoneTopLeft.sx,
-        zoneTopLeft.sy,
-        zoneBottomRight.sx - zoneTopLeft.sx,
-        zoneBottomRight.sy - zoneTopLeft.sy,
-      )
-      gfx.fill({ color: index === 0 ? ZONE_ONE_FILL : ZONE_FOUR_FILL, alpha: 0.25 })
-    }
-
-    addZoneLabel(container, zone.label, zone.startY, zone.endY, canvasW, canvasH, padding)
-
-    if (index < zones.length - 1) {
-      drawDashedBoundary(gfx, zone.endY, canvasW, canvasH, padding)
-    }
-  })
+  drawZoneFills(zonesLayer, canvasW, canvasH, padding)
+  drawZoneBoundaries(zonesLayer, canvasW, canvasH, padding)
+  drawZoneLabels(stage, canvasW, canvasH, padding)
 }

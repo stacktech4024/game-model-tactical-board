@@ -131,7 +131,8 @@ h2 {
 
 .scenario-panel,
 .info-panel,
-.pitch-panel {
+.pitch-panel,
+.video-reference-panel {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.86);
@@ -189,6 +190,66 @@ h2 {
   margin-top: 8px;
   display: grid;
   gap: 6px;
+}
+
+.video-reference-panel {
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.video-reference-list {
+  display: grid;
+  gap: 10px;
+}
+
+.video-reference-card {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.28);
+}
+
+.video-reference-card__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.video-reference-card__header h3 {
+  font-size: 0.9rem;
+}
+
+.video-reference-card__header span,
+.video-reference-card__tags span {
+  color: #93c5fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.video-reference-card__focus,
+.video-reference-card__notes,
+.video-reference-card a {
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 0.82rem;
+}
+
+.video-reference-card__tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.video-reference-card__tags span {
+  color: rgba(147, 197, 253, 0.88);
+}
+
+.video-reference-card a {
+  color: #bfdbfe;
+  font-weight: 700;
 }
 
 .pitch-panel {

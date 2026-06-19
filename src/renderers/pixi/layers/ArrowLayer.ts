@@ -30,9 +30,11 @@ export function drawScenarioArrows(
 
   arrows.forEach((arrow) => {
     const start = pitchToScreen(arrow.from.x, arrow.from.y, canvasW, canvasH, padding)
+    const via = arrow.via ? pitchToScreen(arrow.via.x, arrow.via.y, canvasW, canvasH, padding) : undefined
     const end = pitchToScreen(arrow.to.x, arrow.to.y, canvasW, canvasH, padding)
+    const arrowheadStart = via ?? start
     const color = ARROW_COLORS[arrow.type]
-    const angle = Math.atan2(end.sy - start.sy, end.sx - start.sx)
+    const angle = Math.atan2(end.sy - arrowheadStart.sy, end.sx - arrowheadStart.sx)
     const leftHeadAngle = angle - Math.PI + ARROWHEAD_ANGLE
     const rightHeadAngle = angle - Math.PI - ARROWHEAD_ANGLE
     const leftHeadX = end.sx + Math.cos(leftHeadAngle) * ARROWHEAD_LENGTH
@@ -41,6 +43,9 @@ export function drawScenarioArrows(
     const rightHeadY = end.sy + Math.sin(rightHeadAngle) * ARROWHEAD_LENGTH
 
     gfx.moveTo(start.sx, start.sy)
+    if (via) {
+      gfx.lineTo(via.sx, via.sy)
+    }
     gfx.lineTo(end.sx, end.sy)
     gfx.stroke({ color, width: ARROW_WIDTH, alpha: ARROW_ALPHA })
 

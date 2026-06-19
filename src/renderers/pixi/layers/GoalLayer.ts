@@ -1,75 +1,81 @@
 import { Graphics } from 'pixi.js'
-import { PITCH } from '../../../domain/pitch/pitchConstants'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { PITCH } from '../../../domain/pitch/pitchConstants'
 
-const FAINT_WHITE = 0xffffff
-const BOLD_WHITE = 0xffffff
-
-function drawLine(
-  gfx: Graphics,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  canvasW: number,
-  canvasH: number,
-  padding: number,
-  color: number,
-  width: number,
-  alpha = 1,
-): void {
-  const start = pitchToScreen(x1, y1, canvasW, canvasH, padding)
-  const end = pitchToScreen(x2, y2, canvasW, canvasH, padding)
-
-  gfx.moveTo(start.sx, start.sy)
-  gfx.lineTo(end.sx, end.sy)
-  gfx.stroke({ color, width, alpha })
-}
+const LINE_COLOR = 0xffffff
+const NET_LINE_ALPHA = 0.28
+const DEPTH_LINE_ALPHA = 0.42
+const NET_LINE_WIDTH = 1
+const DEPTH_LINE_WIDTH = 1.5
+const POST_WIDTH = 2.5
+const CROSSBAR_WIDTH = 2.5
+const NET_GRID_DIVISIONS = 6
 
 function drawGoal(
-  gfx: Graphics,
+  goalsLayer: Graphics,
+  goalLineY: number,
+  isOwnGoal: boolean,
   canvasW: number,
   canvasH: number,
   padding: number,
-  frontY: number,
-  backY: number,
 ): void {
-  const leftX = (PITCH.WIDTH - PITCH.GOAL_WIDTH) / 2
-  const rightX = leftX + PITCH.GOAL_WIDTH
-  const gridX1 = leftX + PITCH.GOAL_WIDTH / 3
-  const gridX2 = leftX + (PITCH.GOAL_WIDTH * 2) / 3
-  const gridY1 = frontY + (backY - frontY) / 3
-  const gridY2 = frontY + ((backY - frontY) * 2) / 3
+  const goalCenterX = PITCH.WIDTH / 2
+  const halfGoalWidth = PITCH.GOAL_WIDTH / 2
+  const depthDirection = isOwnGoal ? -1 : 1
+  const backNetY = goalLineY + depthDirection * PITCH.GOAL_DEPTH
 
-  drawLine(gfx, leftX, backY, rightX, backY, canvasW, canvasH, padding, FAINT_WHITE, 1, 0.4)
-  drawLine(gfx, leftX, frontY, leftX, backY, canvasW, canvasH, padding, FAINT_WHITE, 1, 0.4)
-  drawLine(gfx, rightX, frontY, rightX, backY, canvasW, canvasH, padding, FAINT_WHITE, 1, 0.4)
+  const postLeft = pitchToScreen(goalCenterX - halfGoalWidth, goalLineY, canvasW, canvasH, padding)
+  const postRight = pitchToScreen(goalCenterX + halfGoalWidth, goalLineY, canvasW, canvasH, padding)
+  const backLeft = pitchToScreen(goalCenterX - halfGoalWidth, backNetY, canvasW, canvasH, padding)
+  const backRight = pitchToScreen(goalCenterX + halfGoalWidth, backNetY, canvasW, canvasH, padding)
 
-  drawLine(gfx, leftX, frontY, rightX, frontY, canvasW, canvasH, padding, BOLD_WHITE, 2)
-  drawLine(gfx, leftX, frontY, leftX, backY, canvasW, canvasH, padding, BOLD_WHITE, 2)
-  drawLine(gfx, rightX, frontY, rightX, backY, canvasW, canvasH, padding, BOLD_WHITE, 2)
+  goalsLayer.moveTo(backLeft.sx, backLeft.sy)
+  goalsLayer.lineTo(backRight.sx, backRight.sy)
+  goalsLayer.stroke({ color: LINE_COLOR, width: NET_LINE_WIDTH, alpha: NET_LINE_ALPHA })
 
-  drawLine(gfx, leftX, backY, leftX, gridY1, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, leftX, gridY1, leftX, gridY2, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, leftX, gridY2, leftX, frontY, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, rightX, backY, rightX, gridY1, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, rightX, gridY1, rightX, gridY2, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, rightX, gridY2, rightX, frontY, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
+  goalsLayer.moveTo(postLeft.sx, postLeft.sy)
+  goalsLayer.lineTo(backLeft.sx, backLeft.sy)
+  goalsLayer.stroke({ color: LINE_COLOR, width: DEPTH_LINE_WIDTH, alpha: DEPTH_LINE_ALPHA })
 
-  drawLine(gfx, leftX, gridY1, rightX, gridY1, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, leftX, gridY2, rightX, gridY2, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, gridX1, backY, gridX1, frontY, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
-  drawLine(gfx, gridX2, backY, gridX2, frontY, canvasW, canvasH, padding, FAINT_WHITE, 0.5, 0.15)
+  goalsLayer.moveTo(postRight.sx, postRight.sy)
+  goalsLayer.lineTo(backRight.sx, backRight.sy)
+  goalsLayer.stroke({ color: LINE_COLOR, width: DEPTH_LINE_WIDTH, alpha: DEPTH_LINE_ALPHA })
+
+  goalsLayer.moveTo(postLeft.sx, postLeft.sy)
+  goalsLayer.lineTo(postRight.sx, postRight.sy)
+  goalsLayer.stroke({ color: LINE_COLOR, width: CROSSBAR_WIDTH, alpha: DEPTH_LINE_ALPHA })
+
+  const postTickDir = isOwnGoal ? 1 : -1
+
+  goalsLayer.moveTo(postLeft.sx, postLeft.sy)
+  goalsLayer.lineTo(postLeft.sx, postLeft.sy + postTickDir * 4)
+  goalsLayer.stroke({ color: LINE_COLOR, width: POST_WIDTH, alpha: DEPTH_LINE_ALPHA })
+
+  goalsLayer.moveTo(postRight.sx, postRight.sy)
+  goalsLayer.lineTo(postRight.sx, postRight.sy + postTickDir * 4)
+  goalsLayer.stroke({ color: LINE_COLOR, width: POST_WIDTH, alpha: DEPTH_LINE_ALPHA })
+
+  for (let i = 1; i < NET_GRID_DIVISIONS; i += 1) {
+    const t = i / NET_GRID_DIVISIONS
+    const topX = postLeft.sx + (postRight.sx - postLeft.sx) * t
+    const topY = postLeft.sy + (postRight.sy - postLeft.sy) * t
+    const bottomX = backLeft.sx + (backRight.sx - backLeft.sx) * t
+    const bottomY = backLeft.sy + (backRight.sy - backLeft.sy) * t
+
+    goalsLayer.moveTo(topX, topY)
+    goalsLayer.lineTo(bottomX, bottomY)
+    goalsLayer.stroke({ color: LINE_COLOR, width: 0.5, alpha: NET_LINE_ALPHA * 0.5 })
+  }
 }
 
 export function drawGoals(
-  gfx: Graphics,
+  goalsLayer: Graphics,
   canvasW: number,
   canvasH: number,
   padding: number,
 ): void {
-  gfx.clear()
+  goalsLayer.clear()
 
-  drawGoal(gfx, canvasW, canvasH, padding, 0, -PITCH.GOAL_DEPTH)
-  drawGoal(gfx, canvasW, canvasH, padding, PITCH.LENGTH, PITCH.LENGTH + PITCH.GOAL_DEPTH)
+  drawGoal(goalsLayer, 0, true, canvasW, canvasH, padding)
+  drawGoal(goalsLayer, PITCH.LENGTH, false, canvasW, canvasH, padding)
 }

@@ -1,29 +1,35 @@
 import { Graphics } from 'pixi.js'
-import { PITCH } from '../../../domain/pitch/pitchConstants'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { PITCH } from '../../../domain/pitch/pitchConstants'
 
-const DARK_GRASS = 0x2d5a27
-const LIGHT_GRASS = 0x356b2e
-const STRIPE_WIDTH_METERS = 5
+const STRIPE_HEIGHT_M = 5
+const STRIPE_DARK = 0x2d5a1b
+const STRIPE_LIGHT = 0x316320
 
 export function drawGrass(
-  gfx: Graphics,
+  grassLayer: Graphics,
   canvasW: number,
   canvasH: number,
   padding: number,
 ): void {
-  gfx.clear()
+  grassLayer.clear()
 
   let stripeIndex = 0
 
-  for (let startX = 0; startX < PITCH.WIDTH; startX += STRIPE_WIDTH_METERS) {
-    const endX = Math.min(startX + STRIPE_WIDTH_METERS, PITCH.WIDTH)
-    const topLeft = pitchToScreen(startX, PITCH.LENGTH, canvasW, canvasH, padding)
-    const bottomRight = pitchToScreen(endX, 0, canvasW, canvasH, padding)
-    const stripeColor = stripeIndex % 2 === 0 ? DARK_GRASS : LIGHT_GRASS
+  for (let y = 0; y < PITCH.LENGTH; y += STRIPE_HEIGHT_M) {
+    const bandEndY = Math.min(y + STRIPE_HEIGHT_M, PITCH.LENGTH)
+    const corner1 = pitchToScreen(0, y, canvasW, canvasH, padding)
+    const corner2 = pitchToScreen(PITCH.WIDTH, bandEndY, canvasW, canvasH, padding)
+    const x = Math.min(corner1.sx, corner2.sx)
+    const rectY = Math.min(corner1.sy, corner2.sy)
+    const width = Math.abs(corner2.sx - corner1.sx)
+    const height = Math.abs(corner2.sy - corner1.sy)
 
-    gfx.rect(topLeft.sx, topLeft.sy, bottomRight.sx - topLeft.sx, bottomRight.sy - topLeft.sy)
-    gfx.fill({ color: stripeColor })
+    grassLayer.rect(x, rectY, width, height)
+    grassLayer.fill({
+      color: stripeIndex % 2 === 0 ? STRIPE_DARK : STRIPE_LIGHT,
+      alpha: 1,
+    })
 
     stripeIndex += 1
   }

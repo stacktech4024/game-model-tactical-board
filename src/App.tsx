@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TimelineScrubber } from './editor/TimelineScrubber'
+import { VideoReferencePanel } from './editor/VideoReferencePanel'
 import { FORMATION_LABELS } from './data/formations'
 import { SCENARIOS } from './data/scenarios'
 import type { ScenarioFormationMode } from './domain/scenarios/scenarioTypes'
@@ -235,6 +236,8 @@ function App() {
             </div>
             <p className="info-panel__meta">Current formation: {currentFormationLabel}</p>
           </div>
+
+          <VideoReferencePanel />
         </aside>
 
         <section className="pitch-panel" aria-label="Pitch visualization">
