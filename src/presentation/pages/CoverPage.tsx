@@ -8,7 +8,7 @@ export function CoverPage() {
     <PresentationLayout pageId="cover">
       <img src={clubLogo} alt="Pickering FC crest" className="presentation-logo" />
       <p className="presentation-eyebrow">Canada Soccer B Diploma — Capping Project</p>
-      <h1 className="presentation-title">Game &amp; training model</h1>
+      <h1 className="presentation-title">Game &amp; Training Model</h1>
       <p className="presentation-subtitle">
         Pickering FC — U20 OPL Men's Program · Coach Darren Billy
       </p>

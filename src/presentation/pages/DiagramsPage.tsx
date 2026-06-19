@@ -13,7 +13,6 @@ const DIAGRAM_IMAGE_BY_SCENARIO_ID: Record<string, string> = {
   'compact-defensive-block': diagram2,
   'counter-quickly-on-turnover': diagram3,
   'protect-lead-in-back-five': diagram4,
-  'corner-short-decoy-wide-delivery': diagram1,
 }
 
 const DIAGRAM_SCENARIO_IDS = [
@@ -28,14 +27,25 @@ const DIAGRAM_SCENARIOS = DIAGRAM_SCENARIO_IDS.map((id) =>
   SCENARIOS.find((scenario) => scenario.id === id),
 ).filter((scenario): scenario is ScenarioDefinition => Boolean(scenario))
 
+function getBoardUrl(scenario: ScenarioDefinition): string {
+  const step = scenario.phaseSteps[0]?.id
+  const params = new URLSearchParams({ scenario: scenario.id })
+
+  if (step) {
+    params.set('step', step)
+  }
+
+  return `/presentation/live-board?${params.toString()}`
+}
+
 export function DiagramsPage() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioDefinition | null>(null)
 
   return (
     <PresentationLayout pageId="diagrams" noPadding>
       <p className="presentation-eyebrow">Section 2 — the what</p>
-      <h1 className="presentation-title">Open-play Moments of the Game + set pieces</h1>
-      <p className="presentation-body">Click a Moment of the Game to inspect the System, Strategy, Tactics, and coaching cue.</p>
+      <h1 className="presentation-title">All Moments of the Game</h1>
+      <p className="presentation-body">Click any card to inspect the System, Strategy, Tactics, Skill Set, and coaching cue.</p>
 
       <div className="presentation-diagram-grid presentation-diagram-grid--interactive">
         {DIAGRAM_SCENARIOS.map((scenario) => (
@@ -45,7 +55,14 @@ export function DiagramsPage() {
             className="presentation-diagram-card presentation-diagram-card--button"
             onClick={() => setSelectedScenario(scenario)}
           >
-            <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
+            {DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id] ? (
+              <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
+            ) : (
+              <div className="presentation-diagram-card__live-preview">
+                <span>Live board scenario</span>
+                <strong>{scenario.setPieceType}</strong>
+              </div>
+            )}
             <span className="presentation-diagram-card__caption">{scenario.momentOfGame}</span>
           </button>
         ))}
@@ -73,17 +90,25 @@ export function DiagramsPage() {
             >
               Close
             </button>
-            <img
-              src={DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id]}
-              alt={`${selectedScenario.title} expanded diagram`}
-            />
+            {DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id] ? (
+              <img
+                src={DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id]}
+                alt={`${selectedScenario.title} expanded diagram`}
+              />
+            ) : (
+              <div className="diagram-modal__live-preview">
+                <span>Open this set-piece in the live board</span>
+                <strong>{selectedScenario.title}</strong>
+              </div>
+            )}
             <div className="diagram-modal__content">
               <span>Moment of the Game: {selectedScenario.momentOfGame}</span>
-              <h2>{selectedScenario.system}</h2>
+              <h2>{selectedScenario.system.shape}</h2>
+              <p><strong>System:</strong> {selectedScenario.system.description}</p>
               {selectedScenario.setPieceType && (
                 <p><strong>Set piece type:</strong> {selectedScenario.setPieceType}</p>
               )}
-              <p><strong>Field geography:</strong> {selectedScenario.fieldGeography.zones.join(', ')} · {selectedScenario.fieldGeography.channels.join(', ')}</p>
+              <p><strong>Field Geography:</strong> {selectedScenario.fieldGeography.description}</p>
               <p><strong>Strategy:</strong> {selectedScenario.strategy}</p>
               <div>
                 <strong>Tactics</strong>
@@ -106,7 +131,7 @@ export function DiagramsPage() {
                 </div>
               </div>
               <p><strong>Key coaching point:</strong> {selectedScenario.phaseSteps[0]?.coachingCue}</p>
-              <Link className="presentation-link-button" to="/board">
+              <Link className="presentation-link-button" to={getBoardUrl(selectedScenario)}>
                 Open in live board
               </Link>
             </div>

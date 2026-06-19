@@ -56,7 +56,10 @@ export function MethodologyPage() {
     <PresentationLayout pageId="methodology" noPadding>
       <p className="presentation-eyebrow">Section 4 — the reasoning</p>
       <h1 className="presentation-title">Training methodology</h1>
-      <p className="presentation-body">Design the session so the match problem appears, gets isolated, then returns to the game.</p>
+      <p className="presentation-body">
+        Whole-Part-Whole: present the game problem in context, isolate the key relationship, then
+        return to match pressure with real opposition and scoring.
+      </p>
 
       <section className="method-builder">
         <div className="method-steps" role="tablist" aria-label="Whole part whole training design">

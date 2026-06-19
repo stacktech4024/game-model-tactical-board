@@ -28,7 +28,10 @@ export function IntroPage() {
     <PresentationLayout pageId="intro">
       <p className="presentation-eyebrow">Section 1 — the why</p>
       <h1 className="presentation-title">Who we are</h1>
-      <p className="presentation-body">Our identity is simple: control the ball, stretch the field, attack with intent.</p>
+      <p className="presentation-body">
+        Pickering FC U20 OPL Men's Program. A connected coaching approach that links every training
+        session and development goal back to how we play — and why.
+      </p>
 
       <div className="reveal-card-row" role="tablist" aria-label="Coaching philosophy">
         {PHILOSOPHY_CARDS.map((card) => (
@@ -49,6 +52,14 @@ export function IntroPage() {
         <span>{activeCard.title}</span>
         <p>{activeCard.note}</p>
       </section>
+
+      <div className="presentation-chip-row" aria-label="Program context">
+        {['Pickering FC U20 OPL', 'Connected Coaching', 'Canada Soccer B Diploma'].map((chip) => (
+          <span key={chip} className="presentation-chip">
+            {chip}
+          </span>
+        ))}
+      </div>
     </PresentationLayout>
   )
 }

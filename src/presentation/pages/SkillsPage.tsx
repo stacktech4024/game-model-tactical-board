@@ -34,7 +34,10 @@ export function SkillsPage() {
     <PresentationLayout pageId="skills" noPadding>
       <p className="presentation-eyebrow">Section 3 — the how</p>
       <h1 className="presentation-title">Skill development: fullback #2/#3</h1>
-      <p className="presentation-body">The wide-channel build depends on the fullback's timing, angle, and next decision.</p>
+      <p className="presentation-body">
+        The wide-channel build depends on the fullback's scanning, timing, and decision — overlap,
+        underlap, cross, or reset.
+      </p>
 
       <section className="skill-lab">
         <div className="fullback-visual-card" aria-label="Fullback role visual">

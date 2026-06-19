@@ -21,6 +21,7 @@ export function drawScenarioArrows(
   canvasW: number,
   canvasH: number,
   padding: number,
+  activeArrowIds?: Set<string>,
 ): void {
   gfx.clear()
 
@@ -34,6 +35,10 @@ export function drawScenarioArrows(
     const end = pitchToScreen(arrow.to.x, arrow.to.y, canvasW, canvasH, padding)
     const arrowheadStart = via ?? start
     const color = ARROW_COLORS[arrow.type]
+    const hasActiveFilter = Boolean(activeArrowIds?.size)
+    const isActive = activeArrowIds?.has(arrow.id) ?? false
+    const alpha = hasActiveFilter ? (isActive ? 1 : 0.28) : ARROW_ALPHA
+    const width = hasActiveFilter ? (isActive ? ARROW_WIDTH + 1.5 : ARROW_WIDTH) : ARROW_WIDTH
     const angle = Math.atan2(end.sy - arrowheadStart.sy, end.sx - arrowheadStart.sx)
     const leftHeadAngle = angle - Math.PI + ARROWHEAD_ANGLE
     const rightHeadAngle = angle - Math.PI - ARROWHEAD_ANGLE
@@ -47,14 +52,14 @@ export function drawScenarioArrows(
       gfx.lineTo(via.sx, via.sy)
     }
     gfx.lineTo(end.sx, end.sy)
-    gfx.stroke({ color, width: ARROW_WIDTH, alpha: ARROW_ALPHA })
+    gfx.stroke({ color, width, alpha })
 
     gfx.moveTo(end.sx, end.sy)
     gfx.lineTo(leftHeadX, leftHeadY)
-    gfx.stroke({ color, width: ARROW_WIDTH, alpha: ARROW_ALPHA })
+    gfx.stroke({ color, width, alpha })
 
     gfx.moveTo(end.sx, end.sy)
     gfx.lineTo(rightHeadX, rightHeadY)
-    gfx.stroke({ color, width: ARROW_WIDTH, alpha: ARROW_ALPHA })
+    gfx.stroke({ color, width, alpha })
   })
 }

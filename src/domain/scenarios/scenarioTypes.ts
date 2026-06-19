@@ -64,16 +64,24 @@ export type ScenarioMarker = {
 }
 
 export type ScenarioFieldGeography = {
-  zones: string[]
-  channels: string[]
+  zones: HighlightZone[]
+  channels: number[]
+  description: string
 }
 
 export type ScenarioPhaseStep = {
+  id: string
   label: string
   coachingCue: string
-  keyPlayers: string[]
-  zoneChannelFocus: string
-  arrowIds?: string[]
+  keyPlayers: number[]
+  zoneFocus: HighlightZone[]
+  channelFocus: number[]
+  relatedArrows?: string[]
+}
+
+export type ScenarioSystem = {
+  shape: string
+  description: string
 }
 
 export type ScenarioDefinition = {
@@ -84,7 +92,7 @@ export type ScenarioDefinition = {
   formationMode: ScenarioFormationMode
   zoneFocus: string
   fieldGeography: ScenarioFieldGeography
-  system: string
+  system: ScenarioSystem
   strategy: string
   tactics: string[]
   skillSet: string[]
@@ -100,3 +108,5 @@ export type ScenarioDefinition = {
   arrows?: ScenarioArrow[]
   markers?: ScenarioMarker[]
 }
+
+export type ScenarioDetail = ScenarioDefinition

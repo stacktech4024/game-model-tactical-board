@@ -68,9 +68,13 @@ function addShadow(tokenContainer: Container, tokenRadius: number): void {
 
 function addFocusRing(tokenContainer: Container, tokenRadius: number): void {
   const ring = new Graphics()
+  const glow = new Graphics()
 
+  glow.circle(0, 0, tokenRadius + 9)
+  glow.fill({ color: FOCUS_RING_COLOR, alpha: 0.16 })
+  tokenContainer.addChild(glow)
   ring.circle(0, 0, tokenRadius + 5)
-  ring.stroke({ color: FOCUS_RING_COLOR, width: 2.5, alpha: FOCUS_RING_ALPHA })
+  ring.stroke({ color: FOCUS_RING_COLOR, width: 3.5, alpha: FOCUS_RING_ALPHA })
   tokenContainer.addChild(ring)
 }
 
@@ -97,6 +101,10 @@ function addToken(
       fontWeight: 'bold',
     },
   })
+  const hasActiveFocus = player.side !== 'away' && Boolean(focusedPlayerNumbers?.size)
+  const isFocused = player.side !== 'away' && (focusedPlayerNumbers?.has(player.number) ?? false)
+  const tokenAlpha = player.side === 'away' ? 0.58 : hasActiveFocus && !isFocused ? 0.48 : 1
+  const strokeAlpha = player.side === 'away' ? 0.34 : hasActiveFocus && !isFocused ? 0.34 : 0.78
 
   addShadow(tokenContainer, tokenRadius)
 
@@ -105,8 +113,10 @@ function addToken(
   }
 
   tokenFill.circle(0, 0, tokenRadius)
-  tokenFill.fill({ color: getTokenFill(player), alpha: player.side === 'away' ? 0.72 : 1 })
-  tokenFill.stroke({ color: TOKEN_STROKE_COLOR, width: TOKEN_STROKE_WIDTH, alpha: player.side === 'away' ? 0.42 : 0.7 })
+  tokenFill.fill({ color: getTokenFill(player), alpha: tokenAlpha })
+  tokenFill.stroke({ color: TOKEN_STROKE_COLOR, width: TOKEN_STROKE_WIDTH, alpha: strokeAlpha })
+
+  numberText.alpha = hasActiveFocus && !isFocused ? 0.55 : 1
 
   numberText.anchor.set(0.5)
   numberText.position.set(0, 0)

@@ -5,16 +5,20 @@ type TimelineScrubberProps = {
   animatorRef: React.RefObject<ScenarioAnimator | null>
   playState: AnimatorState
   onPause?: () => void
+  onProgressChange?: (progress: number) => void
 }
 
-export function TimelineScrubber({ animatorRef, playState, onPause }: TimelineScrubberProps) {
+export function TimelineScrubber({ animatorRef, playState, onPause, onProgressChange }: TimelineScrubberProps) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     let frameId: number | undefined
 
     const tick = () => {
-      setProgress(animatorRef.current?.getProgress() ?? 0)
+      const nextProgress = animatorRef.current?.getProgress() ?? 0
+
+      setProgress(nextProgress)
+      onProgressChange?.(nextProgress)
 
       if (playState === 'playing') {
         frameId = requestAnimationFrame(tick)
@@ -28,10 +32,11 @@ export function TimelineScrubber({ animatorRef, playState, onPause }: TimelineSc
         cancelAnimationFrame(frameId)
       }
     }
-  }, [animatorRef, playState])
+  }, [animatorRef, onProgressChange, playState])
 
   const handleProgressChange = (value: number) => {
     setProgress(value)
+    onProgressChange?.(value)
     animatorRef.current?.setProgress(value)
     animatorRef.current?.pause()
     onPause?.()

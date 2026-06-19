@@ -4,12 +4,11 @@ import TacticalBoardPage from '../../pages/TacticalBoardPage'
 export function LiveBoardPage() {
   return (
     <PresentationLayout pageId="live-board" noPadding>
-      <p className="presentation-eyebrow">Section 2 — the what</p>
-      <h1 className="presentation-title">Explore it live</h1>
+      <p className="presentation-eyebrow">Section 2 — explore live</p>
+      <h1 className="presentation-title">Interactive tactical board</h1>
       <p className="presentation-body">
-        This is the actual tactical board — the same tool used to build every diagram in this
-        presentation. Select a scenario on the left, then use the play controls to watch the
-        movement, or switch formations and toggle layers to explore further.
+        Select a scenario on the left, then step through each movement phase or press Play to watch
+        the full sequence. Use Previous / Next to inspect each phase cue in detail.
       </p>
       <TacticalBoardPage initialScenarioId="build-through-wide-channels" embedded />
     </PresentationLayout>

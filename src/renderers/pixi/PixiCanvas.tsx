@@ -14,6 +14,7 @@ import { drawGrass } from './layers/GrassLayer'
 import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 import { drawScenarioMarkers } from './layers/MarkerLayer'
+import { drawPhaseHighlights } from './layers/PhaseHighlightLayer'
 import { drawPlayers } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
 import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
@@ -27,6 +28,7 @@ import type {
   ScenarioDefinition,
   ScenarioFormationMode,
   ScenarioMarker,
+  ScenarioPhaseStep,
 } from '../../domain/scenarios/scenarioTypes'
 
 type BallStart = {
@@ -45,6 +47,7 @@ type PixiCanvasProps = {
   selectedAnnotations?: ScenarioAnnotations
   selectedArrows?: ScenarioArrow[]
   selectedMarkers?: ScenarioMarker[]
+  activePhaseStep?: ScenarioPhaseStep
   showAnnotations?: boolean
   showArrows?: boolean
   showMarkers?: boolean
@@ -64,6 +67,7 @@ export function PixiCanvas({
   selectedAnnotations,
   selectedArrows,
   selectedMarkers,
+  activePhaseStep,
   showAnnotations = true,
   showArrows = true,
   showMarkers = true,
@@ -117,6 +121,7 @@ export function PixiCanvas({
       const grassLayer = new Graphics()
       const zonesLayer = new Graphics()
       const annotationLayer = new Graphics()
+      const phaseHighlightLayer = new Graphics()
       const markingsLayer = new Graphics()
       const channelsLayer = new Graphics()
       const goalsLayer = new Graphics()
@@ -130,11 +135,8 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
-      const focusedPlayerNumbers = new Set(
-        selectedScenario.arrows
-          ?.map((arrow) => arrow.playerNumber)
-          .filter((playerNumber): playerNumber is number => typeof playerNumber === 'number') ?? [],
-      )
+      const focusedPlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
+      const activeArrowIds = new Set(activePhaseStep?.relatedArrows ?? [])
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -142,6 +144,7 @@ export function PixiCanvas({
       stage.addChild(markingsLayer)
       stage.addChild(goalsLayer)
       stage.addChild(annotationLayer)
+      stage.addChild(phaseHighlightLayer)
       stage.addChild(arrowLayer)
       stage.addChild(markerLayer)
       stage.addChild(ballLayer)
@@ -158,7 +161,8 @@ export function PixiCanvas({
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
       drawAnnotations(annotationLayer, showAnnotations ? selectedAnnotations : undefined, width, height, pitchPadding)
-      drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding)
+      drawPhaseHighlights(phaseHighlightLayer, activePhaseStep, width, height, pitchPadding)
+      drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding, activeArrowIds)
 
       if (showOpposition) {
         drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
@@ -256,6 +260,7 @@ export function PixiCanvas({
     selectedFormation,
     selectedScenario,
     selectedMarkers,
+    activePhaseStep,
     onAnimatorReady,
     onStateChange,
     showAnnotations,
