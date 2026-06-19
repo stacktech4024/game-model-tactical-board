@@ -1,5 +1,5 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   buildScenarioAnimator,
   type AnimatorState,
@@ -34,6 +34,24 @@ import type {
 type BallStart = {
   x: number
   y: number
+}
+
+type PlayerPhaseVisual = {
+  tokenFill: Graphics
+  numberText: Text
+  focusGlow: Graphics
+  focusRing: Graphics
+}
+
+type PhaseVisualRefs = {
+  phaseHighlightLayer: Graphics
+  arrowLayer: Graphics
+  playerVisuals: Map<number, PlayerPhaseVisual>
+  selectedArrows?: ScenarioArrow[]
+  showArrows: boolean
+  width: number
+  height: number
+  pitchPadding: number
 }
 
 type PixiCanvasProps = {
@@ -77,6 +95,45 @@ export function PixiCanvas({
   onStateChange,
 }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const phaseVisualRefs = useRef<PhaseVisualRefs | undefined>(undefined)
+  const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
+
+  useEffect(() => {
+    const refs = phaseVisualRefs.current
+
+    if (!refs) {
+      return
+    }
+
+    const focusedPlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
+    const activeArrowIds = new Set(activePhaseStep?.relatedArrows ?? [])
+    const hasActiveFocus = Boolean(focusedPlayerNumbers.size)
+
+    refs.playerVisuals.forEach((visual, playerNumber) => {
+      const isFocused = focusedPlayerNumbers.has(playerNumber)
+
+      visual.tokenFill.alpha = hasActiveFocus && !isFocused ? 0.48 : 1
+      visual.numberText.alpha = hasActiveFocus && !isFocused ? 0.55 : 1
+      visual.focusGlow.visible = isFocused
+      visual.focusRing.visible = isFocused
+    })
+
+    drawPhaseHighlights(
+      refs.phaseHighlightLayer,
+      activePhaseStep,
+      refs.width,
+      refs.height,
+      refs.pitchPadding,
+    )
+    drawScenarioArrows(
+      refs.arrowLayer,
+      refs.showArrows ? refs.selectedArrows : undefined,
+      refs.width,
+      refs.height,
+      refs.pitchPadding,
+      activeArrowIds,
+    )
+  }, [activePhaseStep, phaseVisualVersion])
 
   useEffect(() => {
     const container = containerRef.current
@@ -135,8 +192,7 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
-      const focusedPlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
-      const activeArrowIds = new Set(activePhaseStep?.relatedArrows ?? [])
+      const playerVisuals = new Map<number, PlayerPhaseVisual>()
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -161,8 +217,8 @@ export function PixiCanvas({
       drawMarkings(markingsLayer, width, height, pitchPadding)
       drawGoals(goalsLayer, width, height, pitchPadding)
       drawAnnotations(annotationLayer, showAnnotations ? selectedAnnotations : undefined, width, height, pitchPadding)
-      drawPhaseHighlights(phaseHighlightLayer, activePhaseStep, width, height, pitchPadding)
-      drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding, activeArrowIds)
+      drawPhaseHighlights(phaseHighlightLayer, undefined, width, height, pitchPadding)
+      drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding)
 
       if (showOpposition) {
         drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
@@ -177,11 +233,51 @@ export function PixiCanvas({
         width,
         height,
         pitchPadding,
-        focusedPlayerNumbers,
+        undefined,
         homePlayerTokenRefs,
       )
+      homePlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
+        const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
+        const tokenFill = tokenContainer.children[1]
+        const numberText = tokenContainer.children[2]
+
+        if (!(tokenFill instanceof Graphics) || !(numberText instanceof Text)) {
+          return
+        }
+
+        const tokenRadius = player?.isGoalkeeper ? 17 : 14
+        const focusGlow = new Graphics()
+        const focusRing = new Graphics()
+
+        focusGlow.circle(0, 0, tokenRadius + 9)
+        focusGlow.fill({ color: 0xfbbf24, alpha: 0.16 })
+        focusGlow.visible = false
+        focusRing.circle(0, 0, tokenRadius + 5)
+        focusRing.stroke({ color: 0xfbbf24, width: 3.5, alpha: 0.88 })
+        focusRing.visible = false
+        tokenContainer.addChildAt(focusGlow, 1)
+        tokenContainer.addChildAt(focusRing, 2)
+        playerVisuals.set(playerNumber, {
+          tokenFill,
+          numberText,
+          focusGlow,
+          focusRing,
+        })
+      })
       drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
       const ballToken = drawBall(ballLayer, showBall ? selectedBallStart : undefined, width, height, pitchPadding)
+
+      phaseVisualRefs.current = {
+        phaseHighlightLayer,
+        arrowLayer,
+        playerVisuals,
+        selectedArrows,
+        showArrows,
+        width,
+        height,
+        pitchPadding,
+      }
+      setPhaseVisualVersion((version) => version + 1)
 
       scenarioAnimator = buildScenarioAnimator({
         scenario: selectedScenario,
@@ -235,6 +331,7 @@ export function PixiCanvas({
 
     return () => {
       cancelled = true
+      phaseVisualRefs.current = undefined
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
@@ -260,7 +357,6 @@ export function PixiCanvas({
     selectedFormation,
     selectedScenario,
     selectedMarkers,
-    activePhaseStep,
     onAnimatorReady,
     onStateChange,
     showAnnotations,
