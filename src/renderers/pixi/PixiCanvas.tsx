@@ -20,7 +20,7 @@ import { drawZones } from './layers/ZoneLayer'
 import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
-import { PITCH } from '../../domain/pitch/pitchConstants'
+import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants'
 import { screenToPitch } from '../../domain/pitch/coordTransforms'
 import type {
   ScenarioAnnotations,
@@ -41,6 +41,7 @@ type PlayerPhaseVisual = {
   numberText: Text
   focusGlow: Graphics
   focusRing: Graphics
+  zoneNumber: number
 }
 
 type PhaseVisualRefs = {
@@ -52,6 +53,11 @@ type PhaseVisualRefs = {
   width: number
   height: number
   pitchPadding: number
+  zonesLayer: Graphics
+  stage: Container
+  awayPlayerLayer: Container
+  awayPositions: Record<number, { x: number; y: number }>
+  showOpposition: boolean
 }
 
 type PixiCanvasProps = {
@@ -107,16 +113,36 @@ export function PixiCanvas({
 
     const focusedPlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
     const activeArrowIds = new Set(activePhaseStep?.relatedArrows ?? [])
+    const activeZones = new Set<number>(activePhaseStep?.zoneFocus ?? [])
     const hasActiveFocus = Boolean(focusedPlayerNumbers.size)
+    const hasActiveZones = Boolean(activeZones.size)
 
     refs.playerVisuals.forEach((visual, playerNumber) => {
       const isFocused = focusedPlayerNumbers.has(playerNumber)
+      const isOutOfActiveZone = hasActiveZones && !activeZones.has(visual.zoneNumber)
+      const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
 
-      visual.tokenFill.alpha = hasActiveFocus && !isFocused ? 0.48 : 1
-      visual.numberText.alpha = hasActiveFocus && !isFocused ? 0.55 : 1
+      visual.tokenFill.alpha = (hasActiveFocus && !isFocused ? 0.48 : 1) * zoneDimFactor
+      visual.numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
       visual.focusGlow.visible = isFocused
       visual.focusRing.visible = isFocused
     })
+
+    drawZones(refs.zonesLayer, refs.stage, refs.width, refs.height, refs.pitchPadding, activeZones)
+
+    if (refs.showOpposition) {
+      drawPlayers(
+        refs.awayPlayerLayer,
+        OPPOSITION_SQUAD,
+        refs.awayPositions,
+        refs.width,
+        refs.height,
+        refs.pitchPadding,
+        undefined,
+        undefined,
+        activeZones,
+      )
+    }
 
     drawPhaseHighlights(
       refs.phaseHighlightLayer,
@@ -262,6 +288,7 @@ export function PixiCanvas({
           numberText,
           focusGlow,
           focusRing,
+          zoneNumber: getZoneNumberForY(activePositions[playerNumber]?.y ?? 0),
         })
       })
       drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
@@ -276,6 +303,11 @@ export function PixiCanvas({
         width,
         height,
         pitchPadding,
+        zonesLayer,
+        stage,
+        awayPlayerLayer,
+        awayPositions,
+        showOpposition,
       }
       setPhaseVisualVersion((version) => version + 1)
 
