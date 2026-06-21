@@ -427,11 +427,24 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .app-shell--embedded .app-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .scenario-panel {
     max-height: none;
   }
 
+  .app-shell--embedded .scenario-panel {
+    max-height: min(55svh, 460px);
+  }
+
   .pitch-panel {
+    height: min(62svh, 640px);
+    min-height: 520px;
+  }
+
+  .app-shell--embedded .pitch-panel {
     height: min(62svh, 640px);
     min-height: 520px;
   }
