@@ -777,14 +777,60 @@
 }
 
 .profile-chip {
+  display: flex;
+  gap: 5px;
   border: 1px solid rgba(147, 197, 253, 0.18);
   border-radius: 10px;
+  background: rgba(15, 23, 42, 0.8);
   color: #bfdbfe;
+  cursor: pointer;
   font-size: 0.82rem;
   padding: 8px 9px;
+  text-align: left;
 }
 
 .profile-chip strong {
+  color: #f8fafc;
+}
+
+.profile-chip:hover,
+.profile-chip.is-active {
+  border-color: rgba(204, 0, 0, 0.72);
+  background: rgba(204, 0, 0, 0.16);
+}
+
+.profile-detail {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.46);
+  padding: 20px;
+}
+
+.profile-detail > span {
+  color: #cc0000;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.profile-detail h2 {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.profile-detail p {
+  color: #cdd8ea;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.profile-detail strong {
   color: #f8fafc;
 }
 

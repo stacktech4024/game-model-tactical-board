@@ -27,9 +27,12 @@ const FULLBACK_TABS = [
 export function SkillsPage() {
   const [activeTabId, setActiveTabId] = useState(FULLBACK_TABS[0].id)
   const [showAllProfiles, setShowAllProfiles] = useState(false)
+  const [selectedProfilePosition, setSelectedProfilePosition] = useState<string | null>(null)
   const activeTab = FULLBACK_TABS.find((tab) => tab.id === activeTabId) ?? FULLBACK_TABS[0]
   const fullbackProfile = POSITIONAL_PROFILES.find((profile) => profile.position === 'FB')
-  const secondaryProfiles = POSITIONAL_PROFILES.filter((profile) => profile.position !== 'FB')
+  const selectedProfile = POSITIONAL_PROFILES.find(
+    (profile) => profile.position === selectedProfilePosition,
+  )
 
   return (
     <PresentationLayout pageId="skills" noPadding>
@@ -87,13 +90,33 @@ export function SkillsPage() {
               {showAllProfiles ? 'Hide all profiles' : 'View all profiles'}
             </button>
             {showAllProfiles && (
-              <div className="profile-chip-grid">
-                {secondaryProfiles.map((profile) => (
-                  <span key={profile.position} className="profile-chip">
-                    <strong>{profile.position}</strong> {profile.numbers}
-                  </span>
-                ))}
-              </div>
+              <>
+                <div className="profile-chip-grid" aria-label="Position profiles">
+                  {POSITIONAL_PROFILES.map((profile) => (
+                    <button
+                      key={profile.position}
+                      type="button"
+                      aria-pressed={profile.position === selectedProfilePosition}
+                      className={
+                        profile.position === selectedProfilePosition
+                          ? 'profile-chip is-active'
+                          : 'profile-chip'
+                      }
+                      onClick={() => setSelectedProfilePosition(profile.position)}
+                    >
+                      <strong>{profile.position}</strong> {profile.numbers}
+                    </button>
+                  ))}
+                </div>
+                {selectedProfile && (
+                  <section className="profile-detail" aria-live="polite">
+                    <span>{selectedProfile.fullName} · {selectedProfile.numbers}</span>
+                    <h2>{selectedProfile.style}</h2>
+                    <p><strong>In possession:</strong> {selectedProfile.attackingOrg}</p>
+                    <p><strong>Out of possession:</strong> {selectedProfile.defensiveOrg}</p>
+                  </section>
+                )}
+              </>
             )}
           </section>
         </aside>

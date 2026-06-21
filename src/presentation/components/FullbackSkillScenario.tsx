@@ -35,7 +35,7 @@ export function FullbackSkillScenario() {
           const token = playerRefs.current.get(player.id)
 
           if (token) {
-            gsap.set(token, toPositionVars(player.start))
+            gsap.set(token, { ...toPositionVars(player.start), scale: 1 })
           }
         })
         gsap.set(ball, toPositionVars(FULLBACK_SKILL_BALL_START))
@@ -54,6 +54,24 @@ export function FullbackSkillScenario() {
       timeline.call(resetVisuals)
 
       FULLBACK_SKILL_STEPS.forEach((step) => {
+        if (step.id === 'fullback-run') {
+          const fullbackToken = playerRefs.current.get('fullback')
+
+          timeline.call(() => setActiveCue('Scan & time'))
+
+          if (fullbackToken) {
+            timeline.to(fullbackToken, {
+              scale: 1.18,
+              duration: 0.18,
+              ease: 'power1.inOut',
+              repeat: 1,
+              yoyo: true,
+            })
+          }
+
+          timeline.to({}, { duration: 0.12 })
+        }
+
         timeline.call(() => setActiveCue(step.cue))
 
         if (step.ballFrom) {
