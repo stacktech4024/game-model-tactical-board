@@ -1086,6 +1086,94 @@
   min-height: 420px;
 }
 
+.transition-modal-pitch {
+  align-self: start;
+  width: 100%;
+  max-width: none;
+  height: min(78svh, 760px);
+  min-height: 620px;
+  aspect-ratio: auto;
+  justify-self: stretch;
+  border: 0;
+  border-radius: 0;
+}
+
+.transition-modal-pitch .mini-pitch__token {
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+}
+
+.transition-modal-pitch .mini-pitch__cue {
+  z-index: 5;
+  max-width: 180px;
+  font-size: 0.74rem;
+}
+
+.transition-modal-pitch .mini-pitch__caption {
+  right: 150px;
+  font-size: 0.66rem;
+}
+
+.transition-pitch__dim {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  width: 100%;
+  height: 25%;
+  background: rgba(2, 6, 23, 0.38);
+  pointer-events: none;
+}
+
+.transition-pitch__dim--top {
+  top: 0;
+}
+
+.transition-pitch__dim--bottom {
+  bottom: 0;
+}
+
+.transition-pitch__routes {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.transition-pitch__route {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.transition-pitch__route--pass,
+.transition-pitch__route--recovery,
+.transition-pitch__route--support {
+  stroke: #fbbf24;
+  stroke-dasharray: 2 1.5;
+}
+
+.transition-pitch__route--run,
+.transition-pitch__route--press {
+  stroke: #38bdf8;
+}
+
+.transition-pitch__token--opponent {
+  border-color: rgba(226, 232, 240, 0.42);
+  background: #334155;
+  box-shadow: none;
+}
+
+.transition-pitch__ball {
+  width: 11px;
+  height: 11px;
+  transform: translate(calc(-50% + 12px), calc(-50% - 12px));
+}
+
 .diagram-modal__content {
   display: grid;
   gap: 14px;
@@ -1178,6 +1266,11 @@
 
   .diagram-modal__panel img {
     min-height: 260px;
+  }
+
+  .transition-modal-pitch {
+    height: 72svh;
+    min-height: 520px;
   }
 
   .presentation-page,
