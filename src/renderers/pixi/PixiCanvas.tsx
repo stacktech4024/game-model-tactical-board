@@ -5,6 +5,11 @@ import {
   type AnimatorState,
   type ScenarioAnimator,
 } from './animation/scenarioAnimator'
+import {
+  IDLE_MOVEMENT_GATED_SCENARIO_IDS,
+  startIdleMovement,
+  type IdleMovementHandle,
+} from './animation/idleMovement'
 import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
@@ -21,7 +26,7 @@ import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations
 import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
 import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants'
-import { screenToPitch } from '../../domain/pitch/coordTransforms'
+import { getPitchScale, screenToPitch } from '../../domain/pitch/coordTransforms'
 import type {
   ScenarioAnnotations,
   ScenarioArrow,
@@ -34,6 +39,10 @@ import type {
 type BallStart = {
   x: number
   y: number
+}
+
+function isIdleMovementRunningState(state: AnimatorState): boolean {
+  return state === 'playing' || state === 'complete'
 }
 
 type PlayerPhaseVisual = {
@@ -58,6 +67,9 @@ type PhaseVisualRefs = {
   awayPlayerLayer: Container
   awayPositions: Record<number, { x: number; y: number }>
   showOpposition: boolean
+  idleAnchorRefs: Map<number, Container>
+  scenarioId: string
+  pitchScale: number
 }
 
 type PixiCanvasProps = {
@@ -102,6 +114,8 @@ export function PixiCanvas({
 }: PixiCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const phaseVisualRefs = useRef<PhaseVisualRefs | undefined>(undefined)
+  const animatorStateRef = useRef<AnimatorState>('idle')
+  const idleMovementHandleRef = useRef<IdleMovementHandle | undefined>(undefined)
   const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
 
   useEffect(() => {
@@ -162,6 +176,36 @@ export function PixiCanvas({
   }, [activePhaseStep, phaseVisualVersion])
 
   useEffect(() => {
+    const refs = phaseVisualRefs.current
+
+    idleMovementHandleRef.current?.stop()
+    idleMovementHandleRef.current = undefined
+
+    if (!refs || !IDLE_MOVEMENT_GATED_SCENARIO_IDS.has(refs.scenarioId)) {
+      return undefined
+    }
+
+    const activePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
+    const idlePlayerNumbers = new Set(
+      Array.from(refs.idleAnchorRefs.keys()).filter(
+        (playerNumber) => !activePlayerNumbers.has(playerNumber),
+      ),
+    )
+
+    idleMovementHandleRef.current = startIdleMovement({
+      visualGroups: refs.idleAnchorRefs,
+      idlePlayerNumbers,
+      pitchScale: refs.pitchScale,
+      running: isIdleMovementRunningState(animatorStateRef.current),
+    })
+
+    return () => {
+      idleMovementHandleRef.current?.stop()
+      idleMovementHandleRef.current = undefined
+    }
+  }, [activePhaseStep, phaseVisualVersion])
+
+  useEffect(() => {
     const container = containerRef.current
 
     if (!container) {
@@ -218,6 +262,7 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
+      const homeIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
 
       stage.addChild(grassLayer)
@@ -261,11 +306,19 @@ export function PixiCanvas({
         pitchPadding,
         undefined,
         homePlayerTokenRefs,
+        undefined,
+        homeIdleAnchorRefs,
       )
       homePlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
         const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
-        const tokenFill = tokenContainer.children[1]
-        const numberText = tokenContainer.children[2]
+        const visualGroup = tokenContainer.children[0]
+
+        if (!(visualGroup instanceof Container)) {
+          return
+        }
+
+        const tokenFill = visualGroup.children[1]
+        const numberText = visualGroup.children[2]
 
         if (!(tokenFill instanceof Graphics) || !(numberText instanceof Text)) {
           return
@@ -281,8 +334,8 @@ export function PixiCanvas({
         focusRing.circle(0, 0, tokenRadius + 5)
         focusRing.stroke({ color: 0xfbbf24, width: 3.5, alpha: 0.88 })
         focusRing.visible = false
-        tokenContainer.addChildAt(focusGlow, 1)
-        tokenContainer.addChildAt(focusRing, 2)
+        visualGroup.addChildAt(focusGlow, 1)
+        visualGroup.addChildAt(focusRing, 2)
         playerVisuals.set(playerNumber, {
           tokenFill,
           numberText,
@@ -308,8 +361,17 @@ export function PixiCanvas({
         awayPlayerLayer,
         awayPositions,
         showOpposition,
+        idleAnchorRefs: homeIdleAnchorRefs,
+        scenarioId: selectedScenario.id,
+        pitchScale: getPitchScale(width, height, pitchPadding),
       }
       setPhaseVisualVersion((version) => version + 1)
+
+      const handleAnimatorStateChange = (state: AnimatorState) => {
+        animatorStateRef.current = state
+        idleMovementHandleRef.current?.setRunning(isIdleMovementRunningState(state))
+        onStateChange?.(state)
+      }
 
       scenarioAnimator = buildScenarioAnimator({
         scenario: selectedScenario,
@@ -318,7 +380,7 @@ export function PixiCanvas({
         canvasW: width,
         canvasH: height,
         padding: pitchPadding,
-        onStateChange,
+        onStateChange: handleAnimatorStateChange,
       })
       onAnimatorReady?.(scenarioAnimator)
 
@@ -364,6 +426,9 @@ export function PixiCanvas({
     return () => {
       cancelled = true
       phaseVisualRefs.current = undefined
+
+      idleMovementHandleRef.current?.stop()
+      idleMovementHandleRef.current = undefined
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined

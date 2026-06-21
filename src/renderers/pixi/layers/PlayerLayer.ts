@@ -89,9 +89,11 @@ function addToken(
   focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
   activeZones?: Set<number>,
+  idleAnchorRefs?: Map<number, Container>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
   const tokenContainer = new Container()
+  const visualGroup = new Container()
   const tokenFill = new Graphics()
   const tokenRadius = getTokenRadius(player)
   const numberText = new Text({
@@ -112,10 +114,10 @@ function addToken(
   const strokeAlpha =
     (player.side === 'away' ? 0.34 : hasActiveFocus && !isFocused ? 0.34 : 0.78) * zoneDimFactor
 
-  addShadow(tokenContainer, tokenRadius)
+  addShadow(visualGroup, tokenRadius)
 
   if (player.side !== 'away' && focusedPlayerNumbers?.has(player.number)) {
-    addFocusRing(tokenContainer, tokenRadius)
+    addFocusRing(visualGroup, tokenRadius)
   }
 
   tokenFill.circle(0, 0, tokenRadius)
@@ -128,10 +130,12 @@ function addToken(
   numberText.position.set(0, 0)
 
   tokenContainer.position.set(screenPosition.sx, screenPosition.sy)
-  tokenContainer.addChild(tokenFill)
-  tokenContainer.addChild(numberText)
+  visualGroup.addChild(tokenFill)
+  visualGroup.addChild(numberText)
+  tokenContainer.addChild(visualGroup)
   container.addChild(tokenContainer)
   tokenRefs?.set(player.number, tokenContainer)
+  idleAnchorRefs?.set(player.number, visualGroup)
 }
 
 export function drawPlayers(
@@ -144,9 +148,11 @@ export function drawPlayers(
   focusedPlayerNumbers?: Set<number>,
   tokenRefs?: Map<number, Container>,
   activeZones?: Set<number>,
+  idleAnchorRefs?: Map<number, Container>,
 ): void {
   container.removeChildren()
   tokenRefs?.clear()
+  idleAnchorRefs?.clear()
 
   players.forEach((player) => {
     const position = positions[player.number]
@@ -155,6 +161,17 @@ export function drawPlayers(
       return
     }
 
-    addToken(container, player, position, canvasW, canvasH, padding, focusedPlayerNumbers, tokenRefs, activeZones)
+    addToken(
+      container,
+      player,
+      position,
+      canvasW,
+      canvasH,
+      padding,
+      focusedPlayerNumbers,
+      tokenRefs,
+      activeZones,
+      idleAnchorRefs,
+    )
   })
 }

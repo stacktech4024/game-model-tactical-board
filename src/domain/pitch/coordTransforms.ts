@@ -22,6 +22,10 @@ function getPitchLayout(canvasW: number, canvasH: number, padding: number) {
   return { scale, offsetX, offsetY }
 }
 
+export function getPitchScale(canvasW: number, canvasH: number, padding: number): number {
+  return getPitchLayout(canvasW, canvasH, padding).scale
+}
+
 export function pitchToScreen(
   x: number,
   y: number,
