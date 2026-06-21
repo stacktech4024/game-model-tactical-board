@@ -249,13 +249,13 @@ const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
       id: 'winger',
       label: '7/11',
       role: 'Nearest player delays',
-      start: { x: 88, y: 38 },
+      start: { x: 90, y: 36 },
     },
     {
       id: 'fullback',
       label: '2/3',
       role: 'Recovers wide',
-      start: { x: 80, y: 42 },
+      start: { x: 76, y: 44 },
     },
   ],
   ballStart: { x: 84, y: 40 },
@@ -274,7 +274,7 @@ const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
       cue: 'Nearest player delays',
       kind: 'run',
       playerId: 'winger',
-      playerTo: { x: 82, y: 46 },
+      playerTo: { x: 88, y: 47 },
       duration: 0.5,
     },
     {
@@ -282,7 +282,7 @@ const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
       cue: 'Fullback recovers',
       kind: 'run',
       playerId: 'fullback',
-      playerTo: { x: 80, y: 58 },
+      playerTo: { x: 76, y: 58 },
       duration: 0.6,
     },
     {
