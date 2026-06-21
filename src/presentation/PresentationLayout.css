@@ -1110,6 +1110,10 @@
   font-size: 0.74rem;
 }
 
+.fullback-skill-pitch .mini-pitch__caption {
+  right: 16px;
+}
+
 .transition-modal-pitch .mini-pitch__caption {
   right: 150px;
   font-size: 0.66rem;

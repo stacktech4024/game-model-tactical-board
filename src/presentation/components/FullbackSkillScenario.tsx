@@ -119,7 +119,7 @@ export function FullbackSkillScenario({ variant }: FullbackSkillScenarioProps) {
   }, [variant])
 
   return (
-    <div className="mini-pitch mini-pitch--animated" ref={rootRef}>
+    <div className="mini-pitch mini-pitch--animated fullback-skill-pitch" ref={rootRef}>
       <div className="mini-pitch__zone mini-pitch__zone--wide" aria-hidden="true" />
       <div className="mini-pitch__goal-area mini-pitch__goal-area--top" aria-hidden="true" />
       <div className="mini-pitch__goal-area mini-pitch__goal-area--bottom" aria-hidden="true" />
@@ -146,11 +146,12 @@ export function FullbackSkillScenario({ variant }: FullbackSkillScenarioProps) {
               playerRefs.current.delete(player.id)
             }
           }}
-          className={
-            player.tone === 'keeper'
-              ? 'mini-pitch__token mini-pitch__token--animated mini-pitch__token--support'
-              : 'mini-pitch__token mini-pitch__token--animated'
-          }
+          className={[
+            'mini-pitch__token',
+            'mini-pitch__token--animated',
+            player.tone === 'keeper' ? 'mini-pitch__token--support' : '',
+            player.tone === 'opponent' ? 'transition-pitch__token--opponent' : '',
+          ].filter(Boolean).join(' ')}
           aria-label={`${player.label} ${player.role}`}
         >
           {player.label}
@@ -160,14 +161,6 @@ export function FullbackSkillScenario({ variant }: FullbackSkillScenarioProps) {
       <div className="mini-pitch__ball" ref={ballRef} aria-label="Ball" />
       <div className="mini-pitch__cue" aria-live="polite">{activeCue}</div>
       <div className="mini-pitch__caption">{scenario.caption}</div>
-      <div className="mini-pitch__legend" aria-label="Diagram key">
-        {scenario.legend.map((item) => (
-          <span key={item.label}>
-            <i className={`mini-pitch__legend-mark mini-pitch__legend-mark--${item.markClass}`} />
-            {item.label}
-          </span>
-        ))}
-      </div>
     </div>
   )
 }

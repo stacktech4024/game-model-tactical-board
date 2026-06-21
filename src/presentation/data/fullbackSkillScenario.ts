@@ -8,7 +8,7 @@ export type FullbackScenarioPlayer = {
   label: string
   role: string
   start: FullbackScenarioPoint
-  tone?: 'primary' | 'keeper'
+  tone?: 'primary' | 'keeper' | 'opponent'
 }
 
 export type FullbackScenarioStep = {
@@ -44,11 +44,17 @@ export type FullbackSkillVariant = 'in-possession' | 'out-of-possession' | 'tran
 const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
   players: [
     {
+      id: 'goalkeeper',
+      label: '1',
+      role: 'Goalkeeper',
+      start: { x: 50, y: 82 },
+      tone: 'keeper',
+    },
+    {
       id: 'six',
       label: '6',
       role: 'Central support',
       start: { x: 33, y: 68 },
-      tone: 'keeper',
     },
     {
       id: 'ten',
@@ -58,13 +64,13 @@ const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
     },
     {
       id: 'winger',
-      label: '7/11',
+      label: '7',
       role: 'Wide receiver',
       start: { x: 83, y: 39 },
     },
     {
       id: 'fullback',
-      label: '2/3',
+      label: '2',
       role: 'Wide-channel release',
       start: { x: 82, y: 61 },
     },
@@ -82,15 +88,15 @@ const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
       cue: 'Link',
       kind: 'pass',
       ballFrom: { x: 33, y: 68 },
-      ballTo: { x: 51, y: 52 },
+      ballTo: { x: 54, y: 50 },
       duration: 0.85,
     },
     {
       id: 'ten-to-winger',
       cue: 'Wide release',
       kind: 'pass',
-      ballFrom: { x: 51, y: 52 },
-      ballTo: { x: 83, y: 39 },
+      ballFrom: { x: 54, y: 50 },
+      ballTo: { x: 80, y: 36 },
       duration: 0.95,
     },
     {
@@ -107,16 +113,16 @@ const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
       id: 'winger-to-fullback',
       cue: 'Combine',
       kind: 'pass',
-      ballFrom: { x: 83, y: 39 },
-      ballTo: { x: 82, y: 48 },
+      ballFrom: { x: 80, y: 36 },
+      ballTo: { x: 79, y: 46 },
       duration: 0.7,
     },
     {
       id: 'fullback-to-nine',
       cue: 'Final ball',
       kind: 'cross',
-      ballFrom: { x: 82, y: 48 },
-      ballTo: { x: 52, y: 18 },
+      ballFrom: { x: 79, y: 46 },
+      ballTo: { x: 56, y: 22 },
       duration: 1,
     },
     {
@@ -125,11 +131,20 @@ const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
       kind: 'run',
       playerId: 'nine',
       playerTo: { x: 52, y: 15 },
+      ballTo: { x: 53, y: 16 },
       duration: 0.45,
+    },
+    {
+      id: 'finish-goal',
+      cue: 'Finish',
+      kind: 'pass',
+      ballFrom: { x: 53, y: 16 },
+      ballTo: { x: 52, y: -2 },
+      duration: 0.55,
     },
   ],
   caption:
-    'This pattern shows #2/#3 delivering after the wide combination; in match play, #7/#11 can also be the final server.',
+    'Right-side example: #2 delivers after the wide combination; #7 can also be the final server. Mirror with #3 and #11 on the left.',
   legend: [
     { markClass: 'pass', label: 'Pass' },
     { markClass: 'run', label: 'Player run' },
@@ -140,11 +155,17 @@ const IN_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
 const OUT_OF_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
   players: [
     {
+      id: 'goalkeeper',
+      label: '1',
+      role: 'Goalkeeper',
+      start: { x: 50, y: 82 },
+      tone: 'keeper',
+    },
+    {
       id: 'six',
       label: '6',
       role: 'Channel 3 protection',
       start: { x: 50, y: 65 },
-      tone: 'keeper',
     },
     {
       id: 'four',
@@ -160,15 +181,22 @@ const OUT_OF_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
     },
     {
       id: 'winger',
-      label: '7/11',
+      label: '7',
       role: 'Recovers wide',
       start: { x: 88, y: 35 },
     },
     {
       id: 'fullback',
-      label: '2/3',
+      label: '2',
       role: 'Defends wide',
       start: { x: 78, y: 58 },
+    },
+    {
+      id: 'opponent-receiver',
+      label: 'OPP',
+      role: 'Wide receiver',
+      start: { x: 85, y: 40 },
+      tone: 'opponent',
     },
   ],
   ballStart: { x: 90, y: 48 },
@@ -177,7 +205,7 @@ const OUT_OF_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
       id: 'threat-advances',
       cue: 'Threat in Channel 1',
       kind: 'run',
-      ballTo: { x: 85, y: 40 },
+      ballTo: { x: 83, y: 41 },
       duration: 0.6,
     },
     {
@@ -217,7 +245,7 @@ const OUT_OF_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
     },
   ],
   caption:
-    'Out of possession, the nearest fullback presses the receiver while the back line shifts across to protect Channel 1 and deny an inside entry.',
+    'Right-side example: #2 presses the receiver while the back line shifts to protect Channel 1. Mirror with #3 and #11 on the left.',
   legend: [
     { markClass: 'run', label: 'Pressure' },
     { markClass: 'pass', label: 'Recovery' },
@@ -227,11 +255,17 @@ const OUT_OF_POSSESSION_SCENARIO: FullbackSkillScenarioData = {
 const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
   players: [
     {
+      id: 'goalkeeper',
+      label: '1',
+      role: 'Goalkeeper',
+      start: { x: 50, y: 82 },
+      tone: 'keeper',
+    },
+    {
       id: 'six',
       label: '6',
       role: 'Protects inside lane',
       start: { x: 48, y: 55 },
-      tone: 'keeper',
     },
     {
       id: 'four',
@@ -247,15 +281,22 @@ const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
     },
     {
       id: 'winger',
-      label: '7/11',
+      label: '7',
       role: 'Nearest player delays',
       start: { x: 90, y: 36 },
     },
     {
       id: 'fullback',
-      label: '2/3',
+      label: '2',
       role: 'Recovers wide',
       start: { x: 76, y: 44 },
+    },
+    {
+      id: 'opponent-carrier',
+      label: 'OPP',
+      role: 'Counter-attacking carrier',
+      start: { x: 88, y: 56 },
+      tone: 'opponent',
     },
   ],
   ballStart: { x: 84, y: 40 },
@@ -312,7 +353,7 @@ const TRANSITION_SCENARIO: FullbackSkillScenarioData = {
     },
   ],
   caption:
-    'After losing the ball in the wide channel, the nearest player delays while the fullback recovers and the back line resets into a compact shape to protect the inside lane.',
+    'Right-side example: #7 delays while #2 recovers and the back line resets compact. Mirror with #3 and #11 on the left.',
   legend: [
     { markClass: 'run', label: 'Pressure' },
     { markClass: 'pass', label: 'Recovery' },
