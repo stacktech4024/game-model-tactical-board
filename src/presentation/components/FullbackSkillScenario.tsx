@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import {
-  FULLBACK_SKILL_BALL_START,
-  FULLBACK_SKILL_CAPTION,
-  FULLBACK_SKILL_PLAYERS,
-  FULLBACK_SKILL_STEPS,
+  FULLBACK_SKILL_SCENARIOS,
   type FullbackScenarioPoint,
+  type FullbackSkillVariant,
 } from '../data/fullbackSkillScenario'
 
 function toPositionVars(point: FullbackScenarioPoint) {
@@ -15,30 +13,42 @@ function toPositionVars(point: FullbackScenarioPoint) {
   }
 }
 
-export function FullbackSkillScenario() {
+type FullbackSkillScenarioProps = {
+  variant: FullbackSkillVariant
+}
+
+export function FullbackSkillScenario({ variant }: FullbackSkillScenarioProps) {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const ballRef = useRef<HTMLDivElement | null>(null)
   const playerRefs = useRef(new Map<string, HTMLDivElement>())
-  const [activeCue, setActiveCue] = useState(FULLBACK_SKILL_STEPS[0]?.cue ?? '')
+  const gsapContextRef = useRef<gsap.Context | null>(null)
+  const scenario = FULLBACK_SKILL_SCENARIOS[variant]
+  const [activeCue, setActiveCue] = useState(scenario.steps[0]?.cue ?? '')
 
   useEffect(() => {
     const root = rootRef.current
     const ball = ballRef.current
+    const activeScenario = FULLBACK_SKILL_SCENARIOS[variant]
+
+    gsapContextRef.current?.revert()
+    gsapContextRef.current = null
 
     if (!root || !ball) {
       return undefined
     }
 
+    setActiveCue(activeScenario.steps[0]?.cue ?? '')
+
     const ctx = gsap.context(() => {
       const resetVisuals = () => {
-        FULLBACK_SKILL_PLAYERS.forEach((player) => {
+        activeScenario.players.forEach((player) => {
           const token = playerRefs.current.get(player.id)
 
           if (token) {
             gsap.set(token, { ...toPositionVars(player.start), scale: 1 })
           }
         })
-        gsap.set(ball, toPositionVars(FULLBACK_SKILL_BALL_START))
+        gsap.set(ball, toPositionVars(activeScenario.ballStart))
       }
 
       resetVisuals()
@@ -53,14 +63,14 @@ export function FullbackSkillScenario() {
 
       timeline.call(resetVisuals)
 
-      FULLBACK_SKILL_STEPS.forEach((step) => {
-        if (step.id === 'fullback-run') {
-          const fullbackToken = playerRefs.current.get('fullback')
+      activeScenario.steps.forEach((step) => {
+        if (step.emphasizePlayerId) {
+          const emphasisToken = playerRefs.current.get(step.emphasizePlayerId)
 
-          timeline.call(() => setActiveCue('Scan & time'))
+          timeline.call(() => setActiveCue(step.emphasisCue ?? step.cue))
 
-          if (fullbackToken) {
-            timeline.to(fullbackToken, {
+          if (emphasisToken) {
+            timeline.to(emphasisToken, {
               scale: 1.18,
               duration: 0.18,
               ease: 'power1.inOut',
@@ -100,10 +110,13 @@ export function FullbackSkillScenario() {
       })
     }, root)
 
+    gsapContextRef.current = ctx
+
     return () => {
       ctx.revert()
+      gsapContextRef.current = null
     }
-  }, [])
+  }, [variant])
 
   return (
     <div className="mini-pitch mini-pitch--animated" ref={rootRef}>
@@ -123,7 +136,7 @@ export function FullbackSkillScenario() {
       <div className="mini-pitch__channel-label mini-pitch__channel-label--half">Channel 2: Half Space</div>
       <div className="mini-pitch__channel-label mini-pitch__channel-label--central">Channel 3: Central</div>
 
-      {FULLBACK_SKILL_PLAYERS.map((player) => (
+      {scenario.players.map((player) => (
         <div
           key={player.id}
           ref={(node) => {
@@ -146,11 +159,14 @@ export function FullbackSkillScenario() {
 
       <div className="mini-pitch__ball" ref={ballRef} aria-label="Ball" />
       <div className="mini-pitch__cue" aria-live="polite">{activeCue}</div>
-      <div className="mini-pitch__caption">{FULLBACK_SKILL_CAPTION}</div>
+      <div className="mini-pitch__caption">{scenario.caption}</div>
       <div className="mini-pitch__legend" aria-label="Diagram key">
-        <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />Pass</span>
-        <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />Player run</span>
-        <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--cross" />Cross or cutback</span>
+        {scenario.legend.map((item) => (
+          <span key={item.label}>
+            <i className={`mini-pitch__legend-mark mini-pitch__legend-mark--${item.markClass}`} />
+            {item.label}
+          </span>
+        ))}
       </div>
     </div>
   )

@@ -2,8 +2,14 @@ import { useState } from 'react'
 import { PresentationLayout } from '../PresentationLayout'
 import { POSITIONAL_PROFILES } from '../data/positionalProfiles'
 import { FullbackSkillScenario } from '../components/FullbackSkillScenario'
+import type { FullbackSkillVariant } from '../data/fullbackSkillScenario'
 
-const FULLBACK_TABS = [
+const FULLBACK_TABS: {
+  id: FullbackSkillVariant
+  label: string
+  headline: string
+  cues: string[]
+}[] = [
   {
     id: 'in-possession',
     label: 'In Possession',
@@ -45,7 +51,7 @@ export function SkillsPage() {
 
       <section className="skill-lab">
         <div className="fullback-visual-card" aria-label="Fullback role visual">
-          <FullbackSkillScenario />
+          <FullbackSkillScenario variant={activeTabId} />
           <div>
             <span className="skill-role-label">{fullbackProfile?.fullName ?? 'Full back'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
             <h2>{activeTab.headline}</h2>
