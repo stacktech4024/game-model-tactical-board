@@ -1022,7 +1022,7 @@
   max-width: 1180px;
   width: min(100%, 1180px);
   max-height: min(86svh, 820px);
-  overflow: hidden;
+  overflow-y: auto;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 18px;
   background: #0b1220;
