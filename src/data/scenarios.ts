@@ -289,6 +289,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         from: { x: 52, y: 45 },
         to: { x: 60, y: 45 },
         label: 'Force wide',
+        playerNumber: 7,
         order: 1,
         delay: 0,
       },
