@@ -1,12 +1,12 @@
 import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
-import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { getPitchScale, pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import { getZoneNumberForY } from '../../../domain/pitch/pitchConstants'
 import type { SquadPlayer } from '../../../domain/players/playerTypes'
 
-import shaperMaroonUrl from '../../../assets/shapers/player_maroon.png'
-import shaperYellowUrl from '../../../assets/shapers/player_yellow.png'
-import shaperGrayUrl from '../../../assets/shapers/player_gray.png'
-import shaperCyanUrl from '../../../assets/shapers/player_cyan.png'
+import shaperMaroonUrl from '../../../assets/shapers/player_maroon.svg'
+import shaperYellowUrl from '../../../assets/shapers/player_yellow.svg'
+import shaperGrayUrl from '../../../assets/shapers/player_gray.svg'
+import shaperCyanUrl from '../../../assets/shapers/player_cyan.svg'
 
 type FormationPosition = {
   x: number
@@ -15,9 +15,11 @@ type FormationPosition = {
 
 type PositionMap = Record<number, FormationPosition>
 
-const HOME_OUTFIELD_RADIUS = 14
-const HOME_GK_RADIUS = 17
-const AWAY_TOKEN_RADIUS = 12
+const PLAYER_RADIUS_PER_PITCH_METRE = 1.9
+const MIN_HOME_OUTFIELD_RADIUS = 9
+const MAX_HOME_OUTFIELD_RADIUS = 14
+const GOALKEEPER_RADIUS_RATIO = 1.15
+const AWAY_RADIUS_RATIO = 0.88
 const GK_NUMBER_COLOR = 0x111111
 const OUTFIELD_NUMBER_COLOR = 0xffffff
 const SHADOW_COLOR = 0x000000
@@ -27,6 +29,7 @@ const SHADOW_RADIUS_X_RATIO = 0.85
 const SHADOW_RADIUS_Y_RATIO = 0.3
 const FOCUS_RING_COLOR = 0xfbbf24
 const FOCUS_RING_ALPHA = 0.88
+const SHAPER_FORWARD_ROTATION_OFFSET_DEGREES = 90
 
 // The Shapers artwork is a "head" circle plus a curved orientation arm,
 // drawn on a 223x500 canvas where the head circle is ~171px in diameter
@@ -35,19 +38,14 @@ const FOCUS_RING_ALPHA = 0.88
 // regardless of the on-screen token size.
 const SHAPER_HEAD_RADIUS_PX = 85.5
 
-const SHAPER_TEXTURES = {
-  homeOutfield: Texture.from(shaperMaroonUrl),
-  homeGoalkeeper: Texture.from(shaperYellowUrl),
-  awayOutfield: Texture.from(shaperGrayUrl),
-  awayGoalkeeper: Texture.from(shaperCyanUrl),
-}
-
+// Looked up lazily (not cached at module load) because Texture.from() only
+// reads the Assets cache — it must run after preloadTokenAssets() resolves.
 function getTokenTexture(player: SquadPlayer): Texture {
   if (player.side === 'away') {
-    return player.isGoalkeeper ? SHAPER_TEXTURES.awayGoalkeeper : SHAPER_TEXTURES.awayOutfield
+    return Texture.from(player.isGoalkeeper ? shaperCyanUrl : shaperGrayUrl)
   }
 
-  return player.isGoalkeeper ? SHAPER_TEXTURES.homeGoalkeeper : SHAPER_TEXTURES.homeOutfield
+  return Texture.from(player.isGoalkeeper ? shaperYellowUrl : shaperMaroonUrl)
 }
 
 function getNumberColor(player: SquadPlayer): number {
@@ -58,12 +56,30 @@ function getNumberColor(player: SquadPlayer): number {
   return player.isGoalkeeper ? GK_NUMBER_COLOR : OUTFIELD_NUMBER_COLOR
 }
 
-function getTokenRadius(player: SquadPlayer): number {
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+export function getPlayerFocusMetrics(tokenRadius: number) {
+  return {
+    glowRadius: tokenRadius + clamp(tokenRadius * 0.64, 5, 9),
+    ringRadius: tokenRadius + clamp(tokenRadius * 0.36, 3, 5),
+    ringWidth: clamp(tokenRadius * 0.25, 2.25, 3.5),
+  }
+}
+
+export function getPlayerTokenRadius(player: SquadPlayer, pitchScale: number): number {
+  const outfieldRadius = clamp(
+    pitchScale * PLAYER_RADIUS_PER_PITCH_METRE,
+    MIN_HOME_OUTFIELD_RADIUS,
+    MAX_HOME_OUTFIELD_RADIUS,
+  )
+
   if (player.side === 'away') {
-    return AWAY_TOKEN_RADIUS
+    return outfieldRadius * AWAY_RADIUS_RATIO
   }
 
-  return player.isGoalkeeper ? HOME_GK_RADIUS : HOME_OUTFIELD_RADIUS
+  return player.isGoalkeeper ? outfieldRadius * GOALKEEPER_RADIUS_RATIO : outfieldRadius
 }
 
 function addShadow(tokenContainer: Container, tokenRadius: number): void {
@@ -83,12 +99,13 @@ function addShadow(tokenContainer: Container, tokenRadius: number): void {
 function addFocusRing(tokenContainer: Container, tokenRadius: number): void {
   const ring = new Graphics()
   const glow = new Graphics()
+  const { glowRadius, ringRadius, ringWidth } = getPlayerFocusMetrics(tokenRadius)
 
-  glow.circle(0, 0, tokenRadius + 9)
+  glow.circle(0, 0, glowRadius)
   glow.fill({ color: FOCUS_RING_COLOR, alpha: 0.16 })
   tokenContainer.addChild(glow)
-  ring.circle(0, 0, tokenRadius + 5)
-  ring.stroke({ color: FOCUS_RING_COLOR, width: 3.5, alpha: FOCUS_RING_ALPHA })
+  ring.circle(0, 0, ringRadius)
+  ring.stroke({ color: FOCUS_RING_COLOR, width: ringWidth, alpha: FOCUS_RING_ALPHA })
   tokenContainer.addChild(ring)
 }
 
@@ -105,16 +122,18 @@ function addToken(
   idleAnchorRefs?: Map<number, Container>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
+  const pitchScale = getPitchScale(canvasW, canvasH, padding)
   const tokenContainer = new Container()
   const visualGroup = new Container()
-  const tokenRadius = getTokenRadius(player)
+  const tokenRadius = getPlayerTokenRadius(player, pitchScale)
+  const numberFontSize = clamp(tokenRadius * 0.85, player.side === 'away' ? 8 : 9, 12)
   const tokenSprite = new Sprite(getTokenTexture(player))
   const numberText = new Text({
     text: String(player.isGoalkeeper ? 1 : player.number),
     style: {
       fill: getNumberColor(player),
       fontFamily: 'Arial',
-      fontSize: player.side === 'away' ? 10 : 12,
+      fontSize: numberFontSize,
       fontWeight: 'bold',
     },
   })
@@ -136,9 +155,11 @@ function addToken(
   tokenSprite.anchor.set(0.5)
   tokenSprite.scale.set(shapeScale)
   tokenSprite.alpha = tokenAlpha
-  // facingAngle: 0 = facing up the pitch. Pixi rotation is in radians,
-  // clockwise from the sprite's natural "up" orientation.
-  tokenSprite.rotation = ((player.facingAngle ?? 0) * Math.PI) / 180
+  // Shapers artwork naturally faces left. Rotate that axis onto the pitch so
+  // home players default toward the top goal and away players toward the bottom.
+  const facingAngle = player.facingAngle ?? (player.side === 'away' ? 180 : 0)
+  tokenSprite.rotation =
+    ((facingAngle + SHAPER_FORWARD_ROTATION_OFFSET_DEGREES) * Math.PI) / 180
 
   numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
   numberText.anchor.set(0.5)

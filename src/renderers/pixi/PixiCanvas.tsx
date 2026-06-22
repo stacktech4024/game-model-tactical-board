@@ -10,6 +10,7 @@ import {
   startIdleMovement,
   type IdleMovementHandle,
 } from './animation/idleMovement'
+import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
@@ -20,7 +21,11 @@ import { drawGoals } from './layers/GoalLayer'
 import { drawMarkings } from './layers/MarkingsLayer'
 import { drawScenarioMarkers } from './layers/MarkerLayer'
 import { drawPhaseHighlights } from './layers/PhaseHighlightLayer'
-import { drawPlayers } from './layers/PlayerLayer'
+import {
+  drawPlayers,
+  getPlayerFocusMetrics,
+  getPlayerTokenRadius,
+} from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
 import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { OPPOSITION_SQUAD } from '../../data/opponents'
@@ -230,13 +235,16 @@ export function PixiCanvas({
     }
 
     const mount = async () => {
-      await app.init({
-        width,
-        height,
-        background: 0x1a1a1a,
-        antialias: true,
-        autoDensity: true,
-      })
+      await Promise.all([
+        app.init({
+          width,
+          height,
+          background: 0x1a1a1a,
+          antialias: true,
+          autoDensity: true,
+        }),
+        preloadTokenAssets(),
+      ])
 
       initialized = true
 
@@ -264,6 +272,7 @@ export function PixiCanvas({
       const homePlayerTokenRefs = new Map<number, Container>()
       const homeIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
+      const pitchScale = getPitchScale(width, height, pitchPadding)
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -329,15 +338,20 @@ export function PixiCanvas({
           return
         }
 
-        const tokenRadius = player?.isGoalkeeper ? 17 : 14
+        if (!player) {
+          return
+        }
+
+        const tokenRadius = getPlayerTokenRadius(player, pitchScale)
+        const { glowRadius, ringRadius, ringWidth } = getPlayerFocusMetrics(tokenRadius)
         const focusGlow = new Graphics()
         const focusRing = new Graphics()
 
-        focusGlow.circle(0, 0, tokenRadius + 9)
+        focusGlow.circle(0, 0, glowRadius)
         focusGlow.fill({ color: 0xfbbf24, alpha: 0.16 })
         focusGlow.visible = false
-        focusRing.circle(0, 0, tokenRadius + 5)
-        focusRing.stroke({ color: 0xfbbf24, width: 3.5, alpha: 0.88 })
+        focusRing.circle(0, 0, ringRadius)
+        focusRing.stroke({ color: 0xfbbf24, width: ringWidth, alpha: 0.88 })
         focusRing.visible = false
         visualGroup.addChildAt(focusGlow, 1)
         visualGroup.addChildAt(focusRing, 2)
@@ -368,7 +382,7 @@ export function PixiCanvas({
         showOpposition,
         idleAnchorRefs: homeIdleAnchorRefs,
         scenarioId: selectedScenario.id,
-        pitchScale: getPitchScale(width, height, pitchPadding),
+        pitchScale,
       }
       setPhaseVisualVersion((version) => version + 1)
 
