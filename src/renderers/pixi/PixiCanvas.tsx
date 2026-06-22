@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Text } from 'pixi.js'
+import { Application, Container, Graphics, Sprite, Text } from 'pixi.js'
 import { useEffect, useRef, useState } from 'react'
 import {
   buildScenarioAnimator,
@@ -46,7 +46,7 @@ function isIdleMovementRunningState(state: AnimatorState): boolean {
 }
 
 type PlayerPhaseVisual = {
-  tokenFill: Graphics
+  tokenVisual: Sprite | Graphics
   numberText: Text
   focusGlow: Graphics
   focusRing: Graphics
@@ -136,7 +136,7 @@ export function PixiCanvas({
       const isOutOfActiveZone = hasActiveZones && !activeZones.has(visual.zoneNumber)
       const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
 
-      visual.tokenFill.alpha = (hasActiveFocus && !isFocused ? 0.48 : 1) * zoneDimFactor
+      visual.tokenVisual.alpha = (hasActiveFocus && !isFocused ? 0.48 : 1) * zoneDimFactor
       visual.numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
       visual.focusGlow.visible = isFocused
       visual.focusRing.visible = isFocused
@@ -317,10 +317,15 @@ export function PixiCanvas({
           return
         }
 
-        const tokenFill = visualGroup.children[1]
-        const numberText = visualGroup.children[2]
+        const numberText = visualGroup.children.find((child) => child instanceof Text)
+        const tokenVisual =
+          visualGroup.children.find((child) => child instanceof Sprite) ??
+          visualGroup.children.filter((child) => child instanceof Graphics).at(-1)
 
-        if (!(tokenFill instanceof Graphics) || !(numberText instanceof Text)) {
+        if (
+          !(tokenVisual instanceof Sprite || tokenVisual instanceof Graphics) ||
+          !(numberText instanceof Text)
+        ) {
           return
         }
 
@@ -337,7 +342,7 @@ export function PixiCanvas({
         visualGroup.addChildAt(focusGlow, 1)
         visualGroup.addChildAt(focusRing, 2)
         playerVisuals.set(playerNumber, {
-          tokenFill,
+          tokenVisual,
           numberText,
           focusGlow,
           focusRing,
