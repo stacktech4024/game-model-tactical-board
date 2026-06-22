@@ -28,4 +28,10 @@ export type SquadPlayer = {
   position: PlayerPosition
   isGoalkeeper: boolean
   side: PlayerSide
+  /**
+   * Body orientation in degrees, matching the Shapers convention: 0 = facing
+   * "up" the pitch (toward the opponent's goal in the default attacking
+   * orientation). Optional — tokens default to 0 (facing up) when omitted.
+   */
+  facingAngle?: number
 }
