@@ -1,8 +1,15 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PresentationLayout } from '../PresentationLayout'
 import { POSITIONAL_PROFILES } from '../data/positionalProfiles'
-import { FullbackSkillScenario } from '../components/FullbackSkillScenario'
+import { getFullbackSkillPixiScenario } from '../data/fullbackSkillPixiAdapter'
 import type { FullbackSkillVariant } from '../data/fullbackSkillScenario'
+import { PITCH } from '../../domain/pitch/pitchConstants'
+import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
+
+const PIXI_PREVIEW_WIDTH = 360
+const PIXI_PREVIEW_HEIGHT = Math.round(
+  PIXI_PREVIEW_WIDTH * (PITCH.LENGTH / PITCH.WIDTH),
+)
 
 const FULLBACK_TABS: {
   id: FullbackSkillVariant
@@ -32,13 +39,27 @@ const FULLBACK_TABS: {
 
 export function SkillsPage() {
   const [activeTabId, setActiveTabId] = useState(FULLBACK_TABS[0].id)
+  const [activeCue, setActiveCue] = useState(
+    getFullbackSkillPixiScenario(FULLBACK_TABS[0].id).steps?.[0]?.cue ?? '',
+  )
   const [showAllProfiles, setShowAllProfiles] = useState(false)
   const [selectedProfilePosition, setSelectedProfilePosition] = useState<string | null>(null)
   const activeTab = FULLBACK_TABS.find((tab) => tab.id === activeTabId) ?? FULLBACK_TABS[0]
+  const pixiScenario = useMemo(
+    () => getFullbackSkillPixiScenario(activeTabId),
+    [activeTabId],
+  )
   const fullbackProfile = POSITIONAL_PROFILES.find((profile) => profile.position === 'FB')
   const selectedProfile = POSITIONAL_PROFILES.find(
     (profile) => profile.position === selectedProfilePosition,
   )
+
+  const handleTabChange = (tabId: FullbackSkillVariant) => {
+    const nextScenario = getFullbackSkillPixiScenario(tabId)
+
+    setActiveTabId(tabId)
+    setActiveCue(nextScenario.steps?.[0]?.cue ?? '')
+  }
 
   return (
     <PresentationLayout pageId="skills" noPadding>
@@ -51,7 +72,19 @@ export function SkillsPage() {
 
       <section className="skill-lab">
         <div className="fullback-visual-card" aria-label="Fullback role visual">
-          <FullbackSkillScenario variant={activeTabId} />
+          <div className="mini-pitch fullback-skill-pitch">
+            <PixiPitchPreview
+              key={activeTabId}
+              width={PIXI_PREVIEW_WIDTH}
+              height={PIXI_PREVIEW_HEIGHT}
+              players={pixiScenario.players}
+              ballPosition={pixiScenario.ballPosition}
+              steps={pixiScenario.steps}
+              onCueChange={setActiveCue}
+            />
+            <div className="mini-pitch__cue" aria-live="polite">{activeCue}</div>
+            <div className="mini-pitch__caption">{pixiScenario.caption}</div>
+          </div>
           <div>
             <span className="skill-role-label">{fullbackProfile?.fullName ?? 'Full back'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
             <h2>{activeTab.headline}</h2>
@@ -68,7 +101,7 @@ export function SkillsPage() {
                 role="tab"
                 aria-selected={tab.id === activeTabId}
                 className={tab.id === activeTabId ? 'analysis-tab is-active' : 'analysis-tab'}
-                onClick={() => setActiveTabId(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
               >
                 {tab.label}
               </button>
