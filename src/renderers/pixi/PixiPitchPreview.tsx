@@ -60,7 +60,7 @@ const PITCH_PADDING = 32
 function percentageToPitchPosition(x: number, y: number) {
   return {
     x: (x * PITCH.WIDTH) / 100,
-    y: (y * PITCH.LENGTH) / 100,
+    y: PITCH.LENGTH - (y * PITCH.LENGTH) / 100,
   }
 }
 
