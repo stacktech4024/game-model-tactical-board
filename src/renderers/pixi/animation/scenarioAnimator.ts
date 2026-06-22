@@ -22,7 +22,8 @@ export type ScenarioAnimator = {
 
 export type BuildScenarioAnimatorArgs = {
   scenario: ScenarioDefinition
-  playerTokens: Map<number, Container>
+  homePlayerTokens: Map<number, Container>
+  awayPlayerTokens?: Map<number, Container>
   ballToken: Container | undefined
   canvasW: number
   canvasH: number
@@ -69,7 +70,8 @@ function pointToPosition(
 
 export function buildScenarioAnimator({
   scenario,
-  playerTokens,
+  homePlayerTokens,
+  awayPlayerTokens,
   ballToken,
   canvasW,
   canvasH,
@@ -135,7 +137,8 @@ export function buildScenarioAnimator({
         return
       }
 
-      const playerToken = playerTokens.get(arrow.playerNumber)
+      const playerTokens = arrow.side === 'away' ? awayPlayerTokens : homePlayerTokens
+      const playerToken = playerTokens?.get(arrow.playerNumber)
 
       if (!playerToken) {
         return

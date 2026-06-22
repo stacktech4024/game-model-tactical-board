@@ -49,6 +49,9 @@ export type ScenarioArrow = {
   playerNumber?: number
   order?: number
   delay?: number
+  // Which team's token this arrow moves. Omitted means 'home', preserving
+  // behavior for every existing arrow in scenarios.ts.
+  side?: 'home' | 'away'
 }
 
 export type ScenarioMarkerTone =

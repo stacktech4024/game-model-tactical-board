@@ -270,6 +270,7 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const homePlayerTokenRefs = new Map<number, Container>()
+      const awayPlayerTokenRefs = new Map<number, Container>()
       const homeIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
       const pitchScale = getPitchScale(width, height, pitchPadding)
@@ -301,7 +302,16 @@ export function PixiCanvas({
       drawScenarioArrows(arrowLayer, showArrows ? selectedArrows : undefined, width, height, pitchPadding)
 
       if (showOpposition) {
-        drawPlayers(awayPlayerLayer, OPPOSITION_SQUAD, awayPositions, width, height, pitchPadding)
+        drawPlayers(
+          awayPlayerLayer,
+          OPPOSITION_SQUAD,
+          awayPositions,
+          width,
+          height,
+          pitchPadding,
+          undefined,
+          awayPlayerTokenRefs,
+        )
       } else {
         awayPlayerLayer.removeChildren()
       }
@@ -394,7 +404,8 @@ export function PixiCanvas({
 
       scenarioAnimator = buildScenarioAnimator({
         scenario: selectedScenario,
-        playerTokens: homePlayerTokenRefs,
+        homePlayerTokens: homePlayerTokenRefs,
+        awayPlayerTokens: awayPlayerTokenRefs,
         ballToken,
         canvasW: width,
         canvasH: height,
