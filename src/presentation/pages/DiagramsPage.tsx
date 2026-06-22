@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { SCENARIOS } from '../../data/scenarios'
 import type { ScenarioDefinition } from '../../domain/scenarios/scenarioTypes'
 import { PresentationLayout } from '../PresentationLayout'
-import { AttackingTransitionScenario } from '../components/AttackingTransitionScenario'
 import { DefensiveTransitionScenario } from '../components/DefensiveTransitionScenario'
+import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionPixiAdapter'
+import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import diagram1 from '../../assets/diagram1_attacking_org.png'
 import diagram2 from '../../assets/diagram2_defending_org.png'
 import diagram3 from '../../assets/diagram3_attacking_transition.png'
@@ -42,6 +43,15 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
 
 export function DiagramsPage() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioDefinition | null>(null)
+  const [attackingTransitionCue, setAttackingTransitionCue] = useState('Regain')
+
+  const handleScenarioSelect = (scenario: ScenarioDefinition) => {
+    setSelectedScenario(scenario)
+
+    if (scenario.id === 'counter-quickly-on-turnover') {
+      setAttackingTransitionCue('Regain')
+    }
+  }
 
   return (
     <PresentationLayout pageId="diagrams" noPadding>
@@ -55,7 +65,7 @@ export function DiagramsPage() {
             key={scenario.id}
             type="button"
             className="presentation-diagram-card presentation-diagram-card--button"
-            onClick={() => setSelectedScenario(scenario)}
+            onClick={() => handleScenarioSelect(scenario)}
           >
             {DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id] ? (
               <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
@@ -93,7 +103,39 @@ export function DiagramsPage() {
               Close
             </button>
             {selectedScenario.id === 'counter-quickly-on-turnover' ? (
-              <AttackingTransitionScenario />
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div style={{ position: 'relative', width: 480, height: 741 }}>
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={ATTACKING_TRANSITION_PIXI_SCENARIO.players}
+                    ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
+                    steps={ATTACKING_TRANSITION_PIXI_SCENARIO.steps}
+                    routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
+                    repeatDelay={1.15}
+                    onCueChange={setAttackingTransitionCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {attackingTransitionCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {ATTACKING_TRANSITION_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                      Pass
+                    </span>
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                      Player run
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : selectedScenario.id === 'protect-lead-in-back-five' ? (
               <DefensiveTransitionScenario />
             ) : DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id] ? (

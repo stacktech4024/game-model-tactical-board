@@ -27,6 +27,7 @@ export type PixiPitchPreviewStep = {
   id: string
   playerId?: string
   playerTo?: { x: number; y: number }
+  playerMoves?: { playerId: string; to: { x: number; y: number } }[]
   ballFrom?: { x: number; y: number }
   ballTo?: { x: number; y: number }
   duration: number
@@ -373,6 +374,27 @@ export function PixiPitchPreview({
                 playerToken ? '<35%' : undefined,
               )
             }
+
+            step.playerMoves?.forEach((move) => {
+              const moveToken = playerTokensById.get(move.playerId)
+
+              if (moveToken) {
+                timeline.to(
+                  moveToken.position,
+                  {
+                    ...percentageToScreenPosition(
+                      move.to.x,
+                      move.to.y,
+                      width,
+                      height,
+                    ),
+                    duration: step.duration,
+                    ease: 'power2.inOut',
+                  },
+                  stepLabel,
+                )
+              }
+            })
 
             routeGraphicsByRevealStepId.get(step.id)?.forEach((routeGraphics) => {
               timeline.to(
