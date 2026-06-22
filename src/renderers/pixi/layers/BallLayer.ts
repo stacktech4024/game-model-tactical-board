@@ -6,6 +6,8 @@ import ballNikeUrl from '../../../assets/shapers/ball_nike_ORIGINAL.svg'
 const BALL_RADIUS_PER_PITCH_METRE = 0.9
 const MIN_BALL_RADIUS = 7
 const MAX_BALL_RADIUS = 10
+const BALL_FOOT_OFFSET_X = 6
+const BALL_FOOT_OFFSET_Y = 8
 
 // Looked up lazily (not cached at module load) because Texture.from() only
 // reads the Assets cache — it must run after preloadTokenAssets() resolves.
@@ -43,7 +45,7 @@ export function drawBall(
   ballSprite.width = ballRadius * 2
   ballSprite.height = ballRadius * 2
 
-  ballToken.position.set(point.sx, point.sy)
+  ballToken.position.set(point.sx + BALL_FOOT_OFFSET_X, point.sy + BALL_FOOT_OFFSET_Y)
   ballToken.addChild(shadow)
   ballToken.addChild(ballSprite)
   container.addChild(ballToken)

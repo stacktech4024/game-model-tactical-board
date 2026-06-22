@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { SCENARIOS } from '../../data/scenarios'
 import type { ScenarioDefinition } from '../../domain/scenarios/scenarioTypes'
 import { PresentationLayout } from '../PresentationLayout'
-import { DefensiveTransitionScenario } from '../components/DefensiveTransitionScenario'
 import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionPixiAdapter'
+import { DEFENSIVE_TRANSITION_PIXI_SCENARIO } from '../data/defensiveTransitionPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import diagram1 from '../../assets/diagram1_attacking_org.png'
 import diagram2 from '../../assets/diagram2_defending_org.png'
@@ -44,12 +44,17 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
 export function DiagramsPage() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioDefinition | null>(null)
   const [attackingTransitionCue, setAttackingTransitionCue] = useState('Regain')
+  const [defensiveTransitionCue, setDefensiveTransitionCue] = useState('Ball lost')
 
   const handleScenarioSelect = (scenario: ScenarioDefinition) => {
     setSelectedScenario(scenario)
 
     if (scenario.id === 'counter-quickly-on-turnover') {
       setAttackingTransitionCue('Regain')
+    }
+
+    if (scenario.id === 'protect-lead-in-back-five') {
+      setDefensiveTransitionCue('Ball lost')
     }
   }
 
@@ -137,7 +142,45 @@ export function DiagramsPage() {
                 </div>
               </div>
             ) : selectedScenario.id === 'protect-lead-in-back-five' ? (
-              <DefensiveTransitionScenario />
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div style={{ position: 'relative', width: 480, height: 741 }}>
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={DEFENSIVE_TRANSITION_PIXI_SCENARIO.players}
+                    ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
+                    steps={DEFENSIVE_TRANSITION_PIXI_SCENARIO.steps}
+                    routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
+                    repeatDelay={1}
+                    onCueChange={setDefensiveTransitionCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {defensiveTransitionCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {DEFENSIVE_TRANSITION_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i
+                        className="mini-pitch__legend-mark"
+                        style={{ background: '#ef4444' }}
+                      />
+                      Pressure
+                    </span>
+                    <span>
+                      <i
+                        className="mini-pitch__legend-mark"
+                        style={{ background: '#22c55e' }}
+                      />
+                      Recovery
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id] ? (
               <img
                 src={DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id]}
