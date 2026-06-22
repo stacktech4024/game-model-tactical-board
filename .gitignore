@@ -26,3 +26,8 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Local validation screenshots
+/validation-screenshots/
+/verify-*.png
+/modal-constrained-*.png
