@@ -29,7 +29,7 @@ const SHADOW_RADIUS_X_RATIO = 0.85
 const SHADOW_RADIUS_Y_RATIO = 0.3
 const FOCUS_RING_COLOR = 0xfbbf24
 const FOCUS_RING_ALPHA = 0.88
-const SHAPER_FORWARD_ROTATION_OFFSET_DEGREES = 90
+const SHAPER_FORWARD_ROTATION_OFFSET_DEGREES = -90
 
 // The Shapers artwork is a "head" circle plus a curved orientation arm,
 // drawn on a 223x500 canvas where the head circle is ~171px in diameter
@@ -155,7 +155,7 @@ function addToken(
   tokenSprite.anchor.set(0.5)
   tokenSprite.scale.set(shapeScale)
   tokenSprite.alpha = tokenAlpha
-  // Shapers artwork naturally faces left. Rotate that axis onto the pitch so
+  // Shapers artwork naturally faces right. Rotate that axis onto the pitch so
   // home players default toward the top goal and away players toward the bottom.
   const facingAngle = player.facingAngle ?? (player.side === 'away' ? 180 : 0)
   tokenSprite.rotation =
