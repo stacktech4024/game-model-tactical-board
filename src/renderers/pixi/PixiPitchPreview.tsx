@@ -4,7 +4,9 @@ import { useEffect, useRef } from 'react'
 import type { SquadPlayer } from '../../domain/players/playerTypes'
 import { pitchToScreen } from '../../domain/pitch/coordTransforms'
 import { PITCH } from '../../domain/pitch/pitchConstants'
+import type { ScenarioArrow } from '../../domain/scenarios/scenarioTypes'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
+import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
 import { drawChannels } from './layers/ChannelLayer'
 import { drawGoals } from './layers/GoalLayer'
@@ -33,6 +35,14 @@ export type PixiPitchPreviewStep = {
   emphasisCue?: string
 }
 
+export type PixiPitchPreviewRoute = {
+  id: string
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+  type: 'pass' | 'run' | 'dribble' | 'press' | 'recovery'
+  revealOnStepId?: string
+}
+
 export type PixiPitchPreviewProps = {
   width: number
   height: number
@@ -41,6 +51,7 @@ export type PixiPitchPreviewProps = {
   steps?: PixiPitchPreviewStep[]
   repeatDelay?: number
   onCueChange?: (cue: string) => void
+  routes?: PixiPitchPreviewRoute[]
 }
 
 const PITCH_PADDING = 32
@@ -105,6 +116,7 @@ export function PixiPitchPreview({
   steps,
   repeatDelay = 1.5,
   onCueChange,
+  routes,
 }: PixiPitchPreviewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gsapContextRef = useRef<gsap.Context | null>(null)
@@ -162,9 +174,11 @@ export function PixiPitchPreview({
       const channelsLayer = new Graphics()
       const markingsLayer = new Graphics()
       const goalsLayer = new Graphics()
+      const routesLayer = new Container()
       const ballLayer = new Container()
       const playerLayer = new Container()
       const playerTokenRefs = new Map<number, Container>()
+      const routeGraphicsByRevealStepId = new Map<string, Graphics[]>()
       const { squad, positions, labels, numbersById } = buildPlayerAdapter(players)
 
       app.stage.addChild(grassLayer)
@@ -172,6 +186,7 @@ export function PixiPitchPreview({
       app.stage.addChild(channelsLayer)
       app.stage.addChild(markingsLayer)
       app.stage.addChild(goalsLayer)
+      app.stage.addChild(routesLayer)
       app.stage.addChild(ballLayer)
       app.stage.addChild(playerLayer)
 
@@ -183,6 +198,34 @@ export function PixiPitchPreview({
       drawChannels(channelsLayer, width, height, PITCH_PADDING)
       drawMarkings(markingsLayer, width, height, PITCH_PADDING)
       drawGoals(goalsLayer, width, height, PITCH_PADDING)
+
+      routes?.forEach((route) => {
+        const routeGraphics = new Graphics()
+        const arrow: ScenarioArrow = {
+          id: route.id,
+          type: route.type,
+          from: percentageToPitchPosition(route.from.x, route.from.y),
+          to: percentageToPitchPosition(route.to.x, route.to.y),
+        }
+
+        drawScenarioArrows(
+          routeGraphics,
+          [arrow],
+          width,
+          height,
+          PITCH_PADDING,
+        )
+        routeGraphics.alpha = route.revealOnStepId ? 0 : 1
+        routesLayer.addChild(routeGraphics)
+
+        if (route.revealOnStepId) {
+          const stepRoutes = routeGraphicsByRevealStepId.get(route.revealOnStepId) ?? []
+
+          stepRoutes.push(routeGraphics)
+          routeGraphicsByRevealStepId.set(route.revealOnStepId, stepRoutes)
+        }
+      })
+
       drawPlayers(
         playerLayer,
         squad,
@@ -236,6 +279,11 @@ export function PixiPitchPreview({
               }
             })
             ballToken.position.set(initialBallPosition.x, initialBallPosition.y)
+            routeGraphicsByRevealStepId.forEach((stepRoutes) => {
+              stepRoutes.forEach((routeGraphics) => {
+                routeGraphics.alpha = 0
+              })
+            })
           }
 
           resetVisuals()
@@ -251,7 +299,7 @@ export function PixiPitchPreview({
 
           timeline.call(resetVisuals)
 
-          steps.forEach((step) => {
+          steps.forEach((step, stepIndex) => {
             if (step.emphasizePlayerId) {
               const emphasisToken = playerTokensById.get(step.emphasizePlayerId)
 
@@ -273,6 +321,9 @@ export function PixiPitchPreview({
               timeline.to({}, { duration: 0.12 })
             }
 
+            const stepLabel = `preview-step-${stepIndex}`
+
+            timeline.addLabel(stepLabel)
             timeline.call(() => {
               onCueChangeRef.current?.(step.cue)
             })
@@ -322,6 +373,18 @@ export function PixiPitchPreview({
                 playerToken ? '<35%' : undefined,
               )
             }
+
+            routeGraphicsByRevealStepId.get(step.id)?.forEach((routeGraphics) => {
+              timeline.to(
+                routeGraphics,
+                {
+                  alpha: 1,
+                  duration: 0.12,
+                  ease: 'power1.out',
+                },
+                stepLabel,
+              )
+            })
           })
         }, container)
 
@@ -346,7 +409,7 @@ export function PixiPitchPreview({
 
       destroyApp()
     }
-  }, [ballPosition, height, players, repeatDelay, steps, width])
+  }, [ballPosition, height, players, repeatDelay, routes, steps, width])
 
   return <div ref={containerRef} className="pixi-pitch-preview" />
 }
