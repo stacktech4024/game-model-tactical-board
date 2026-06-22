@@ -1,6 +1,8 @@
 import { Application, Container, Graphics, Text } from 'pixi.js'
+import { gsap } from 'gsap'
 import { useEffect, useRef } from 'react'
 import type { SquadPlayer } from '../../domain/players/playerTypes'
+import { pitchToScreen } from '../../domain/pitch/coordTransforms'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import { drawBall } from './layers/BallLayer'
@@ -19,11 +21,26 @@ type PixiPitchPreviewPlayer = {
   tone?: 'primary' | 'keeper' | 'opponent'
 }
 
+export type PixiPitchPreviewStep = {
+  id: string
+  playerId?: string
+  playerTo?: { x: number; y: number }
+  ballFrom?: { x: number; y: number }
+  ballTo?: { x: number; y: number }
+  duration: number
+  emphasizePlayerId?: string
+  cue: string
+  emphasisCue?: string
+}
+
 export type PixiPitchPreviewProps = {
   width: number
   height: number
   players: PixiPitchPreviewPlayer[]
   ballPosition: { x: number; y: number }
+  steps?: PixiPitchPreviewStep[]
+  repeatDelay?: number
+  onCueChange?: (cue: string) => void
 }
 
 const PITCH_PADDING = 32
@@ -35,10 +52,29 @@ function percentageToPitchPosition(x: number, y: number) {
   }
 }
 
+function percentageToScreenPosition(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const pitchPosition = percentageToPitchPosition(x, y)
+  const screenPosition = pitchToScreen(
+    pitchPosition.x,
+    pitchPosition.y,
+    width,
+    height,
+    PITCH_PADDING,
+  )
+
+  return { x: screenPosition.sx, y: screenPosition.sy }
+}
+
 function buildPlayerAdapter(players: PixiPitchPreviewPlayer[]) {
   const squad: SquadPlayer[] = []
   const positions: Record<number, { x: number; y: number }> = {}
   const labels = new Map<number, string>()
+  const numbersById = new Map<string, number>()
 
   players.forEach((player, index) => {
     const number = index + 1
@@ -55,9 +91,10 @@ function buildPlayerAdapter(players: PixiPitchPreviewPlayer[]) {
     })
     positions[number] = percentageToPitchPosition(player.x, player.y)
     labels.set(number, player.label)
+    numbersById.set(player.id, number)
   })
 
-  return { squad, positions, labels }
+  return { squad, positions, labels, numbersById }
 }
 
 export function PixiPitchPreview({
@@ -65,8 +102,17 @@ export function PixiPitchPreview({
   height,
   players,
   ballPosition,
+  steps,
+  repeatDelay = 1.5,
+  onCueChange,
 }: PixiPitchPreviewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const gsapContextRef = useRef<gsap.Context | null>(null)
+  const onCueChangeRef = useRef(onCueChange)
+
+  useEffect(() => {
+    onCueChangeRef.current = onCueChange
+  }, [onCueChange])
 
   useEffect(() => {
     const container = containerRef.current
@@ -79,6 +125,9 @@ export function PixiPitchPreview({
     let cancelled = false
     let initialized = false
     let destroyed = false
+
+    gsapContextRef.current?.revert()
+    gsapContextRef.current = null
 
     const destroyApp = () => {
       if (destroyed) {
@@ -116,7 +165,7 @@ export function PixiPitchPreview({
       const ballLayer = new Container()
       const playerLayer = new Container()
       const playerTokenRefs = new Map<number, Container>()
-      const { squad, positions, labels } = buildPlayerAdapter(players)
+      const { squad, positions, labels, numbersById } = buildPlayerAdapter(players)
 
       app.stage.addChild(grassLayer)
       app.stage.addChild(zonesLayer)
@@ -156,13 +205,136 @@ export function PixiPitchPreview({
       })
 
       const ballPitchPosition = percentageToPitchPosition(ballPosition.x, ballPosition.y)
-      drawBall(ballLayer, ballPitchPosition, width, height, PITCH_PADDING)
+      const ballToken = drawBall(ballLayer, ballPitchPosition, width, height, PITCH_PADDING)
+
+      if (steps?.length && ballToken) {
+        const playerTokensById = new Map<string, Container>()
+        const initialPlayerPositions = new Map<string, { x: number; y: number }>()
+
+        numbersById.forEach((number, id) => {
+          const token = playerTokenRefs.get(number)
+
+          if (token) {
+            playerTokensById.set(id, token)
+            initialPlayerPositions.set(id, { x: token.position.x, y: token.position.y })
+          }
+        })
+
+        const initialBallPosition = {
+          x: ballToken.position.x,
+          y: ballToken.position.y,
+        }
+
+        const ctx = gsap.context(() => {
+          const resetVisuals = () => {
+            initialPlayerPositions.forEach((position, id) => {
+              const token = playerTokensById.get(id)
+
+              if (token) {
+                token.position.set(position.x, position.y)
+                token.scale.set(1)
+              }
+            })
+            ballToken.position.set(initialBallPosition.x, initialBallPosition.y)
+          }
+
+          resetVisuals()
+          onCueChangeRef.current?.(steps[0]?.cue ?? '')
+
+          const timeline = gsap.timeline({
+            repeat: -1,
+            repeatDelay,
+            defaults: {
+              ease: 'power1.inOut',
+            },
+          })
+
+          timeline.call(resetVisuals)
+
+          steps.forEach((step) => {
+            if (step.emphasizePlayerId) {
+              const emphasisToken = playerTokensById.get(step.emphasizePlayerId)
+
+              timeline.call(() => {
+                onCueChangeRef.current?.(step.emphasisCue ?? step.cue)
+              })
+
+              if (emphasisToken) {
+                timeline.to(emphasisToken.scale, {
+                  x: 1.18,
+                  y: 1.18,
+                  duration: 0.18,
+                  ease: 'power1.inOut',
+                  repeat: 1,
+                  yoyo: true,
+                })
+              }
+
+              timeline.to({}, { duration: 0.12 })
+            }
+
+            timeline.call(() => {
+              onCueChangeRef.current?.(step.cue)
+            })
+
+            if (step.ballFrom) {
+              timeline.set(
+                ballToken.position,
+                percentageToScreenPosition(
+                  step.ballFrom.x,
+                  step.ballFrom.y,
+                  width,
+                  height,
+                ),
+              )
+            }
+
+            const playerToken = step.playerId
+              ? playerTokensById.get(step.playerId)
+              : undefined
+
+            if (playerToken && step.playerTo) {
+              timeline.to(playerToken.position, {
+                ...percentageToScreenPosition(
+                  step.playerTo.x,
+                  step.playerTo.y,
+                  width,
+                  height,
+                ),
+                duration: step.duration,
+                ease: 'power2.inOut',
+              })
+            }
+
+            if (step.ballTo) {
+              timeline.to(
+                ballToken.position,
+                {
+                  ...percentageToScreenPosition(
+                    step.ballTo.x,
+                    step.ballTo.y,
+                    width,
+                    height,
+                  ),
+                  duration: step.duration,
+                  ease: 'power1.inOut',
+                },
+                playerToken ? '<35%' : undefined,
+              )
+            }
+          })
+        }, container)
+
+        gsapContextRef.current = ctx
+      }
     }
 
     void mount()
 
     return () => {
       cancelled = true
+      gsapContextRef.current?.revert()
+      gsapContextRef.current = null
 
       if (!initialized) {
         return
@@ -174,7 +346,7 @@ export function PixiPitchPreview({
 
       destroyApp()
     }
-  }, [ballPosition, height, players, width])
+  }, [ballPosition, height, players, repeatDelay, steps, width])
 
   return <div ref={containerRef} className="pixi-pitch-preview" />
 }
