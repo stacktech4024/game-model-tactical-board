@@ -188,8 +188,8 @@ export function PixiPitchPreview({
       app.stage.addChild(markingsLayer)
       app.stage.addChild(goalsLayer)
       app.stage.addChild(routesLayer)
-      app.stage.addChild(ballLayer)
       app.stage.addChild(playerLayer)
+      app.stage.addChild(ballLayer)
 
       container.textContent = ''
       container.appendChild(app.canvas)

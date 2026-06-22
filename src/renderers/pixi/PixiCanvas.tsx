@@ -283,9 +283,9 @@ export function PixiCanvas({
       stage.addChild(phaseHighlightLayer)
       stage.addChild(arrowLayer)
       stage.addChild(markerLayer)
-      stage.addChild(ballLayer)
       stage.addChild(awayPlayerLayer)
       stage.addChild(playerLayer)
+      stage.addChild(ballLayer)
       stage.addChild(debugLayer)
 
       container.textContent = ''
