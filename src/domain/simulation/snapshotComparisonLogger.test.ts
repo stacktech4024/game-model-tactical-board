@@ -22,7 +22,10 @@ function makePlan(): ScenarioPlan {
     moment: 'Attacking Transition',
     initialPlayers: [
       { id: 'home-6', side: 'home', number: 6, position: { x: 30, y: 50 } },
+      { id: 'home-7', side: 'home', number: 7, position: { x: 34, y: 88 } },
+      { id: 'home-8', side: 'home', number: 8, position: { x: 25, y: 60 } },
       { id: 'home-9', side: 'home', number: 9, position: { x: 34, y: 80 } },
+      { id: 'home-11', side: 'home', number: 11, position: { x: 50, y: 70 } },
     ],
     initialBall: { id: 'ball', position: { x: 34, y: 50 } },
     animationIntents: [
@@ -41,6 +44,54 @@ function makePlan(): ScenarioPlan {
         timing: { startTime: 0, endTime: 1, duration: 1, startProgress: 0, endProgress: 0.5 },
       },
       {
+        id: 'intent-run-pending',
+        arrowId: 'run-6',
+        type: 'player-movement',
+        arrowType: 'run',
+        side: 'home',
+        playerNumber: 6,
+        from: { x: 30, y: 50 },
+        to: { x: 36, y: 60 },
+        order: 2,
+        delay: 0,
+        sequenceIndex: 1,
+        easeHint: 'power2.inOut',
+        // Within the [0, 2] totalDuration window used by this fixture
+        // (anchored by intent-run below, the last array entry), but pending
+        // for every progress value the existing tests exercise (<= 0.75).
+        timing: { startTime: 1.8, endTime: 1.9, duration: 0.1, startProgress: 0.9, endProgress: 0.95 },
+      },
+      {
+        id: 'intent-run-completed',
+        arrowId: 'run-8',
+        type: 'player-movement',
+        arrowType: 'run',
+        side: 'home',
+        playerNumber: 8,
+        from: { x: 25, y: 60 },
+        to: { x: 28, y: 65 },
+        order: 2,
+        delay: 0,
+        sequenceIndex: 1,
+        easeHint: 'power2.inOut',
+        timing: { startTime: 0.05, endTime: 0.15, duration: 0.1, startProgress: 0.05, endProgress: 0.15 },
+      },
+      {
+        id: 'intent-shot',
+        arrowId: 'shot',
+        type: 'ball-movement',
+        arrowType: 'shot',
+        side: 'home',
+        playerNumber: 7,
+        from: { x: 34, y: 76 },
+        to: { x: 34, y: 100 },
+        order: 3,
+        delay: 0,
+        sequenceIndex: 2,
+        easeHint: 'power3.out',
+        timing: { startTime: 0.6, endTime: 0.8, duration: 0.2, startProgress: 0.3, endProgress: 0.4 },
+      },
+      {
         id: 'intent-run',
         arrowId: 'run',
         type: 'player-movement',
@@ -49,9 +100,9 @@ function makePlan(): ScenarioPlan {
         playerNumber: 9,
         from: { x: 34, y: 80 },
         to: { x: 40, y: 90 },
-        order: 2,
+        order: 4,
         delay: 0,
-        sequenceIndex: 1,
+        sequenceIndex: 3,
         easeHint: 'power2.inOut',
         timing: { startTime: 1, endTime: 2, duration: 1, startProgress: 0.5, endProgress: 1 },
       },
@@ -112,7 +163,8 @@ test('compareSnapshotToLivePositions does not annotate eased divergence when the
 })
 
 test('compareSnapshotToLivePositions annotates an unexplained mismatch when no active non-linear intent explains a non-trivial delta', () => {
-  // player 6 has no animation intent at all, and is not marked ambient.
+  // player 6 has a player-movement intent (pending, starts at progress 0.9),
+  // so it is scripted - just not active here - and is not marked ambient.
   const rows = compareSnapshotToLivePositions({
     plan: makePlan(),
     progress: 0.1,
@@ -129,6 +181,126 @@ test('compareSnapshotToLivePositions annotates an unexplained mismatch when no a
   assert.ok(player6Row)
   assert.ok(player6Row.deltaPx >= 1)
   assert.equal(player6Row.note, 'unexplained mismatch')
+})
+
+test('compareSnapshotToLivePositions annotates no scripted player movement for a player with no player-movement intent anywhere in the plan', () => {
+  // player 11 has no animation intents at all, scripted or otherwise.
+  const rows = compareSnapshotToLivePositions({
+    plan: makePlan(),
+    progress: 0.5,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    canvasPadding: CANVAS_PADDING,
+    liveHomePlayerScreenPositions: new Map([
+      [11, offsetBy(domainScreenPositionFor(50, 70), 15, 0)],
+    ]),
+  })
+
+  const player11Row = rows.find((row) => row.entityId === 'home-11')
+
+  assert.ok(player11Row)
+  assert.ok(player11Row.deltaPx >= 1)
+  assert.equal(
+    player11Row.note,
+    'no scripted player movement for this entity — position reflects static formation slot',
+  )
+})
+
+test('compareSnapshotToLivePositions does not annotate no-scripted-movement for a pending player-movement intent', () => {
+  // player 6's intent starts at progress 0.9; at progress 0.1 it is pending,
+  // not absent, so this must fall back to unexplained mismatch, not the
+  // no-scripted-movement note.
+  const rows = compareSnapshotToLivePositions({
+    plan: makePlan(),
+    progress: 0.1,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    canvasPadding: CANVAS_PADDING,
+    liveHomePlayerScreenPositions: new Map([
+      [6, offsetBy(domainScreenPositionFor(30, 50), 15, 0)],
+    ]),
+  })
+
+  const player6Row = rows.find((row) => row.entityId === 'home-6')
+
+  assert.ok(player6Row)
+  assert.notEqual(
+    player6Row.note,
+    'no scripted player movement for this entity — position reflects static formation slot',
+  )
+  assert.equal(player6Row.note, 'unexplained mismatch')
+})
+
+test('compareSnapshotToLivePositions does not annotate no-scripted-movement for a completed player-movement intent', () => {
+  // player 8's run intent window ends at progress 0.15; at progress 0.5 it
+  // has completed, but it was still scripted, so this must not get the
+  // no-scripted-movement note.
+  const player8CompletedDomain = domainScreenPositionFor(28, 65)
+  const rows = compareSnapshotToLivePositions({
+    plan: makePlan(),
+    progress: 0.5,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    canvasPadding: CANVAS_PADDING,
+    liveHomePlayerScreenPositions: new Map([
+      [8, offsetBy(player8CompletedDomain, 15, 0)],
+    ]),
+  })
+
+  const player8Row = rows.find((row) => row.entityId === 'home-8')
+
+  assert.ok(player8Row)
+  assert.ok(player8Row.deltaPx >= 1)
+  assert.notEqual(
+    player8Row.note,
+    'no scripted player movement for this entity — position reflects static formation slot',
+  )
+  assert.equal(player8Row.note, 'unexplained mismatch')
+})
+
+test('compareSnapshotToLivePositions does not treat a shot arrow\'s playerNumber as a player-movement intent', () => {
+  // player 7 only appears as the playerNumber on a ball-movement shot arrow
+  // (cosmetic scale pulse only, per scenarioAnimator) - it has no actual
+  // player-movement intent, so it should still get the no-scripted-movement
+  // note rather than being treated as scripted.
+  const rows = compareSnapshotToLivePositions({
+    plan: makePlan(),
+    progress: 0.5,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    canvasPadding: CANVAS_PADDING,
+    liveHomePlayerScreenPositions: new Map([
+      [7, offsetBy(domainScreenPositionFor(34, 88), 15, 0)],
+    ]),
+  })
+
+  const player7Row = rows.find((row) => row.entityId === 'home-7')
+
+  assert.ok(player7Row)
+  assert.ok(player7Row.deltaPx >= 1)
+  assert.equal(
+    player7Row.note,
+    'no scripted player movement for this entity — position reflects static formation slot',
+  )
+})
+
+test('compareSnapshotToLivePositions suppresses the no-scripted-movement note for an ambient player, same as it suppresses unexplained mismatch', () => {
+  const rows = compareSnapshotToLivePositions({
+    plan: makePlan(),
+    progress: 0.5,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    canvasPadding: CANVAS_PADDING,
+    liveHomePlayerScreenPositions: new Map([
+      [11, offsetBy(domainScreenPositionFor(50, 70), 15, 0)],
+    ]),
+    ambientPlayerNumbers: new Set([11]),
+  })
+
+  const player11Row = rows.find((row) => row.entityId === 'home-11')
+
+  assert.ok(player11Row)
+  assert.equal(player11Row.note, 'ambient/idle drift expected for non-key player')
 })
 
 test('compareSnapshotToLivePositions reports the ambient/idle drift note unconditionally for ambient players, even with a zero delta', () => {

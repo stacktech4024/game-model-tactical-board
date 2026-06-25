@@ -573,9 +573,11 @@ export function PixiCanvas({
             : undefined
           const keyPlayerNumbers = activePhaseStepRef.current?.keyPlayers ?? []
           const ambientPlayerNumbers = new Set(
-            Array.from(homePlayerTokenRefs.keys()).filter(
-              (playerNumber) => !keyPlayerNumbers.includes(playerNumber),
-            ),
+            Array.from(homePlayerTokenRefs.keys()).filter((playerNumber) => {
+              const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
+
+              return Boolean(player && !player.isGoalkeeper && !keyPlayerNumbers.includes(playerNumber))
+            }),
           )
 
           logSnapshotComparison({

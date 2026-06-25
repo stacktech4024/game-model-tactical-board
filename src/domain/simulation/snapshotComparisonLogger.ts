@@ -41,6 +41,8 @@ export type CompareSnapshotToLivePositionsArgs = {
 const AMBIENT_DRIFT_NOTE = 'ambient/idle drift expected for non-key player'
 const EASED_DIVERGENCE_NOTE = 'eased-vs-linear divergence expected mid-tween'
 const UNEXPLAINED_MISMATCH_NOTE = 'unexplained mismatch'
+const NO_SCRIPTED_PLAYER_MOVEMENT_NOTE =
+  'no scripted player movement for this entity — position reflects static formation slot'
 
 // Below this, two positions are considered the same point for annotation
 // purposes (floating point/rounding noise, not a real divergence).
@@ -67,12 +69,30 @@ function findActiveEaseHint(
   )?.easeHint
 }
 
+// A shot arrow's playerNumber is cosmetic only (scale pulse) - it never
+// drives a position tween, so only true 'player-movement' intents count
+// here. Pending and completed intents both count: the player was scripted,
+// even if that script isn't active at the current progress.
+function hasPlayerMovementIntent(
+  intents: ScheduledAnimationIntent[],
+  side: ScheduledAnimationIntent['side'],
+  playerNumber: number,
+): boolean {
+  return intents.some(
+    (intent) =>
+      intent.type === 'player-movement' &&
+      intent.side === side &&
+      intent.playerNumber === playerNumber,
+  )
+}
+
 function buildComparisonNote(args: {
   isAmbient: boolean
   easeHint: IntentEaseHint | undefined
   deltaPx: number
+  hasScriptedMovement: boolean
 }): string | undefined {
-  const { isAmbient, easeHint, deltaPx } = args
+  const { isAmbient, easeHint, deltaPx, hasScriptedMovement } = args
   const notes: string[] = []
 
   // Ambient/idle drift is reported unconditionally for ambient entities,
@@ -86,7 +106,7 @@ function buildComparisonNote(args: {
     if (easeHint && easeHint !== 'linear') {
       notes.push(EASED_DIVERGENCE_NOTE)
     } else if (!isAmbient) {
-      notes.push(UNEXPLAINED_MISMATCH_NOTE)
+      notes.push(hasScriptedMovement ? UNEXPLAINED_MISMATCH_NOTE : NO_SCRIPTED_PLAYER_MOVEMENT_NOTE)
     }
   }
 
@@ -131,7 +151,7 @@ export function compareSnapshotToLivePositions({
       domainScreenPosition,
       liveScreenPosition: liveBallScreenPosition,
       deltaPx,
-      note: buildComparisonNote({ isAmbient: false, easeHint, deltaPx }),
+      note: buildComparisonNote({ isAmbient: false, easeHint, deltaPx, hasScriptedMovement: true }),
     })
   }
 
@@ -161,6 +181,11 @@ export function compareSnapshotToLivePositions({
           intent.side === player.side &&
           intent.playerNumber === player.number,
       )
+      const hasScriptedMovement = hasPlayerMovementIntent(
+        plan.animationIntents,
+        player.side,
+        player.number,
+      )
 
       rows.push({
         entityId: player.id,
@@ -168,7 +193,7 @@ export function compareSnapshotToLivePositions({
         domainScreenPosition,
         liveScreenPosition,
         deltaPx,
-        note: buildComparisonNote({ isAmbient, easeHint, deltaPx }),
+        note: buildComparisonNote({ isAmbient, easeHint, deltaPx, hasScriptedMovement }),
       })
     })
 
