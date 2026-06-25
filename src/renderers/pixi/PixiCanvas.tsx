@@ -30,6 +30,11 @@ import { PICKERING_SQUAD } from '../../data/squad'
 import type { FormationPositionMap } from '../../data/formations'
 import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants'
 import { getPitchScale, screenToPitch } from '../../domain/pitch/coordTransforms'
+import { buildScenarioPlan } from '../../domain/simulation/scenarioPlan'
+import {
+  logSnapshotComparison,
+  type LiveScreenPosition,
+} from '../../domain/simulation/snapshotComparisonLogger'
 import type {
   ScenarioAnnotations,
   ScenarioArrow,
@@ -59,6 +64,13 @@ type PlayerPhaseVisual = {
 // Away tokens stay slightly transparent at all times (no focus state applies
 // to them), matching PlayerLayer's fixed away-side alpha at initial draw.
 const AWAY_BASE_ALPHA = 0.58
+
+// Read-only evidence-gathering toggle (Checkpoint 2.4B): when true, periodically
+// diffs live Pixi/GSAP token screen positions against the Phase 2 domain
+// WorldSnapshot for the same scenario/progress and logs the comparison via
+// console.debug. Does not affect rendering, playback, or animator behavior.
+const ENABLE_SNAPSHOT_COMPARISON_LOGGER = false
+const SNAPSHOT_COMPARISON_LOG_INTERVAL_MS = 500
 
 type PhaseVisualRefs = {
   phaseHighlightLayer: Graphics
@@ -135,9 +147,15 @@ export function PixiCanvas({
     controller: AmbientShapeShiftHandle
     playerTokens: Map<number, Container>
   } | undefined>(undefined)
+  // Read by the snapshot comparison logger's ticker callback (mount effect),
+  // which can't list activePhaseStep as a dependency without rebuilding the
+  // Pixi app on every phase-step change.
+  const activePhaseStepRef = useRef(activePhaseStep)
   const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
 
   useEffect(() => {
+    activePhaseStepRef.current = activePhaseStep
+
     const refs = phaseVisualRefs.current
 
     if (!refs) {
@@ -288,6 +306,7 @@ export function PixiCanvas({
     const pitchPadding = 32
     let removePointerMoveListener: (() => void) | undefined
     let scenarioAnimator: ScenarioAnimator | undefined
+    let removeComparisonTicker: (() => void) | undefined
 
     const destroyApp = () => {
       if (destroyed) {
@@ -333,6 +352,9 @@ export function PixiCanvas({
       const stage: Container = app.stage
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
+      const comparisonPlan = ENABLE_SNAPSHOT_COMPARISON_LOGGER
+        ? buildScenarioPlan(selectedScenario, activePositions)
+        : undefined
       const homePlayerTokenRefs = new Map<number, Container>()
       const awayPlayerTokenRefs = new Map<number, Container>()
       const homeIdleAnchorRefs = new Map<number, Container>()
@@ -521,6 +543,60 @@ export function PixiCanvas({
       })
       onAnimatorReady?.(scenarioAnimator)
 
+      if (ENABLE_SNAPSHOT_COMPARISON_LOGGER && comparisonPlan) {
+        let elapsedSinceLastLogMs = 0
+
+        const handleComparisonTick = () => {
+          if (!scenarioAnimator) {
+            return
+          }
+
+          elapsedSinceLastLogMs += app.ticker.deltaMS
+
+          if (elapsedSinceLastLogMs < SNAPSHOT_COMPARISON_LOG_INTERVAL_MS) {
+            return
+          }
+
+          elapsedSinceLastLogMs = 0
+
+          const liveHomePlayerScreenPositions = new Map<number, LiveScreenPosition>()
+
+          homePlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
+            liveHomePlayerScreenPositions.set(playerNumber, {
+              sx: tokenContainer.position.x,
+              sy: tokenContainer.position.y,
+            })
+          })
+
+          const liveBallScreenPosition: LiveScreenPosition | undefined = ballToken
+            ? { sx: ballToken.position.x, sy: ballToken.position.y }
+            : undefined
+          const keyPlayerNumbers = activePhaseStepRef.current?.keyPlayers ?? []
+          const ambientPlayerNumbers = new Set(
+            Array.from(homePlayerTokenRefs.keys()).filter(
+              (playerNumber) => !keyPlayerNumbers.includes(playerNumber),
+            ),
+          )
+
+          logSnapshotComparison({
+            scenarioId: selectedScenario.id,
+            plan: comparisonPlan,
+            progress: scenarioAnimator.getProgress(),
+            canvasWidth: width,
+            canvasHeight: height,
+            canvasPadding: pitchPadding,
+            liveHomePlayerScreenPositions,
+            liveBallScreenPosition,
+            ambientPlayerNumbers,
+          })
+        }
+
+        app.ticker.add(handleComparisonTick)
+        removeComparisonTicker = () => {
+          app.ticker.remove(handleComparisonTick)
+        }
+      }
+
       if (debugMode) {
         drawDebug(debugLayer, app.stage, width, height, pitchPadding)
       }
@@ -572,6 +648,8 @@ export function PixiCanvas({
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
+      removeComparisonTicker?.()
+      removeComparisonTicker = undefined
       scenarioAnimator?.destroy()
       scenarioAnimator = undefined
 
