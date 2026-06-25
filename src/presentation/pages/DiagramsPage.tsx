@@ -112,7 +112,7 @@ export function DiagramsPage() {
                 className="transition-modal-pitch"
                 style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
               >
-                <div style={{ position: 'relative', width: 480, height: 741 }}>
+                <div className="transition-modal-pitch__preview">
                   <PixiPitchPreview
                     width={480}
                     height={741}
@@ -146,7 +146,7 @@ export function DiagramsPage() {
                 className="transition-modal-pitch"
                 style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
               >
-                <div style={{ position: 'relative', width: 480, height: 741 }}>
+                <div className="transition-modal-pitch__preview">
                   <PixiPitchPreview
                     width={480}
                     height={741}

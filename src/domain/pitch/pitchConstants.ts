@@ -25,15 +25,15 @@ export const PITCH = {
   CORNER_ARC_RADIUS: 1.0,
   PENALTY_SPOT_DIST: 11.0,
   ZONES: [
-    { label: 'Zone 1: Build Up', startY: 0, endY: 26.25 } satisfies PitchBand,
+    { label: 'Zone 1', startY: 0, endY: 26.25 } satisfies PitchBand,
     {
-      label: 'Zone 2: Unbalance',
+      label: 'Zone 2',
       startY: 26.25,
       endY: 52.5,
     } satisfies PitchBand,
-    { label: 'Zone 3: Supply', startY: 52.5, endY: 78.75 } satisfies PitchBand,
+    { label: 'Zone 3', startY: 52.5, endY: 78.75 } satisfies PitchBand,
     {
-      label: 'Zone 4: Penetrate',
+      label: 'Zone 4',
       startY: 78.75,
       endY: 105,
     } satisfies PitchBand,

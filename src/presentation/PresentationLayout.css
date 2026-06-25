@@ -417,9 +417,9 @@
     repeating-linear-gradient(
       0deg,
       rgba(49, 99, 32, 0.95) 0,
-      rgba(49, 99, 32, 0.95) 34px,
-      rgba(45, 90, 27, 0.95) 34px,
-      rgba(45, 90, 27, 0.95) 68px
+      rgba(49, 99, 32, 0.95) 4.76%,
+      rgba(45, 90, 27, 0.95) 4.76%,
+      rgba(45, 90, 27, 0.95) 9.52%
     );
 }
 
@@ -1082,14 +1082,28 @@
 
 .transition-modal-pitch {
   align-self: start;
-  width: 100%;
+  width: min(100%, 492px, calc(84svh * 68 / 105));
   max-width: none;
-  height: min(78svh, 760px);
-  min-height: 620px;
-  aspect-ratio: auto;
-  justify-self: stretch;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 68 / 105;
+  justify-self: center;
   border: 0;
   border-radius: 0;
+}
+
+.transition-modal-pitch__preview,
+.transition-modal-pitch .pixi-pitch-preview,
+.transition-modal-pitch .pixi-pitch-preview canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+}
+
+.transition-modal-pitch__preview {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .transition-modal-pitch .mini-pitch__token {
@@ -1267,8 +1281,7 @@
   }
 
   .transition-modal-pitch {
-    height: 72svh;
-    min-height: 520px;
+    width: min(100%, calc(72svh * 68 / 105));
   }
 
   .presentation-page,

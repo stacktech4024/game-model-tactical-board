@@ -117,13 +117,13 @@ export function DefensiveTransitionScenario() {
       <div className="mini-pitch__halfway-line" aria-hidden="true" />
       <div className="mini-pitch__centre-circle" aria-hidden="true" />
       <div className="mini-pitch__centre-mark" aria-hidden="true" />
-      <div className="mini-pitch__zone-label mini-pitch__zone-label--one">Zone 1: Build Up</div>
-      <div className="mini-pitch__zone-label mini-pitch__zone-label--two">Zone 2: Unbalance</div>
-      <div className="mini-pitch__zone-label mini-pitch__zone-label--three">Zone 3: Supply</div>
-      <div className="mini-pitch__zone-label mini-pitch__zone-label--four">Zone 4: Penetrate</div>
-      <div className="mini-pitch__channel-label mini-pitch__channel-label--wide">Channel 1: Wide</div>
-      <div className="mini-pitch__channel-label mini-pitch__channel-label--half">Channel 2: Half Space</div>
-      <div className="mini-pitch__channel-label mini-pitch__channel-label--central">Channel 3: Central</div>
+      <div className="mini-pitch__zone-label mini-pitch__zone-label--one">Zone 1</div>
+      <div className="mini-pitch__zone-label mini-pitch__zone-label--two">Zone 2</div>
+      <div className="mini-pitch__zone-label mini-pitch__zone-label--three">Zone 3</div>
+      <div className="mini-pitch__zone-label mini-pitch__zone-label--four">Zone 4</div>
+      <div className="mini-pitch__channel-label mini-pitch__channel-label--wide">Channel 1</div>
+      <div className="mini-pitch__channel-label mini-pitch__channel-label--half">Channel 2</div>
+      <div className="mini-pitch__channel-label mini-pitch__channel-label--central">Channel 3</div>
 
       <svg className="transition-pitch__routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         {DEFENSIVE_TRANSITION_MOVEMENTS.map((movement) => (
