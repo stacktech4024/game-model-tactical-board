@@ -228,6 +228,7 @@ export function getWorldSnapshotAtProgress(
   const clampedProgress = clampProgress(progress)
   const activePhaseStep = getActivePhaseStep(plan.phaseSteps, clampedProgress)
   const copiedActivePhaseStep = activePhaseStep ? copyPhaseStep(activePhaseStep) : undefined
+  const totalDuration = getTotalDuration(plan.animationIntents)
   const positionedState = applyIntentPositions(
     plan.initialPlayers.map(copyPlayerState),
     plan.initialBall ? copyBallState(plan.initialBall) : undefined,
@@ -240,7 +241,7 @@ export function getWorldSnapshotAtProgress(
     title: plan.title,
     moment: plan.moment,
     clock: {
-      elapsedSeconds: 0,
+      elapsedSeconds: clampedProgress * totalDuration,
       progress: clampedProgress,
     },
     players: positionedState.players,
