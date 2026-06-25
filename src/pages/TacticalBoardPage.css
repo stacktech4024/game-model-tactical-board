@@ -423,14 +423,6 @@ h2 {
     justify-content: flex-start;
   }
 
-  .app-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .app-shell--embedded .app-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .scenario-panel {
     max-height: none;
   }
@@ -447,5 +439,40 @@ h2 {
   .app-shell--embedded .pitch-panel {
     height: min(62svh, 640px);
     min-height: 520px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell--embedded .app-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell:not(.app-shell--embedded) .pitch-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .playback-controls__label {
+    flex: 0 0 100%;
+  }
+
+  .pitch-panel,
+  .app-shell--embedded .pitch-panel {
+    height: auto;
+    min-height: 0;
+  }
+
+  .pitch-canvas-host {
+    width: 100%;
+    height: auto;
   }
 }
