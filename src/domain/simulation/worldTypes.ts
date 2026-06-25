@@ -30,10 +30,20 @@ export type BallState = {
 }
 
 export type WorldSnapshot = {
+  scenarioId: string
+  title: string
+  moment: ScenarioMoment
   clock: WorldClock
   players: PlayerState[]
   ball?: BallState
-  activePhaseStepId?: string
+  activePhaseStep?: PlannedPhaseStep
+  focus: {
+    keyPlayers: PlayerReference[]
+    zoneFocus: HighlightZone[]
+    channelFocus: number[]
+    relatedArrows: string[]
+  }
+  animationIntents: SnapshotAnimationIntent[]
 }
 
 export type PlannedPhaseStep = {
@@ -47,6 +57,13 @@ export type PlannedPhaseStep = {
 }
 
 export type AnimationIntentType = 'ball-movement' | 'player-movement'
+
+export type PlannedIntentTiming = {
+  startProgress: number
+  endProgress: number
+}
+
+export type IntentPlaybackState = 'pending' | 'active' | 'completed'
 
 export type AnimationIntent = {
   id: EntityId
@@ -64,12 +81,20 @@ export type AnimationIntent = {
   label?: string
 }
 
+export type ScheduledAnimationIntent = AnimationIntent & {
+  timing: PlannedIntentTiming
+}
+
+export type SnapshotAnimationIntent = ScheduledAnimationIntent & {
+  playbackState: IntentPlaybackState
+}
+
 export type ScenarioPlan = {
   scenarioId: string
   title: string
   moment: ScenarioMoment
   initialPlayers: PlayerState[]
   initialBall?: BallState
-  animationIntents: AnimationIntent[]
+  animationIntents: ScheduledAnimationIntent[]
   phaseSteps: PlannedPhaseStep[]
 }

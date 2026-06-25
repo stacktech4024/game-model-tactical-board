@@ -4,11 +4,11 @@ import type {
   ScenarioDefinition,
 } from '../scenarios/scenarioTypes'
 import type {
-  AnimationIntent,
   AnimationIntentType,
   BallState,
   PlayerState,
   ScenarioPlan,
+  ScheduledAnimationIntent,
   TeamSide,
 } from './worldTypes'
 
@@ -69,8 +69,8 @@ function buildInitialBall(scenario: ScenarioDefinition): BallState | undefined {
   }
 }
 
-function buildAnimationIntents(scenario: ScenarioDefinition): AnimationIntent[] {
-  return (scenario.arrows ?? [])
+function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimationIntent[] {
+  const orderedArrows = (scenario.arrows ?? [])
     .map((arrow, originalIndex) => ({ arrow, originalIndex }))
     .sort((a, b) => {
       const orderDiff = (a.arrow.order ?? 0) - (b.arrow.order ?? 0)
@@ -81,6 +81,10 @@ function buildAnimationIntents(scenario: ScenarioDefinition): AnimationIntent[] 
 
       return a.originalIndex - b.originalIndex
     })
+
+  const intentCount = orderedArrows.length
+
+  return orderedArrows
     .map(({ arrow }, sequenceIndex) => ({
       id: `intent-${arrow.id}`,
       arrowId: arrow.id,
@@ -94,6 +98,10 @@ function buildAnimationIntents(scenario: ScenarioDefinition): AnimationIntent[] 
       order: arrow.order ?? 0,
       delay: arrow.delay ?? 0,
       sequenceIndex,
+      timing: {
+        startProgress: sequenceIndex / intentCount,
+        endProgress: (sequenceIndex + 1) / intentCount,
+      },
       label: arrow.label,
     }))
 }

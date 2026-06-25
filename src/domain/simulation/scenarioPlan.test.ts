@@ -152,6 +152,49 @@ test('buildScenarioPlan sorts animation intents deterministically from scenario 
   )
 })
 
+test('buildScenarioPlan assigns deterministic timing windows to intents', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+
+  assert.deepEqual(
+    plan.animationIntents.map((intent) => intent.timing),
+    [
+      { startProgress: 0, endProgress: 1 / 6 },
+      { startProgress: 1 / 6, endProgress: 2 / 6 },
+      { startProgress: 2 / 6, endProgress: 3 / 6 },
+      { startProgress: 3 / 6, endProgress: 4 / 6 },
+      { startProgress: 4 / 6, endProgress: 5 / 6 },
+      { startProgress: 5 / 6, endProgress: 1 },
+    ],
+  )
+})
+
+test('buildScenarioPlan timing windows cover normalized progress from 0 to 1', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+
+  assert.equal(plan.animationIntents[0].timing.startProgress, 0)
+  assert.equal(plan.animationIntents.at(-1)?.timing.endProgress, 1)
+})
+
+test('buildScenarioPlan timing windows follow sorted intent order', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+
+  assert.deepEqual(
+    plan.animationIntents.map((intent) => ({
+      arrowId: intent.arrowId,
+      startProgress: intent.timing.startProgress,
+      endProgress: intent.timing.endProgress,
+    })),
+    [
+      { arrowId: 'early-run', startProgress: 0, endProgress: 1 / 6 },
+      { arrowId: 'late-pass', startProgress: 1 / 6, endProgress: 2 / 6 },
+      { arrowId: 'press', startProgress: 2 / 6, endProgress: 3 / 6 },
+      { arrowId: 'recovery', startProgress: 3 / 6, endProgress: 4 / 6 },
+      { arrowId: 'dribble', startProgress: 4 / 6, endProgress: 5 / 6 },
+      { arrowId: 'shot', startProgress: 5 / 6, endProgress: 1 },
+    ],
+  )
+})
+
 test('buildScenarioPlan maps pass, dribble, and shot as ball-related intents', () => {
   const plan = buildScenarioPlan(makeScenario(), {})
   const intentTypes = Object.fromEntries(
@@ -204,6 +247,7 @@ test('buildScenarioPlan does not mutate the original scenario or formation objec
   const plan = buildScenarioPlan(scenario, formationPositions)
   plan.initialPlayers[0].position.x = 99
   plan.animationIntents[0].from.x = 99
+  plan.animationIntents[0].timing.startProgress = 99
   plan.phaseSteps[0].zoneFocus.push(4)
 
   assert.deepEqual(scenario, scenarioBefore)
