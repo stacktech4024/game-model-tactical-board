@@ -1,4 +1,4 @@
-import { PITCH } from './pitchConstants'
+import { PITCH } from './pitchConstants.ts'
 
 export type ScreenPoint = {
   sx: number

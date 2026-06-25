@@ -1,6 +1,11 @@
-import { pitchToScreen, type ScreenPoint } from '../pitch/coordTransforms'
-import { getWorldSnapshotAtProgress } from './worldSnapshot'
-import type { ScenarioPlan } from './worldTypes'
+import { pitchToScreen, type ScreenPoint } from '../pitch/coordTransforms.ts'
+import { getWorldSnapshotAtProgress } from './worldSnapshot.ts'
+import type {
+  IntentEaseHint,
+  PlannedIntentTiming,
+  ScenarioPlan,
+  ScheduledAnimationIntent,
+} from './worldTypes.ts'
 
 export type LiveScreenPosition = {
   sx: number
@@ -34,9 +39,58 @@ export type CompareSnapshotToLivePositionsArgs = {
 }
 
 const AMBIENT_DRIFT_NOTE = 'ambient/idle drift expected for non-key player'
+const EASED_DIVERGENCE_NOTE = 'eased-vs-linear divergence expected mid-tween'
+const UNEXPLAINED_MISMATCH_NOTE = 'unexplained mismatch'
+
+// Below this, two positions are considered the same point for annotation
+// purposes (floating point/rounding noise, not a real divergence).
+const MIN_NONTRIVIAL_DELTA_PX = 1
 
 function distancePx(a: ScreenPoint, b: LiveScreenPosition): number {
   return Math.hypot(a.sx - b.sx, a.sy - b.sy)
+}
+
+function isIntentActiveAtProgress(timing: PlannedIntentTiming, progress: number): boolean {
+  return progress >= timing.startProgress && progress <= timing.endProgress
+}
+
+// Looks up the ease hint (descriptive metadata only, see IntentEaseHint) of
+// whichever scheduled intent is currently mid-tween for this entity, so the
+// logger can explain - not interpolate - eased-vs-linear divergence.
+function findActiveEaseHint(
+  intents: ScheduledAnimationIntent[],
+  progress: number,
+  predicate: (intent: ScheduledAnimationIntent) => boolean,
+): IntentEaseHint | undefined {
+  return intents.find(
+    (intent) => predicate(intent) && isIntentActiveAtProgress(intent.timing, progress),
+  )?.easeHint
+}
+
+function buildComparisonNote(args: {
+  isAmbient: boolean
+  easeHint: IntentEaseHint | undefined
+  deltaPx: number
+}): string | undefined {
+  const { isAmbient, easeHint, deltaPx } = args
+  const notes: string[] = []
+
+  // Ambient/idle drift is reported unconditionally for ambient entities,
+  // independent of delta size, matching prior behavior - this note must
+  // never be replaced by a generic one (see Checkpoint 2.4D rule 6).
+  if (isAmbient) {
+    notes.push(AMBIENT_DRIFT_NOTE)
+  }
+
+  if (deltaPx >= MIN_NONTRIVIAL_DELTA_PX) {
+    if (easeHint && easeHint !== 'linear') {
+      notes.push(EASED_DIVERGENCE_NOTE)
+    } else if (!isAmbient) {
+      notes.push(UNEXPLAINED_MISMATCH_NOTE)
+    }
+  }
+
+  return notes.length > 0 ? notes.join('; ') : undefined
 }
 
 // Pure comparison: builds a WorldSnapshot for the given plan/progress and
@@ -64,13 +118,20 @@ export function compareSnapshotToLivePositions({
       canvasHeight,
       canvasPadding,
     )
+    const deltaPx = distancePx(domainScreenPosition, liveBallScreenPosition)
+    const easeHint = findActiveEaseHint(
+      plan.animationIntents,
+      progress,
+      (intent) => intent.type === 'ball-movement',
+    )
 
     rows.push({
       entityId: snapshot.ball.id,
       entityType: 'ball',
       domainScreenPosition,
       liveScreenPosition: liveBallScreenPosition,
-      deltaPx: distancePx(domainScreenPosition, liveBallScreenPosition),
+      deltaPx,
+      note: buildComparisonNote({ isAmbient: false, easeHint, deltaPx }),
     })
   }
 
@@ -90,14 +151,24 @@ export function compareSnapshotToLivePositions({
         canvasHeight,
         canvasPadding,
       )
+      const deltaPx = distancePx(domainScreenPosition, liveScreenPosition)
+      const isAmbient = ambientPlayerNumbers?.has(player.number) ?? false
+      const easeHint = findActiveEaseHint(
+        plan.animationIntents,
+        progress,
+        (intent) =>
+          intent.type === 'player-movement' &&
+          intent.side === player.side &&
+          intent.playerNumber === player.number,
+      )
 
       rows.push({
         entityId: player.id,
         entityType: 'player',
         domainScreenPosition,
         liveScreenPosition,
-        deltaPx: distancePx(domainScreenPosition, liveScreenPosition),
-        note: ambientPlayerNumbers?.has(player.number) ? AMBIENT_DRIFT_NOTE : undefined,
+        deltaPx,
+        note: buildComparisonNote({ isAmbient, easeHint, deltaPx }),
       })
     })
 

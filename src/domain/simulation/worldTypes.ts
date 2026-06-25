@@ -68,6 +68,13 @@ export type PlannedIntentTiming = {
 
 export type IntentPlaybackState = 'pending' | 'active' | 'completed'
 
+// Descriptive metadata only: documents the GSAP easing curve the runtime
+// playback layer (scenarioAnimator) uses for this intent's arrow type.
+// WorldSnapshot interpolation stays linear regardless of this hint - it
+// exists so tooling (e.g. snapshotComparisonLogger) can explain expected
+// eased-vs-linear divergence without the domain layer importing GSAP.
+export type IntentEaseHint = 'linear' | 'power1.inOut' | 'power2.inOut' | 'power3.out'
+
 export type AnimationIntent = {
   id: EntityId
   arrowId: string
@@ -81,6 +88,7 @@ export type AnimationIntent = {
   order: number
   delay: number
   sequenceIndex: number
+  easeHint?: IntentEaseHint
   label?: string
 }
 

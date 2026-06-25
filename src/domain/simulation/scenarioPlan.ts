@@ -6,6 +6,7 @@ import type {
 import type {
   AnimationIntentType,
   BallState,
+  IntentEaseHint,
   PlayerState,
   ScenarioPlan,
   ScheduledAnimationIntent,
@@ -54,6 +55,22 @@ function getArrowMoveDuration(arrow: ScenarioArrow): number {
     case 'press':
     case 'recovery':
       return PLAYER_MOVE_DURATION
+  }
+}
+
+// Mirrors the GSAP ease scenarioAnimator.ts applies for each arrow type, as
+// descriptive metadata only - see the IntentEaseHint doc comment.
+function getArrowEaseHint(arrow: ScenarioArrow): IntentEaseHint {
+  switch (arrow.type) {
+    case 'pass':
+    case 'dribble':
+      return 'power1.inOut'
+    case 'shot':
+      return 'power3.out'
+    case 'run':
+    case 'press':
+    case 'recovery':
+      return 'power2.inOut'
   }
 }
 
@@ -140,6 +157,7 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
       order: arrow.order ?? Number.MAX_SAFE_INTEGER,
       delay: arrow.delay ?? 0,
       sequenceIndex,
+      easeHint: getArrowEaseHint(arrow),
       timing: {
         ...timing,
         startProgress: totalDuration > 0 ? timing.startTime / totalDuration : 0,

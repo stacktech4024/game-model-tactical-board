@@ -343,6 +343,34 @@ test('buildScenarioPlan maps run, press, and recovery as player-related intents'
   assert.equal(intentTypes.recovery, 'player-movement')
 })
 
+test('buildScenarioPlan assigns the power1.inOut ease hint to pass and dribble intents', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const easeHintsByArrowType = Object.fromEntries(
+    plan.animationIntents.map((intent) => [intent.arrowType, intent.easeHint]),
+  )
+
+  assert.equal(easeHintsByArrowType.pass, 'power1.inOut')
+  assert.equal(easeHintsByArrowType.dribble, 'power1.inOut')
+})
+
+test('buildScenarioPlan assigns the power3.out ease hint to shot intents', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const shotIntent = plan.animationIntents.find((intent) => intent.arrowType === 'shot')
+
+  assert.equal(shotIntent?.easeHint, 'power3.out')
+})
+
+test('buildScenarioPlan assigns the power2.inOut ease hint to run, press, and recovery intents', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const easeHintsByArrowType = Object.fromEntries(
+    plan.animationIntents.map((intent) => [intent.arrowType, intent.easeHint]),
+  )
+
+  assert.equal(easeHintsByArrowType.run, 'power2.inOut')
+  assert.equal(easeHintsByArrowType.press, 'power2.inOut')
+  assert.equal(easeHintsByArrowType.recovery, 'power2.inOut')
+})
+
 test('buildScenarioPlan preserves phase step focus and key player metadata', () => {
   const plan = buildScenarioPlan(makeScenario(), {})
 
