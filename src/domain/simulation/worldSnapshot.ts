@@ -62,7 +62,7 @@ function getIntentPlaybackState(
     return 'pending'
   }
 
-  if (progress >= intent.timing.endProgress) {
+  if (progress > intent.timing.endProgress) {
     return 'completed'
   }
 
@@ -87,6 +87,9 @@ function copyAnimationIntent(
     delay: intent.delay,
     sequenceIndex: intent.sequenceIndex,
     timing: {
+      startTime: intent.timing.startTime,
+      endTime: intent.timing.endTime,
+      duration: intent.timing.duration,
       startProgress: intent.timing.startProgress,
       endProgress: intent.timing.endProgress,
     },

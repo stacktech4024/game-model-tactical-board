@@ -6,6 +6,10 @@ import test from 'node:test'
 import type { ScenarioDefinition } from '../scenarios/scenarioTypes.ts'
 import { buildScenarioPlan, type FormationPositions } from './scenarioPlan.ts'
 
+function round(value: number): number {
+  return Number(value.toFixed(6))
+}
+
 function makeScenario(): ScenarioDefinition {
   return {
     id: 'phase-2-test',
@@ -95,6 +99,13 @@ function makeScenario(): ScenarioDefinition {
   }
 }
 
+function makeScenarioWithArrows(arrows: ScenarioDefinition['arrows']): ScenarioDefinition {
+  return {
+    ...makeScenario(),
+    arrows,
+  }
+}
+
 test('buildScenarioPlan preserves scenario identity', () => {
   const scenario = makeScenario()
   const plan = buildScenarioPlan(scenario, {})
@@ -156,14 +167,19 @@ test('buildScenarioPlan assigns deterministic timing windows to intents', () => 
   const plan = buildScenarioPlan(makeScenario(), {})
 
   assert.deepEqual(
-    plan.animationIntents.map((intent) => intent.timing),
+    plan.animationIntents.map((intent) => ({
+      arrowId: intent.arrowId,
+      startTime: round(intent.timing.startTime),
+      endTime: round(intent.timing.endTime),
+      duration: round(intent.timing.duration),
+    })),
     [
-      { startProgress: 0, endProgress: 1 / 6 },
-      { startProgress: 1 / 6, endProgress: 2 / 6 },
-      { startProgress: 2 / 6, endProgress: 3 / 6 },
-      { startProgress: 3 / 6, endProgress: 4 / 6 },
-      { startProgress: 4 / 6, endProgress: 5 / 6 },
-      { startProgress: 5 / 6, endProgress: 1 },
+      { arrowId: 'early-run', startTime: 0, endTime: 1.15, duration: 1.15 },
+      { arrowId: 'late-pass', startTime: 1.35, endTime: 2.05, duration: 0.7 },
+      { arrowId: 'press', startTime: 2.05, endTime: 3.2, duration: 1.15 },
+      { arrowId: 'recovery', startTime: 3.2, endTime: 4.35, duration: 1.15 },
+      { arrowId: 'dribble', startTime: 4.35, endTime: 5.21, duration: 0.86 },
+      { arrowId: 'shot', startTime: 5.21, endTime: 5.61, duration: 0.4 },
     ],
   )
 })
@@ -181,18 +197,128 @@ test('buildScenarioPlan timing windows follow sorted intent order', () => {
   assert.deepEqual(
     plan.animationIntents.map((intent) => ({
       arrowId: intent.arrowId,
-      startProgress: intent.timing.startProgress,
-      endProgress: intent.timing.endProgress,
+      startProgress: round(intent.timing.startProgress),
+      endProgress: round(intent.timing.endProgress),
     })),
     [
-      { arrowId: 'early-run', startProgress: 0, endProgress: 1 / 6 },
-      { arrowId: 'late-pass', startProgress: 1 / 6, endProgress: 2 / 6 },
-      { arrowId: 'press', startProgress: 2 / 6, endProgress: 3 / 6 },
-      { arrowId: 'recovery', startProgress: 3 / 6, endProgress: 4 / 6 },
-      { arrowId: 'dribble', startProgress: 4 / 6, endProgress: 5 / 6 },
-      { arrowId: 'shot', startProgress: 5 / 6, endProgress: 1 },
+      { arrowId: 'early-run', startProgress: 0, endProgress: round(1.15 / 5.61) },
+      { arrowId: 'late-pass', startProgress: round(1.35 / 5.61), endProgress: round(2.05 / 5.61) },
+      { arrowId: 'press', startProgress: round(2.05 / 5.61), endProgress: round(3.2 / 5.61) },
+      { arrowId: 'recovery', startProgress: round(3.2 / 5.61), endProgress: round(4.35 / 5.61) },
+      { arrowId: 'dribble', startProgress: round(4.35 / 5.61), endProgress: round(5.21 / 5.61) },
+      { arrowId: 'shot', startProgress: round(5.21 / 5.61), endProgress: 1 },
     ],
   )
+})
+
+test('buildScenarioPlan places missing arrow order after explicit orders', () => {
+  const scenario = makeScenarioWithArrows([
+    {
+      id: 'missing-order',
+      type: 'pass',
+      from: { x: 10, y: 20 },
+      to: { x: 20, y: 30 },
+    },
+    {
+      id: 'explicit-order',
+      type: 'run',
+      from: { x: 30, y: 40 },
+      to: { x: 35, y: 45 },
+      playerNumber: 8,
+      order: 1,
+    },
+  ])
+  const plan = buildScenarioPlan(scenario, {})
+
+  assert.deepEqual(
+    plan.animationIntents.map((intent) => intent.arrowId),
+    ['explicit-order', 'missing-order'],
+  )
+})
+
+test('buildScenarioPlan preserves original array order for equal explicit orders', () => {
+  const scenario = makeScenarioWithArrows([
+    {
+      id: 'first',
+      type: 'pass',
+      from: { x: 10, y: 20 },
+      to: { x: 20, y: 30 },
+      order: 1,
+    },
+    {
+      id: 'second',
+      type: 'run',
+      from: { x: 30, y: 40 },
+      to: { x: 35, y: 45 },
+      playerNumber: 8,
+      order: 1,
+    },
+  ])
+  const plan = buildScenarioPlan(scenario, {})
+
+  assert.deepEqual(
+    plan.animationIntents.map((intent) => intent.arrowId),
+    ['first', 'second'],
+  )
+})
+
+test('buildScenarioPlan assigns pass and dribble intents 0.7 duration', () => {
+  const scenario = makeScenarioWithArrows([
+    {
+      id: 'pass',
+      type: 'pass',
+      from: { x: 10, y: 20 },
+      to: { x: 20, y: 30 },
+      order: 1,
+    },
+    {
+      id: 'dribble',
+      type: 'dribble',
+      from: { x: 20, y: 30 },
+      to: { x: 25, y: 36 },
+      playerNumber: 7,
+      order: 2,
+    },
+  ])
+  const plan = buildScenarioPlan(scenario, {})
+  const durationsByArrow = Object.fromEntries(
+    plan.animationIntents.map((intent) => [intent.arrowId, round(intent.timing.duration)]),
+  )
+
+  assert.equal(durationsByArrow.pass, 0.7)
+  assert.equal(durationsByArrow.dribble, 0.7)
+})
+
+test('buildScenarioPlan assigns shot intents 0.4 duration', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const shotIntent = plan.animationIntents.find((intent) => intent.arrowType === 'shot')
+
+  assert.equal(round(shotIntent?.timing.duration ?? 0), 0.4)
+})
+
+test('buildScenarioPlan assigns run, press, and recovery intents 1.15 duration', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const durationsByArrowType = Object.fromEntries(
+    plan.animationIntents.map((intent) => [intent.arrowType, round(intent.timing.duration)]),
+  )
+
+  assert.equal(durationsByArrowType.run, 1.15)
+  assert.equal(durationsByArrowType.press, 1.15)
+  assert.equal(durationsByArrowType.recovery, 1.15)
+})
+
+test('buildScenarioPlan includes the 0.16 segment gap for via-point intents', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const dribbleIntent = plan.animationIntents.find((intent) => intent.arrowId === 'dribble')
+
+  assert.equal(round(dribbleIntent?.timing.duration ?? 0), 0.86)
+})
+
+test('buildScenarioPlan shifts intent start time by delay relative to the accumulated timeline', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const delayedIntent = plan.animationIntents.find((intent) => intent.arrowId === 'late-pass')
+
+  assert.equal(round(delayedIntent?.timing.startTime ?? 0), 1.35)
 })
 
 test('buildScenarioPlan maps pass, dribble, and shot as ball-related intents', () => {

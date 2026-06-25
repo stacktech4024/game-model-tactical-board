@@ -59,6 +59,9 @@ export type PlannedPhaseStep = {
 export type AnimationIntentType = 'ball-movement' | 'player-movement'
 
 export type PlannedIntentTiming = {
+  startTime: number
+  endTime: number
+  duration: number
   startProgress: number
   endProgress: number
 }

@@ -43,8 +43,11 @@ function makePlan(): ScenarioPlan {
         delay: 0,
         sequenceIndex: 0,
         timing: {
+          startTime: 0,
+          endTime: 0.7,
+          duration: 0.7,
           startProgress: 0,
-          endProgress: 1 / 3,
+          endProgress: 0.2,
         },
         label: 'Pass',
       },
@@ -61,8 +64,11 @@ function makePlan(): ScenarioPlan {
         delay: 0,
         sequenceIndex: 1,
         timing: {
-          startProgress: 1 / 3,
-          endProgress: 2 / 3,
+          startTime: 0.7,
+          endTime: 1.85,
+          duration: 1.15,
+          startProgress: 0.2,
+          endProgress: 0.8,
         },
         label: 'Run',
       },
@@ -79,7 +85,10 @@ function makePlan(): ScenarioPlan {
         delay: 0,
         sequenceIndex: 2,
         timing: {
-          startProgress: 2 / 3,
+          startTime: 1.85,
+          endTime: 2.25,
+          duration: 0.4,
+          startProgress: 0.8,
           endProgress: 1,
         },
         label: 'Shot',
@@ -130,6 +139,9 @@ function makePlanWithAnimationIntentCount(intentCount: number): ScenarioPlan {
         {
           ...plan.animationIntents[0],
           timing: {
+            startTime: 0,
+            endTime: 0.7,
+            duration: 0.7,
             startProgress: 0,
             endProgress: 1,
           },
@@ -273,5 +285,5 @@ test('getWorldSnapshotAtProgress clamps progress before calculating completed in
   const snapshot = getWorldSnapshotAtProgress(makePlan(), 1.5)
 
   assert.equal(snapshot.clock.progress, 1)
-  assert.equal(snapshot.animationIntents[2].playbackState, 'completed')
+  assert.equal(snapshot.animationIntents[2].playbackState, 'active')
 })

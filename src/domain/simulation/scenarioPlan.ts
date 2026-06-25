@@ -16,6 +16,11 @@ export type FormationPositions = Partial<Record<number, PitchPoint>>
 
 const BALL_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['pass', 'dribble', 'shot'])
 const PLAYER_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['run', 'press', 'recovery'])
+const PASS_MOVE_DURATION = 0.7
+const DRIBBLE_MOVE_DURATION = 0.7
+const SHOT_MOVE_DURATION = 0.4
+const PLAYER_MOVE_DURATION = 1.15
+const VIA_SEGMENT_GAP = 0.16
 
 function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
@@ -35,6 +40,21 @@ function getIntentType(arrow: ScenarioArrow): AnimationIntentType {
 
 function getArrowSide(arrow: ScenarioArrow): TeamSide {
   return arrow.side ?? 'home'
+}
+
+function getArrowMoveDuration(arrow: ScenarioArrow): number {
+  switch (arrow.type) {
+    case 'pass':
+      return PASS_MOVE_DURATION
+    case 'dribble':
+      return DRIBBLE_MOVE_DURATION
+    case 'shot':
+      return SHOT_MOVE_DURATION
+    case 'run':
+    case 'press':
+    case 'recovery':
+      return PLAYER_MOVE_DURATION
+  }
 }
 
 function buildInitialPlayers(formationPositions: FormationPositions): PlayerState[] {
@@ -73,7 +93,9 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
   const orderedArrows = (scenario.arrows ?? [])
     .map((arrow, originalIndex) => ({ arrow, originalIndex }))
     .sort((a, b) => {
-      const orderDiff = (a.arrow.order ?? 0) - (b.arrow.order ?? 0)
+      const orderDiff =
+        (a.arrow.order ?? Number.MAX_SAFE_INTEGER) -
+        (b.arrow.order ?? Number.MAX_SAFE_INTEGER)
 
       if (orderDiff !== 0) {
         return orderDiff
@@ -82,10 +104,30 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
       return a.originalIndex - b.originalIndex
     })
 
-  const intentCount = orderedArrows.length
+  let currentTime = 0
+  const scheduledArrows = orderedArrows.map(({ arrow }) => {
+    const delay = arrow.delay ?? 0
+    const duration = getArrowMoveDuration(arrow) + (arrow.via ? VIA_SEGMENT_GAP : 0)
+    const startTime = currentTime + delay
+    const endTime = startTime + duration
 
-  return orderedArrows
-    .map(({ arrow }, sequenceIndex) => ({
+    currentTime = endTime
+
+    return {
+      arrow,
+      timing: {
+        startTime,
+        endTime,
+        duration,
+        startProgress: 0,
+        endProgress: 0,
+      },
+    }
+  })
+  const totalDuration = currentTime
+
+  return scheduledArrows
+    .map(({ arrow, timing }, sequenceIndex) => ({
       id: `intent-${arrow.id}`,
       arrowId: arrow.id,
       type: getIntentType(arrow),
@@ -95,12 +137,13 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
       from: copyPoint(arrow.from),
       via: arrow.via ? copyPoint(arrow.via) : undefined,
       to: copyPoint(arrow.to),
-      order: arrow.order ?? 0,
+      order: arrow.order ?? Number.MAX_SAFE_INTEGER,
       delay: arrow.delay ?? 0,
       sequenceIndex,
       timing: {
-        startProgress: sequenceIndex / intentCount,
-        endProgress: (sequenceIndex + 1) / intentCount,
+        ...timing,
+        startProgress: totalDuration > 0 ? timing.startTime / totalDuration : 0,
+        endProgress: totalDuration > 0 ? timing.endTime / totalDuration : 0,
       },
       label: arrow.label,
     }))
