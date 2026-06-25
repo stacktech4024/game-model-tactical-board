@@ -37,7 +37,7 @@ type TokenPosition = {
 }
 
 function isBallArrow(arrow: ScenarioArrow): boolean {
-  return arrow.type === 'pass' || arrow.type === 'dribble'
+  return arrow.type === 'pass' || arrow.type === 'dribble' || arrow.type === 'shot'
 }
 
 function isPlayerArrow(arrow: ScenarioArrow): boolean {

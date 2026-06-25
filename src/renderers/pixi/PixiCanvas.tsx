@@ -5,7 +5,7 @@ import {
   type AnimatorState,
   type ScenarioAnimator,
 } from './animation/scenarioAnimator'
-import { startIdleMovement, type IdleMovementHandle } from './animation/idleMovement'
+import { createIdleMovement, type IdleMovementHandle } from './animation/idleMovement'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawScenarioArrows } from './layers/ArrowLayer'
@@ -121,7 +121,12 @@ export function PixiCanvas({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const phaseVisualRefs = useRef<PhaseVisualRefs | undefined>(undefined)
   const animatorStateRef = useRef<AnimatorState>('idle')
-  const idleMovementHandlesRef = useRef<IdleMovementHandle[]>([])
+  const idleControllersRef = useRef<{
+    home: IdleMovementHandle
+    away: IdleMovementHandle
+    homeAnchors: Map<number, Container>
+    awayAnchors: Map<number, Container>
+  } | undefined>(undefined)
   const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
 
   useEffect(() => {
@@ -178,10 +183,40 @@ export function PixiCanvas({
   useEffect(() => {
     const refs = phaseVisualRefs.current
 
-    idleMovementHandlesRef.current.forEach((handle) => handle.stop())
-    idleMovementHandlesRef.current = []
-
     if (!refs) {
+      idleControllersRef.current?.home.stop()
+      idleControllersRef.current?.away.stop()
+      idleControllersRef.current = undefined
+      return undefined
+    }
+
+    const running = isIdleMovementRunningState(animatorStateRef.current)
+    const anchorsChanged =
+      idleControllersRef.current?.homeAnchors !== refs.homeIdleAnchorRefs ||
+      idleControllersRef.current?.awayAnchors !== refs.awayIdleAnchorRefs
+
+    if (anchorsChanged) {
+      idleControllersRef.current?.home.stop()
+      idleControllersRef.current?.away.stop()
+      idleControllersRef.current = {
+        home: createIdleMovement({
+          visualGroups: refs.homeIdleAnchorRefs,
+          pitchScale: refs.pitchScale,
+          running,
+        }),
+        away: createIdleMovement({
+          visualGroups: refs.awayIdleAnchorRefs,
+          pitchScale: refs.pitchScale,
+          running,
+        }),
+        homeAnchors: refs.homeIdleAnchorRefs,
+        awayAnchors: refs.awayIdleAnchorRefs,
+      }
+    }
+
+    const controllers = idleControllersRef.current
+
+    if (!controllers) {
       return undefined
     }
 
@@ -191,34 +226,16 @@ export function PixiCanvas({
           (playerNumber) => !excluded.has(playerNumber),
         ),
       )
-    const running = isIdleMovementRunningState(animatorStateRef.current)
     // keyPlayers in scenario data always refers to home-side numbers today -
     // no scenario scripts away-side keyPlayers yet, so the away exclusion set
     // stays empty until that exists (see Items D/E/B).
     const homeActivePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
     const awayActivePlayerNumbers = new Set<number>()
 
-    const handles = [
-      startIdleMovement({
-        visualGroups: refs.homeIdleAnchorRefs,
-        idlePlayerNumbers: buildIdlePlayerNumbers(refs.homeIdleAnchorRefs, homeActivePlayerNumbers),
-        pitchScale: refs.pitchScale,
-        running,
-      }),
-      startIdleMovement({
-        visualGroups: refs.awayIdleAnchorRefs,
-        idlePlayerNumbers: buildIdlePlayerNumbers(refs.awayIdleAnchorRefs, awayActivePlayerNumbers),
-        pitchScale: refs.pitchScale,
-        running,
-      }),
-    ]
+    controllers.home.update(buildIdlePlayerNumbers(refs.homeIdleAnchorRefs, homeActivePlayerNumbers))
+    controllers.away.update(buildIdlePlayerNumbers(refs.awayIdleAnchorRefs, awayActivePlayerNumbers))
 
-    idleMovementHandlesRef.current = handles
-
-    return () => {
-      handles.forEach((handle) => handle.stop())
-      idleMovementHandlesRef.current = []
-    }
+    return undefined
   }, [activePhaseStep, phaseVisualVersion])
 
   useEffect(() => {
@@ -448,7 +465,8 @@ export function PixiCanvas({
 
       const handleAnimatorStateChange = (state: AnimatorState) => {
         animatorStateRef.current = state
-        idleMovementHandlesRef.current.forEach((handle) => handle.setRunning(isIdleMovementRunningState(state)))
+        idleControllersRef.current?.home.setRunning(isIdleMovementRunningState(state))
+        idleControllersRef.current?.away.setRunning(isIdleMovementRunningState(state))
         onStateChange?.(state)
       }
 
@@ -507,8 +525,9 @@ export function PixiCanvas({
       cancelled = true
       phaseVisualRefs.current = undefined
 
-      idleMovementHandlesRef.current.forEach((handle) => handle.stop())
-      idleMovementHandlesRef.current = []
+      idleControllersRef.current?.home.stop()
+      idleControllersRef.current?.away.stop()
+      idleControllersRef.current = undefined
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
