@@ -38,6 +38,7 @@ export type ScenarioArrowType =
   | 'dribble'
   | 'press'
   | 'recovery'
+  | 'shot'
 
 export type ScenarioArrow = {
   id: string

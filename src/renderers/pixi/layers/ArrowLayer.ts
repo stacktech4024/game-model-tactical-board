@@ -13,6 +13,7 @@ const ARROW_COLORS: Record<ScenarioArrowType, number> = {
   dribble: 0x22d3ee,
   press: 0xef4444,
   recovery: 0x22c55e,
+  shot: 0xa855f7,
 }
 
 export function drawScenarioArrows(

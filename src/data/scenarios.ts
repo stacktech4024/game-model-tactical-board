@@ -53,6 +53,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
         channelFocus: [3],
         relatedArrows: ['wide-build-cross-inside', 'wide-build-six-to-ten', 'wide-build-finish-nine'],
       },
+      {
+        id: 'wide-build-finish',
+        label: 'Finish',
+        coachingCue: 'Convert the central chance with a composed finish across goal.',
+        keyPlayers: [9],
+        zoneFocus: [4],
+        channelFocus: [3],
+        relatedArrows: ['wide-build-shot-goal'],
+      },
     ],
     ballStart: { x: 12, y: 24 },
     annotations: {
@@ -108,6 +117,16 @@ export const SCENARIOS: ScenarioDefinition[] = [
         order: 5,
         delay: 0.2,
       },
+      {
+        id: 'wide-build-shot-goal',
+        type: 'shot',
+        from: { x: 40, y: 84 },
+        to: { x: 31.2, y: 106 },
+        label: 'Finish',
+        playerNumber: 9,
+        order: 6,
+        delay: 0.2,
+      },
     ],
     markers: [
       {
@@ -121,6 +140,12 @@ export const SCENARIOS: ScenarioDefinition[] = [
         point: { x: 34, y: 90 },
         label: '2nd ST',
         tone: 'warning',
+      },
+      {
+        id: 'wide-build-goal-marker',
+        point: { x: 31.2, y: 106 },
+        label: 'GOAL',
+        tone: 'success',
       },
     ],
     description: 'Calm possession, use width, and advance with controlled support.',
@@ -173,6 +198,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
         channelFocus: [1, 2],
         relatedArrows: ['counter-right-wing-run', 'counter-left-wing-run'],
       },
+      {
+        id: 'counter-finish',
+        label: 'Finish',
+        coachingCue: 'Turn the early forward pass into a decisive strike before recovery pressure arrives.',
+        keyPlayers: [9],
+        zoneFocus: [4],
+        channelFocus: [3],
+        relatedArrows: ['counter-shot-goal'],
+      },
     ],
     ballStart: { x: 34, y: 50 },
     annotations: {
@@ -211,6 +245,16 @@ export const SCENARIOS: ScenarioDefinition[] = [
         order: 2,
         delay: 0.25,
       },
+      {
+        id: 'counter-shot-goal',
+        type: 'shot',
+        from: { x: 34, y: 76 },
+        to: { x: 36.6, y: 106 },
+        label: 'Finish',
+        playerNumber: 9,
+        order: 3,
+        delay: 0.2,
+      },
     ],
     markers: [
       {
@@ -224,6 +268,12 @@ export const SCENARIOS: ScenarioDefinition[] = [
         point: { x: 34, y: 50 },
         label: 'Regain',
         tone: 'warning',
+      },
+      {
+        id: 'counter-goal-marker',
+        point: { x: 36.6, y: 106 },
+        label: 'GOAL',
+        tone: 'success',
       },
     ],
     description: 'First look forward after a regain and find the striker early.',
@@ -474,6 +524,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
         channelFocus: [3],
         relatedArrows: ['wing-back-combine-central'],
       },
+      {
+        id: 'wing-back-finish',
+        label: 'Finish',
+        coachingCue: 'Finish the central combination before the back line can recover.',
+        keyPlayers: [9],
+        zoneFocus: [4],
+        channelFocus: [3],
+        relatedArrows: ['wing-back-shot-goal'],
+      },
     ],
     ballStart: { x: 12, y: 58 },
     annotations: {
@@ -513,6 +572,16 @@ export const SCENARIOS: ScenarioDefinition[] = [
         order: 2,
         delay: 0.25,
       },
+      {
+        id: 'wing-back-shot-goal',
+        type: 'shot',
+        from: { x: 29, y: 84 },
+        to: { x: 36.8, y: 106 },
+        label: 'Finish',
+        playerNumber: 9,
+        order: 3,
+        delay: 0.25,
+      },
     ],
     markers: [
       {
@@ -525,6 +594,12 @@ export const SCENARIOS: ScenarioDefinition[] = [
         id: 'wing-back-rwb-marker',
         point: { x: 60, y: 78 },
         label: 'RWB high',
+        tone: 'success',
+      },
+      {
+        id: 'wing-back-goal-marker',
+        point: { x: 36.8, y: 106 },
+        label: 'GOAL',
         tone: 'success',
       },
     ],
