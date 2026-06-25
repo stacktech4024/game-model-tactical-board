@@ -11,12 +11,27 @@ import type {
   WorldSnapshot,
 } from './worldTypes'
 
+const VIA_SEGMENT_GAP = 0.16
+
 function clampProgress(progress: number): number {
   return Math.min(1, Math.max(0, progress))
 }
 
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value))
+}
+
 function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
+}
+
+function interpolatePitchPoint(from: PitchPoint, to: PitchPoint, t: number): PitchPoint {
+  const clampedT = clamp01(t)
+
+  return {
+    x: from.x + (to.x - from.x) * clampedT,
+    y: from.y + (to.y - from.y) * clampedT,
+  }
 }
 
 function copyPlayerReference(player: PlayerReference): PlayerReference {
@@ -69,6 +84,44 @@ function getIntentPlaybackState(
   return 'active'
 }
 
+function getIntentPosition(
+  intent: ScheduledAnimationIntent,
+  progress: number,
+  totalDuration: number,
+): PitchPoint {
+  if (progress > intent.timing.endProgress) {
+    return copyPoint(intent.to)
+  }
+
+  const absoluteTime = progress * totalDuration
+  const elapsedTime = absoluteTime - intent.timing.startTime
+
+  if (!intent.via) {
+    return interpolatePitchPoint(intent.from, intent.to, elapsedTime / intent.timing.duration)
+  }
+
+  const movementDuration = Math.max(0, intent.timing.duration - VIA_SEGMENT_GAP)
+  const segmentDuration = movementDuration / 2
+
+  if (segmentDuration === 0) {
+    return copyPoint(intent.to)
+  }
+
+  if (elapsedTime <= segmentDuration) {
+    return interpolatePitchPoint(intent.from, intent.via, elapsedTime / segmentDuration)
+  }
+
+  if (elapsedTime <= segmentDuration + VIA_SEGMENT_GAP) {
+    return copyPoint(intent.via)
+  }
+
+  return interpolatePitchPoint(
+    intent.via,
+    intent.to,
+    (elapsedTime - segmentDuration - VIA_SEGMENT_GAP) / segmentDuration,
+  )
+}
+
 function copyAnimationIntent(
   intent: ScheduledAnimationIntent,
   progress: number,
@@ -98,6 +151,63 @@ function copyAnimationIntent(
   }
 }
 
+function getTotalDuration(intents: ScheduledAnimationIntent[]): number {
+  return intents.at(-1)?.timing.endTime ?? 0
+}
+
+function applyIntentPositions(
+  players: PlayerState[],
+  ball: BallState | undefined,
+  intents: ScheduledAnimationIntent[],
+  progress: number,
+): {
+  players: PlayerState[]
+  ball?: BallState
+} {
+  const totalDuration = getTotalDuration(intents)
+  let currentBall = ball
+  const playersByKey = new Map(
+    players.map((player) => [`${player.side}-${player.number}`, player]),
+  )
+
+  intents.forEach((intent) => {
+    const playbackState = getIntentPlaybackState(intent, progress)
+
+    if (playbackState === 'pending') {
+      return
+    }
+
+    // Domain snapshots use linear pitch-coordinate interpolation. GSAP easing
+    // remains a renderer/playback adapter concern for now.
+    const nextPosition = getIntentPosition(intent, progress, totalDuration)
+
+    if (intent.type === 'ball-movement') {
+      currentBall = {
+        id: currentBall?.id ?? 'ball',
+        position: nextPosition,
+      }
+      return
+    }
+
+    if (intent.playerNumber === undefined) {
+      return
+    }
+
+    const player = playersByKey.get(`${intent.side}-${intent.playerNumber}`)
+
+    if (!player) {
+      return
+    }
+
+    player.position = nextPosition
+  })
+
+  return {
+    players,
+    ball: currentBall,
+  }
+}
+
 function getActivePhaseStep(
   phaseSteps: PlannedPhaseStep[],
   progress: number,
@@ -118,6 +228,12 @@ export function getWorldSnapshotAtProgress(
   const clampedProgress = clampProgress(progress)
   const activePhaseStep = getActivePhaseStep(plan.phaseSteps, clampedProgress)
   const copiedActivePhaseStep = activePhaseStep ? copyPhaseStep(activePhaseStep) : undefined
+  const positionedState = applyIntentPositions(
+    plan.initialPlayers.map(copyPlayerState),
+    plan.initialBall ? copyBallState(plan.initialBall) : undefined,
+    plan.animationIntents,
+    clampedProgress,
+  )
 
   return {
     scenarioId: plan.scenarioId,
@@ -127,8 +243,8 @@ export function getWorldSnapshotAtProgress(
       elapsedSeconds: 0,
       progress: clampedProgress,
     },
-    players: plan.initialPlayers.map(copyPlayerState),
-    ball: plan.initialBall ? copyBallState(plan.initialBall) : undefined,
+    players: positionedState.players,
+    ball: positionedState.ball,
     activePhaseStep: copiedActivePhaseStep,
     focus: {
       keyPlayers: copiedActivePhaseStep?.keyPlayers.map(copyPlayerReference) ?? [],

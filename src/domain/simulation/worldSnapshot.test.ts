@@ -1,10 +1,31 @@
 /// <reference types="node" />
 
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import type { ScenarioPlan } from './worldTypes.ts'
 import { getWorldSnapshotAtProgress } from './worldSnapshot.ts'
+
+function round(value: number): number {
+  return Number(value.toFixed(6))
+}
+
+function roundPoint(point: { x: number; y: number }): { x: number; y: number } {
+  return {
+    x: round(point.x),
+    y: round(point.y),
+  }
+}
+
+function getPlayerPosition(plan: ScenarioPlan, progress: number, playerNumber: number): { x: number; y: number } {
+  const snapshot = getWorldSnapshotAtProgress(plan, progress)
+  const player = snapshot.players.find((item) => item.number === playerNumber && item.side === 'home')
+
+  assert.ok(player)
+
+  return player.position
+}
 
 function makePlan(): ScenarioPlan {
   return {
@@ -47,7 +68,7 @@ function makePlan(): ScenarioPlan {
           endTime: 0.7,
           duration: 0.7,
           startProgress: 0,
-          endProgress: 0.2,
+          endProgress: 0.7 / 2.25,
         },
         label: 'Pass',
       },
@@ -67,8 +88,8 @@ function makePlan(): ScenarioPlan {
           startTime: 0.7,
           endTime: 1.85,
           duration: 1.15,
-          startProgress: 0.2,
-          endProgress: 0.8,
+          startProgress: 0.7 / 2.25,
+          endProgress: 1.85 / 2.25,
         },
         label: 'Run',
       },
@@ -88,7 +109,7 @@ function makePlan(): ScenarioPlan {
           startTime: 1.85,
           endTime: 2.25,
           duration: 0.4,
-          startProgress: 0.8,
+          startProgress: 1.85 / 2.25,
           endProgress: 1,
         },
         label: 'Shot',
@@ -124,6 +145,138 @@ function makePlan(): ScenarioPlan {
         zoneFocus: [4],
         channelFocus: [3],
         relatedArrows: ['pass'],
+      },
+    ],
+  }
+}
+
+function makeViaPlan(): ScenarioPlan {
+  return {
+    ...makePlan(),
+    initialBall: {
+      id: 'ball',
+      position: { x: 0, y: 0 },
+    },
+    animationIntents: [
+      {
+        id: 'intent-via-pass',
+        arrowId: 'via-pass',
+        type: 'ball-movement',
+        arrowType: 'pass',
+        side: 'home',
+        from: { x: 0, y: 0 },
+        via: { x: 10, y: 10 },
+        to: { x: 20, y: 0 },
+        order: 1,
+        delay: 0,
+        sequenceIndex: 0,
+        timing: {
+          startTime: 0,
+          endTime: 0.86,
+          duration: 0.86,
+          startProgress: 0,
+          endProgress: 1,
+        },
+      },
+    ],
+  }
+}
+
+function makeDelayPlan(): ScenarioPlan {
+  return {
+    ...makePlan(),
+    initialBall: {
+      id: 'ball',
+      position: { x: 2, y: 2 },
+    },
+    animationIntents: [
+      {
+        id: 'intent-delayed-pass',
+        arrowId: 'delayed-pass',
+        type: 'ball-movement',
+        arrowType: 'pass',
+        side: 'home',
+        from: { x: 10, y: 10 },
+        to: { x: 20, y: 20 },
+        order: 1,
+        delay: 0.3,
+        sequenceIndex: 0,
+        timing: {
+          startTime: 0.3,
+          endTime: 1,
+          duration: 0.7,
+          startProgress: 0.3,
+          endProgress: 1,
+        },
+      },
+    ],
+  }
+}
+
+function makeMultiBallPlan(): ScenarioPlan {
+  return {
+    ...makePlan(),
+    initialBall: {
+      id: 'ball',
+      position: { x: 0, y: 0 },
+    },
+    animationIntents: [
+      {
+        id: 'intent-first-pass',
+        arrowId: 'first-pass',
+        type: 'ball-movement',
+        arrowType: 'pass',
+        side: 'home',
+        from: { x: 0, y: 0 },
+        to: { x: 10, y: 0 },
+        order: 1,
+        delay: 0,
+        sequenceIndex: 0,
+        timing: {
+          startTime: 0,
+          endTime: 1,
+          duration: 1,
+          startProgress: 0,
+          endProgress: 1 / 3,
+        },
+      },
+      {
+        id: 'intent-second-pass',
+        arrowId: 'second-pass',
+        type: 'ball-movement',
+        arrowType: 'pass',
+        side: 'home',
+        from: { x: 10, y: 0 },
+        to: { x: 10, y: 10 },
+        order: 2,
+        delay: 0,
+        sequenceIndex: 1,
+        timing: {
+          startTime: 1,
+          endTime: 2,
+          duration: 1,
+          startProgress: 1 / 3,
+          endProgress: 2 / 3,
+        },
+      },
+      {
+        id: 'intent-third-pass',
+        arrowId: 'third-pass',
+        type: 'ball-movement',
+        arrowType: 'pass',
+        side: 'home',
+        from: { x: 10, y: 10 },
+        to: { x: 20, y: 10 },
+        order: 3,
+        delay: 0,
+        sequenceIndex: 2,
+        timing: {
+          startTime: 2,
+          endTime: 3,
+          duration: 1,
+          startProgress: 2 / 3,
+          endProgress: 1,
+        },
       },
     ],
   }
@@ -286,4 +439,67 @@ test('getWorldSnapshotAtProgress clamps progress before calculating completed in
 
   assert.equal(snapshot.clock.progress, 1)
   assert.equal(snapshot.animationIntents[2].playbackState, 'active')
+})
+
+test('getWorldSnapshotAtProgress places the ball at a completed pass target', () => {
+  const snapshot = getWorldSnapshotAtProgress(makePlan(), 0.32)
+
+  assert.deepEqual(snapshot.ball?.position, { x: 20, y: 30 })
+})
+
+test('getWorldSnapshotAtProgress linearly interpolates an active ball pass', () => {
+  const snapshot = getWorldSnapshotAtProgress(makePlan(), 0.35 / 2.25)
+
+  assert.deepEqual(roundPoint(snapshot.ball!.position), { x: 16, y: 27 })
+})
+
+test('getWorldSnapshotAtProgress moves a via ball intent to the via point around halfway', () => {
+  const snapshot = getWorldSnapshotAtProgress(makeViaPlan(), 0.35 / 0.86)
+
+  assert.deepEqual(roundPoint(snapshot.ball!.position), { x: 10, y: 10 })
+})
+
+test('getWorldSnapshotAtProgress places a completed player run target on the referenced player', () => {
+  const position = getPlayerPosition(makePlan(), 0.83, 8)
+
+  assert.deepEqual(position, { x: 48, y: 60 })
+})
+
+test('getWorldSnapshotAtProgress interpolates only the referenced active player', () => {
+  const plan = makePlan()
+  const player8Position = getPlayerPosition(plan, 1.275 / 2.25, 8)
+  const player6Position = getPlayerPosition(plan, 1.275 / 2.25, 6)
+
+  assert.deepEqual(roundPoint(player8Position), { x: 44, y: 57.5 })
+  assert.deepEqual(player6Position, { x: 32, y: 52 })
+})
+
+test('getWorldSnapshotAtProgress does not move a player for a pending intent', () => {
+  const position = getPlayerPosition(makePlan(), 0.1, 8)
+
+  assert.deepEqual(position, { x: 40, y: 55 })
+})
+
+test('getWorldSnapshotAtProgress applies multiple completed intents in schedule order', () => {
+  const snapshot = getWorldSnapshotAtProgress(makeMultiBallPlan(), 2 / 3)
+
+  assert.deepEqual(roundPoint(snapshot.ball!.position), { x: 10, y: 10 })
+})
+
+test('getWorldSnapshotAtProgress holds the previous ball position during delay before an intent starts', () => {
+  const snapshot = getWorldSnapshotAtProgress(makeDelayPlan(), 0.1)
+
+  assert.deepEqual(snapshot.ball?.position, { x: 2, y: 2 })
+})
+
+test('simulation domain files do not import Pixi, GSAP, or React', () => {
+  const source = [
+    readFileSync('src/domain/simulation/worldTypes.ts', 'utf8'),
+    readFileSync('src/domain/simulation/scenarioPlan.ts', 'utf8'),
+    readFileSync('src/domain/simulation/worldSnapshot.ts', 'utf8'),
+  ].join('\n')
+
+  assert.equal(source.includes('pixi.js'), false)
+  assert.equal(source.includes('gsap'), false)
+  assert.equal(source.includes('react'), false)
 })
