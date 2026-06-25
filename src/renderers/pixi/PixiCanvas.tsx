@@ -5,6 +5,7 @@ import {
   type AnimatorState,
   type ScenarioAnimator,
 } from './animation/scenarioAnimator'
+import { createAmbientShapeShift, type AmbientShapeShiftHandle } from './animation/ambientShapeShift'
 import { createIdleMovement, type IdleMovementHandle } from './animation/idleMovement'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import { drawAnnotations } from './layers/AnnotationLayer'
@@ -26,6 +27,7 @@ import { drawZones } from './layers/ZoneLayer'
 import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
+import type { FormationPositionMap } from '../../data/formations'
 import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants'
 import { getPitchScale, screenToPitch } from '../../domain/pitch/coordTransforms'
 import type {
@@ -73,6 +75,8 @@ type PhaseVisualRefs = {
   awayPlayerLayer: Container
   awayPositions: Record<number, { x: number; y: number }>
   showOpposition: boolean
+  homePlayerTokenRefs: Map<number, Container>
+  activePositions: FormationPositionMap
   homeIdleAnchorRefs: Map<number, Container>
   awayIdleAnchorRefs: Map<number, Container>
   pitchScale: number
@@ -126,6 +130,10 @@ export function PixiCanvas({
     away: IdleMovementHandle
     homeAnchors: Map<number, Container>
     awayAnchors: Map<number, Container>
+  } | undefined>(undefined)
+  const ambientShapeShiftRef = useRef<{
+    controller: AmbientShapeShiftHandle
+    playerTokens: Map<number, Container>
   } | undefined>(undefined)
   const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
 
@@ -187,6 +195,8 @@ export function PixiCanvas({
       idleControllersRef.current?.home.stop()
       idleControllersRef.current?.away.stop()
       idleControllersRef.current = undefined
+      ambientShapeShiftRef.current?.controller.stop()
+      ambientShapeShiftRef.current = undefined
       return undefined
     }
 
@@ -214,6 +224,24 @@ export function PixiCanvas({
       }
     }
 
+    const ambientPlayerTokensChanged =
+      ambientShapeShiftRef.current?.playerTokens !== refs.homePlayerTokenRefs
+
+    if (ambientPlayerTokensChanged) {
+      ambientShapeShiftRef.current?.controller.stop()
+      ambientShapeShiftRef.current = {
+        controller: createAmbientShapeShift({
+          playerTokens: refs.homePlayerTokenRefs,
+          formationPositions: refs.activePositions,
+          canvasW: refs.width,
+          canvasH: refs.height,
+          padding: refs.pitchPadding,
+          running,
+        }),
+        playerTokens: refs.homePlayerTokenRefs,
+      }
+    }
+
     const controllers = idleControllersRef.current
 
     if (!controllers) {
@@ -231,9 +259,17 @@ export function PixiCanvas({
     // stays empty until that exists (see Items D/E/B).
     const homeActivePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
     const awayActivePlayerNumbers = new Set<number>()
+    const ambientPlayerNumbers = new Set(
+      Array.from(refs.homePlayerTokenRefs.keys()).filter((playerNumber) => {
+        const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
+
+        return Boolean(player && !player.isGoalkeeper && !homeActivePlayerNumbers.has(playerNumber))
+      }),
+    )
 
     controllers.home.update(buildIdlePlayerNumbers(refs.homeIdleAnchorRefs, homeActivePlayerNumbers))
     controllers.away.update(buildIdlePlayerNumbers(refs.awayIdleAnchorRefs, awayActivePlayerNumbers))
+    ambientShapeShiftRef.current?.controller.update(ambientPlayerNumbers, activePhaseStep?.zoneFocus)
 
     return undefined
   }, [activePhaseStep, phaseVisualVersion])
@@ -457,6 +493,8 @@ export function PixiCanvas({
         awayPlayerLayer,
         awayPositions,
         showOpposition,
+        homePlayerTokenRefs,
+        activePositions,
         homeIdleAnchorRefs,
         awayIdleAnchorRefs,
         pitchScale,
@@ -467,6 +505,7 @@ export function PixiCanvas({
         animatorStateRef.current = state
         idleControllersRef.current?.home.setRunning(isIdleMovementRunningState(state))
         idleControllersRef.current?.away.setRunning(isIdleMovementRunningState(state))
+        ambientShapeShiftRef.current?.controller.setRunning(isIdleMovementRunningState(state))
         onStateChange?.(state)
       }
 
@@ -528,6 +567,8 @@ export function PixiCanvas({
       idleControllersRef.current?.home.stop()
       idleControllersRef.current?.away.stop()
       idleControllersRef.current = undefined
+      ambientShapeShiftRef.current?.controller.stop()
+      ambientShapeShiftRef.current = undefined
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
