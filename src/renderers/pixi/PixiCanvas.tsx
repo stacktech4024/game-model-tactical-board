@@ -58,10 +58,15 @@ type PlayerPhaseVisual = {
   zoneNumber: number
 }
 
+// Away tokens stay slightly transparent at all times (no focus state applies
+// to them), matching PlayerLayer's fixed away-side alpha at initial draw.
+const AWAY_BASE_ALPHA = 0.58
+
 type PhaseVisualRefs = {
   phaseHighlightLayer: Graphics
   arrowLayer: Graphics
   playerVisuals: Map<number, PlayerPhaseVisual>
+  awayPlayerVisuals: Map<number, PlayerPhaseVisual>
   selectedArrows?: ScenarioArrow[]
   showArrows: boolean
   width: number
@@ -149,19 +154,13 @@ export function PixiCanvas({
 
     drawZones(refs.zonesLayer, refs.stage, refs.width, refs.height, refs.pitchPadding, activeZones)
 
-    if (refs.showOpposition) {
-      drawPlayers(
-        refs.awayPlayerLayer,
-        OPPOSITION_SQUAD,
-        refs.awayPositions,
-        refs.width,
-        refs.height,
-        refs.pitchPadding,
-        undefined,
-        undefined,
-        activeZones,
-      )
-    }
+    refs.awayPlayerVisuals.forEach((visual) => {
+      const isOutOfActiveZone = hasActiveZones && !activeZones.has(visual.zoneNumber)
+      const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
+
+      visual.tokenVisual.alpha = AWAY_BASE_ALPHA * zoneDimFactor
+      visual.numberText.alpha = zoneDimFactor
+    })
 
     drawPhaseHighlights(
       refs.phaseHighlightLayer,
@@ -273,7 +272,49 @@ export function PixiCanvas({
       const awayPlayerTokenRefs = new Map<number, Container>()
       const homeIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
+      const awayPlayerVisuals = new Map<number, PlayerPhaseVisual>()
       const pitchScale = getPitchScale(width, height, pitchPadding)
+
+      // Builds the focus-ring/glow overlay for a token and extracts the parts
+      // the phase-tick effect mutates in place, so that effect never needs to
+      // recreate Containers (which would orphan any in-flight GSAP tween).
+      const buildPlayerPhaseVisual = (
+        tokenContainer: Container,
+        tokenRadius: number,
+      ): Omit<PlayerPhaseVisual, 'zoneNumber'> | undefined => {
+        const visualGroup = tokenContainer.children[0]
+
+        if (!(visualGroup instanceof Container)) {
+          return undefined
+        }
+
+        const numberText = visualGroup.children.find((child) => child instanceof Text)
+        const tokenVisual =
+          visualGroup.children.find((child) => child instanceof Sprite) ??
+          visualGroup.children.filter((child) => child instanceof Graphics).at(-1)
+
+        if (
+          !(tokenVisual instanceof Sprite || tokenVisual instanceof Graphics) ||
+          !(numberText instanceof Text)
+        ) {
+          return undefined
+        }
+
+        const { glowRadius, ringRadius, ringWidth } = getPlayerFocusMetrics(tokenRadius)
+        const focusGlow = new Graphics()
+        const focusRing = new Graphics()
+
+        focusGlow.circle(0, 0, glowRadius)
+        focusGlow.fill({ color: 0xfbbf24, alpha: 0.16 })
+        focusGlow.visible = false
+        focusRing.circle(0, 0, ringRadius)
+        focusRing.stroke({ color: 0xfbbf24, width: ringWidth, alpha: 0.88 })
+        focusRing.visible = false
+        visualGroup.addChildAt(focusGlow, 1)
+        visualGroup.addChildAt(focusRing, 2)
+
+        return { tokenVisual, numberText, focusGlow, focusRing }
+      }
 
       stage.addChild(grassLayer)
       stage.addChild(zonesLayer)
@@ -312,6 +353,25 @@ export function PixiCanvas({
           undefined,
           awayPlayerTokenRefs,
         )
+        awayPlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
+          const awayPlayer = OPPOSITION_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
+
+          if (!awayPlayer) {
+            return
+          }
+
+          const awayTokenRadius = getPlayerTokenRadius(awayPlayer, pitchScale)
+          const visual = buildPlayerPhaseVisual(tokenContainer, awayTokenRadius)
+
+          if (!visual) {
+            return
+          }
+
+          awayPlayerVisuals.set(playerNumber, {
+            ...visual,
+            zoneNumber: getZoneNumberForY(awayPositions[playerNumber]?.y ?? 0),
+          })
+        })
       } else {
         awayPlayerLayer.removeChildren()
       }
@@ -330,46 +390,20 @@ export function PixiCanvas({
       )
       homePlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
         const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
-        const visualGroup = tokenContainer.children[0]
-
-        if (!(visualGroup instanceof Container)) {
-          return
-        }
-
-        const numberText = visualGroup.children.find((child) => child instanceof Text)
-        const tokenVisual =
-          visualGroup.children.find((child) => child instanceof Sprite) ??
-          visualGroup.children.filter((child) => child instanceof Graphics).at(-1)
-
-        if (
-          !(tokenVisual instanceof Sprite || tokenVisual instanceof Graphics) ||
-          !(numberText instanceof Text)
-        ) {
-          return
-        }
 
         if (!player) {
           return
         }
 
         const tokenRadius = getPlayerTokenRadius(player, pitchScale)
-        const { glowRadius, ringRadius, ringWidth } = getPlayerFocusMetrics(tokenRadius)
-        const focusGlow = new Graphics()
-        const focusRing = new Graphics()
+        const visual = buildPlayerPhaseVisual(tokenContainer, tokenRadius)
 
-        focusGlow.circle(0, 0, glowRadius)
-        focusGlow.fill({ color: 0xfbbf24, alpha: 0.16 })
-        focusGlow.visible = false
-        focusRing.circle(0, 0, ringRadius)
-        focusRing.stroke({ color: 0xfbbf24, width: ringWidth, alpha: 0.88 })
-        focusRing.visible = false
-        visualGroup.addChildAt(focusGlow, 1)
-        visualGroup.addChildAt(focusRing, 2)
+        if (!visual) {
+          return
+        }
+
         playerVisuals.set(playerNumber, {
-          tokenVisual,
-          numberText,
-          focusGlow,
-          focusRing,
+          ...visual,
           zoneNumber: getZoneNumberForY(activePositions[playerNumber]?.y ?? 0),
         })
       })
@@ -380,6 +414,7 @@ export function PixiCanvas({
         phaseHighlightLayer,
         arrowLayer,
         playerVisuals,
+        awayPlayerVisuals,
         selectedArrows,
         showArrows,
         width,
