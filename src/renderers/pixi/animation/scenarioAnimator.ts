@@ -4,6 +4,9 @@ import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes'
 
 const BALL_MOVE_DURATION = 0.7
+const SHOT_MOVE_DURATION = 0.4
+const SHOT_IMPACT_SCALE = 1.25
+const SHOT_IMPACT_DURATION = 0.12
 const PLAYER_MOVE_DURATION = 1.15
 const DEFAULT_ARROW_DELAY = 0
 const SEGMENT_GAP = 0.16
@@ -107,25 +110,48 @@ export function buildScenarioAnimator({
         return
       }
 
+      const isShot = arrow.type === 'shot'
+      const moveDuration = isShot ? SHOT_MOVE_DURATION : BALL_MOVE_DURATION
+      const moveEase = isShot ? 'power3.out' : 'power1.inOut'
+
       rememberInitialPosition(ballToken)
       timeline.set(ballToken.position, start, `+=${delay}`)
+
+      // A shot needs a visible "this player struck it" cue, or the ball
+      // just appears to glide there on its own.
+      if (isShot && arrow.playerNumber) {
+        const strikerTokens = arrow.side === 'away' ? awayPlayerTokens : homePlayerTokens
+        const strikerToken = strikerTokens?.get(arrow.playerNumber)
+
+        if (strikerToken) {
+          rememberInitialPosition(strikerToken)
+          timeline.to(strikerToken.scale, {
+            x: SHOT_IMPACT_SCALE,
+            y: SHOT_IMPACT_SCALE,
+            duration: SHOT_IMPACT_DURATION,
+            ease: 'power1.out',
+            yoyo: true,
+            repeat: 1,
+          }, '<')
+        }
+      }
 
       if (via) {
         timeline.to(ballToken.position, {
           ...via,
-          duration: BALL_MOVE_DURATION / 2,
-          ease: 'power1.inOut',
+          duration: moveDuration / 2,
+          ease: moveEase,
         })
         timeline.to(ballToken.position, {
           ...end,
-          duration: BALL_MOVE_DURATION / 2,
-          ease: 'power1.inOut',
+          duration: moveDuration / 2,
+          ease: moveEase,
         }, `+=${SEGMENT_GAP}`)
       } else {
         timeline.to(ballToken.position, {
           ...end,
-          duration: BALL_MOVE_DURATION,
-          ease: 'power1.inOut',
+          duration: moveDuration,
+          ease: moveEase,
         })
       }
 
