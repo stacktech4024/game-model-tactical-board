@@ -75,8 +75,3 @@ export function startIdleMovement({
     },
   }
 }
-
-export const IDLE_MOVEMENT_GATED_SCENARIO_IDS: ReadonlySet<string> = new Set([
-  'counter-quickly-on-turnover',
-  'protect-lead-in-back-five',
-])

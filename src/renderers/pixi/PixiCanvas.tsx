@@ -5,11 +5,7 @@ import {
   type AnimatorState,
   type ScenarioAnimator,
 } from './animation/scenarioAnimator'
-import {
-  IDLE_MOVEMENT_GATED_SCENARIO_IDS,
-  startIdleMovement,
-  type IdleMovementHandle,
-} from './animation/idleMovement'
+import { startIdleMovement, type IdleMovementHandle } from './animation/idleMovement'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import { drawAnnotations } from './layers/AnnotationLayer'
 import { drawScenarioArrows } from './layers/ArrowLayer'
@@ -77,8 +73,8 @@ type PhaseVisualRefs = {
   awayPlayerLayer: Container
   awayPositions: Record<number, { x: number; y: number }>
   showOpposition: boolean
-  idleAnchorRefs: Map<number, Container>
-  scenarioId: string
+  homeIdleAnchorRefs: Map<number, Container>
+  awayIdleAnchorRefs: Map<number, Container>
   pitchScale: number
 }
 
@@ -125,7 +121,7 @@ export function PixiCanvas({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const phaseVisualRefs = useRef<PhaseVisualRefs | undefined>(undefined)
   const animatorStateRef = useRef<AnimatorState>('idle')
-  const idleMovementHandleRef = useRef<IdleMovementHandle | undefined>(undefined)
+  const idleMovementHandlesRef = useRef<IdleMovementHandle[]>([])
   const [phaseVisualVersion, setPhaseVisualVersion] = useState(0)
 
   useEffect(() => {
@@ -182,30 +178,46 @@ export function PixiCanvas({
   useEffect(() => {
     const refs = phaseVisualRefs.current
 
-    idleMovementHandleRef.current?.stop()
-    idleMovementHandleRef.current = undefined
+    idleMovementHandlesRef.current.forEach((handle) => handle.stop())
+    idleMovementHandlesRef.current = []
 
-    if (!refs || !IDLE_MOVEMENT_GATED_SCENARIO_IDS.has(refs.scenarioId)) {
+    if (!refs) {
       return undefined
     }
 
-    const activePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
-    const idlePlayerNumbers = new Set(
-      Array.from(refs.idleAnchorRefs.keys()).filter(
-        (playerNumber) => !activePlayerNumbers.has(playerNumber),
-      ),
-    )
+    const buildIdlePlayerNumbers = (anchorRefs: Map<number, Container>, excluded: Set<number>) =>
+      new Set(
+        Array.from(anchorRefs.keys()).filter(
+          (playerNumber) => !excluded.has(playerNumber),
+        ),
+      )
+    const running = isIdleMovementRunningState(animatorStateRef.current)
+    // keyPlayers in scenario data always refers to home-side numbers today -
+    // no scenario scripts away-side keyPlayers yet, so the away exclusion set
+    // stays empty until that exists (see Items D/E/B).
+    const homeActivePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
+    const awayActivePlayerNumbers = new Set<number>()
 
-    idleMovementHandleRef.current = startIdleMovement({
-      visualGroups: refs.idleAnchorRefs,
-      idlePlayerNumbers,
-      pitchScale: refs.pitchScale,
-      running: isIdleMovementRunningState(animatorStateRef.current),
-    })
+    const handles = [
+      startIdleMovement({
+        visualGroups: refs.homeIdleAnchorRefs,
+        idlePlayerNumbers: buildIdlePlayerNumbers(refs.homeIdleAnchorRefs, homeActivePlayerNumbers),
+        pitchScale: refs.pitchScale,
+        running,
+      }),
+      startIdleMovement({
+        visualGroups: refs.awayIdleAnchorRefs,
+        idlePlayerNumbers: buildIdlePlayerNumbers(refs.awayIdleAnchorRefs, awayActivePlayerNumbers),
+        pitchScale: refs.pitchScale,
+        running,
+      }),
+    ]
+
+    idleMovementHandlesRef.current = handles
 
     return () => {
-      idleMovementHandleRef.current?.stop()
-      idleMovementHandleRef.current = undefined
+      handles.forEach((handle) => handle.stop())
+      idleMovementHandlesRef.current = []
     }
   }, [activePhaseStep, phaseVisualVersion])
 
@@ -271,6 +283,7 @@ export function PixiCanvas({
       const homePlayerTokenRefs = new Map<number, Container>()
       const awayPlayerTokenRefs = new Map<number, Container>()
       const homeIdleAnchorRefs = new Map<number, Container>()
+      const awayIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
       const awayPlayerVisuals = new Map<number, PlayerPhaseVisual>()
       const pitchScale = getPitchScale(width, height, pitchPadding)
@@ -352,6 +365,8 @@ export function PixiCanvas({
           pitchPadding,
           undefined,
           awayPlayerTokenRefs,
+          undefined,
+          awayIdleAnchorRefs,
         )
         awayPlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
           const awayPlayer = OPPOSITION_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
@@ -425,15 +440,15 @@ export function PixiCanvas({
         awayPlayerLayer,
         awayPositions,
         showOpposition,
-        idleAnchorRefs: homeIdleAnchorRefs,
-        scenarioId: selectedScenario.id,
+        homeIdleAnchorRefs,
+        awayIdleAnchorRefs,
         pitchScale,
       }
       setPhaseVisualVersion((version) => version + 1)
 
       const handleAnimatorStateChange = (state: AnimatorState) => {
         animatorStateRef.current = state
-        idleMovementHandleRef.current?.setRunning(isIdleMovementRunningState(state))
+        idleMovementHandlesRef.current.forEach((handle) => handle.setRunning(isIdleMovementRunningState(state)))
         onStateChange?.(state)
       }
 
@@ -492,8 +507,8 @@ export function PixiCanvas({
       cancelled = true
       phaseVisualRefs.current = undefined
 
-      idleMovementHandleRef.current?.stop()
-      idleMovementHandleRef.current = undefined
+      idleMovementHandlesRef.current.forEach((handle) => handle.stop())
+      idleMovementHandlesRef.current = []
 
       removePointerMoveListener?.()
       removePointerMoveListener = undefined
