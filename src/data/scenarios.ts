@@ -397,6 +397,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
     skillSet: ['Reaction after loss', 'Press angle', 'Cover shadow', 'Counter-press communication', 'Recovery positioning'],
     phaseSteps: [
       {
+        id: 'turnover-beat',
+        label: 'Turnover',
+        coachingCue: 'Recognize the loose pass immediately and switch into counter-press mode.',
+        keyPlayers: [8],
+        zoneFocus: [3],
+        channelFocus: [2],
+        relatedArrows: ['fuse-loose-pass'],
+      },
+      {
         id: 'loss-trigger',
         label: 'Loss trigger',
         coachingCue: 'The moment we lose it, the nearest player presses the first touch.',
@@ -415,12 +424,22 @@ export const SCENARIOS: ScenarioDefinition[] = [
         relatedArrows: ['fuse-six-cover'],
       },
     ],
-    ballStart: { x: 54, y: 63 },
+    ballStart: { x: 48, y: 66 },
     annotations: {
       highlightZones: [2, 3],
       highlightChannels: ['wide-right', 'half-space-right', 'central-left', 'central-right'],
     },
     arrows: [
+      {
+        id: 'fuse-loose-pass',
+        type: 'pass',
+        from: { x: 48, y: 66 },
+        to: { x: 54, y: 63 },
+        label: 'Loose pass',
+        playerNumber: 8,
+        order: 0,
+        delay: 0,
+      },
       {
         id: 'fuse-nearest-press',
         type: 'press',
