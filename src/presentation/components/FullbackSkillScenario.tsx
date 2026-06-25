@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import {
   FULLBACK_SKILL_SCENARIOS,
   type FullbackScenarioPoint,
+  type FullbackSkillScenarioData,
   type FullbackSkillVariant,
 } from '../data/fullbackSkillScenario'
 
@@ -11,6 +12,39 @@ function toPositionVars(point: FullbackScenarioPoint) {
     left: `${point.x}%`,
     top: `${point.y}%`,
   }
+}
+
+function getIdlePlayerIds(scenario: FullbackSkillScenarioData) {
+  const scriptedPlayerIds = new Set<string>()
+
+  scenario.steps.forEach((step) => {
+    if (step.playerId) {
+      scriptedPlayerIds.add(step.playerId)
+    }
+
+    if (step.emphasizePlayerId) {
+      scriptedPlayerIds.add(step.emphasizePlayerId)
+    }
+  })
+
+  return scenario.players
+    .map((player) => player.id)
+    .filter((playerId) => !scriptedPlayerIds.has(playerId))
+}
+
+function startIdleWander(token: HTMLDivElement, index: number) {
+  const angle = Math.random() * Math.PI * 2
+  const distance = 1.4 + Math.random() * 1.1
+
+  gsap.to(token, {
+    xPercent: Math.cos(angle) * distance,
+    yPercent: Math.sin(angle) * distance,
+    duration: 2.5 + Math.random() * 2,
+    delay: index * 0.18 + Math.random() * 0.6,
+    repeat: -1,
+    yoyo: true,
+    ease: 'sine.inOut',
+  })
 }
 
 type FullbackSkillScenarioProps = {
@@ -52,6 +86,13 @@ export function FullbackSkillScenario({ variant }: FullbackSkillScenarioProps) {
       }
 
       resetVisuals()
+      getIdlePlayerIds(activeScenario).forEach((playerId, index) => {
+        const token = playerRefs.current.get(playerId)
+
+        if (token) {
+          startIdleWander(token, index)
+        }
+      })
 
       const timeline = gsap.timeline({
         repeat: -1,

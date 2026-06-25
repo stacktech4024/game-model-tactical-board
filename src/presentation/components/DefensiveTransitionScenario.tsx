@@ -12,6 +12,23 @@ function toPositionVars(point: DefensiveTransitionPoint) {
   return { left: `${point.x}%`, top: `${point.y}%` }
 }
 
+const DEFENSIVE_TRANSITION_IDLE_PLAYER_IDS = ['opponent-carrier', 'opponent-outlet']
+
+function startIdleWander(token: HTMLDivElement, index: number) {
+  const angle = Math.random() * Math.PI * 2
+  const distance = 1.4 + Math.random() * 1.1
+
+  gsap.to(token, {
+    xPercent: Math.cos(angle) * distance,
+    yPercent: Math.sin(angle) * distance,
+    duration: 2.5 + Math.random() * 2,
+    delay: index * 0.18 + Math.random() * 0.6,
+    repeat: -1,
+    yoyo: true,
+    ease: 'sine.inOut',
+  })
+}
+
 export function DefensiveTransitionScenario() {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const ballRef = useRef<HTMLDivElement | null>(null)
@@ -36,6 +53,13 @@ export function DefensiveTransitionScenario() {
       }
 
       resetVisuals()
+      DEFENSIVE_TRANSITION_IDLE_PLAYER_IDS.forEach((playerId, index) => {
+        const token = playerRefs.current.get(playerId)
+
+        if (token) {
+          startIdleWander(token, index)
+        }
+      })
       const timeline = gsap.timeline({
         repeat: -1,
         repeatDelay: 1,
