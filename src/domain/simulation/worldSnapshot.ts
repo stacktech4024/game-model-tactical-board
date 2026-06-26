@@ -1,4 +1,5 @@
 import type { PitchPoint } from '../scenarios/scenarioTypes'
+import { VIA_SEGMENT_GAP } from './scenarioPlan.ts'
 import type {
   BallState,
   IntentPlaybackState,
@@ -10,8 +11,6 @@ import type {
   SnapshotAnimationIntent,
   WorldSnapshot,
 } from './worldTypes'
-
-const VIA_SEGMENT_GAP = 0.16
 
 function clampProgress(progress: number): number {
   return Math.min(1, Math.max(0, progress))
