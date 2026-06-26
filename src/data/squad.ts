@@ -8,6 +8,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'GK',
     isGoalkeeper: true,
     side: 'home',
+    facingAngle: 0,
   },
   {
     id: 'aaron-2',
@@ -16,6 +17,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'RB',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: -24,
   },
   {
     id: 'christian-3',
@@ -24,6 +26,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'LB',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: 24,
   },
   {
     id: 'chin-4',
@@ -32,6 +35,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'CB',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: -10,
   },
   {
     id: 'marc-5',
@@ -40,6 +44,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'CB',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: 10,
   },
   {
     id: 'viktor-6',
@@ -48,6 +53,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'CDM',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: 18,
   },
   {
     id: 'seth-7',
@@ -56,6 +62,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'RW',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: -32,
   },
   {
     id: 'toyeeb-8',
@@ -64,6 +71,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'CM',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: -8,
   },
   {
     id: 'anushan-9',
@@ -72,6 +80,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'ST',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: 0,
   },
   {
     id: 'peter-10',
@@ -80,6 +89,7 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'CAM',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: -16,
   },
   {
     id: 'justin-11',
@@ -88,5 +98,6 @@ export const PICKERING_SQUAD: SquadPlayer[] = [
     position: 'LW',
     isGoalkeeper: false,
     side: 'home',
+    facingAngle: 32,
   },
 ]

@@ -8,6 +8,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'GK',
     isGoalkeeper: true,
     side: 'away',
+    facingAngle: 180,
   },
   {
     id: 'away-2',
@@ -16,6 +17,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'RB',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 204,
   },
   {
     id: 'away-3',
@@ -24,6 +26,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'LB',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 156,
   },
   {
     id: 'away-4',
@@ -32,6 +35,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'CB',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 190,
   },
   {
     id: 'away-5',
@@ -40,6 +44,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'CB',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 170,
   },
   {
     id: 'away-6',
@@ -48,6 +53,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'CDM',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 162,
   },
   {
     id: 'away-7',
@@ -56,6 +62,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'RW',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 212,
   },
   {
     id: 'away-8',
@@ -64,6 +71,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'CM',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 188,
   },
   {
     id: 'away-9',
@@ -72,6 +80,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'ST',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 180,
   },
   {
     id: 'away-10',
@@ -80,6 +89,7 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'CAM',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 196,
   },
   {
     id: 'away-11',
@@ -88,5 +98,6 @@ export const OPPOSITION_SQUAD: SquadPlayer[] = [
     position: 'LW',
     isGoalkeeper: false,
     side: 'away',
+    facingAngle: 148,
   },
 ]
