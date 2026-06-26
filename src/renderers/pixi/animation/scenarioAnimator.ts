@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan'
 import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes'
+import { getBallPlaybackTween, type BallPlaybackTween } from './snapshotPlaybackAdapter'
 
 const SHOT_IMPACT_SCALE = 1.25
 const SHOT_IMPACT_DURATION = 0.12
@@ -74,6 +75,13 @@ function pointToPosition(
   return { x: screenPoint.sx, y: screenPoint.sy }
 }
 
+function ballTweenToPosition(tween: BallPlaybackTween): TokenPosition {
+  return {
+    x: tween.targetScreenPosition.sx,
+    y: tween.targetScreenPosition.sy,
+  }
+}
+
 export function buildScenarioAnimator({
   scenario,
   formationPositions,
@@ -89,6 +97,7 @@ export function buildScenarioAnimator({
   const initialPositions = new Map<Container, TokenPosition>()
   const plan = buildScenarioPlan(scenario, formationPositions)
   const intentByArrowId = new Map(plan.animationIntents.map((intent) => [intent.arrowId, intent]))
+  const totalDuration = plan.animationIntents.at(-1)?.timing.endTime ?? 0
   const timeline = gsap.timeline({
     paused: true,
     onComplete: () => {
@@ -105,6 +114,10 @@ export function buildScenarioAnimator({
     initialPositions.set(token, { x: token.position.x, y: token.position.y })
   }
 
+  const getProgressAtTime = (time: number) => (
+    totalDuration > 0 ? time / totalDuration : 0
+  )
+
   getSortedArrows(scenario.arrows).forEach((arrow) => {
     const intent = intentByArrowId.get(arrow.id)
 
@@ -114,13 +127,12 @@ export function buildScenarioAnimator({
 
     const delay = arrow.delay ?? DEFAULT_ARROW_DELAY
     const start = pointToPosition(arrow.from, canvasW, canvasH, padding)
-    const via = arrow.via ? pointToPosition(arrow.via, canvasW, canvasH, padding) : undefined
-    const end = pointToPosition(arrow.to, canvasW, canvasH, padding)
+    const hasVia = Boolean(arrow.via)
     // scenarioPlan.ts bakes SEGMENT_GAP into timing.duration for via arrows
     // (duration = moveDuration + VIA_SEGMENT_GAP), so subtract it back out
     // to recover the same per-segment moveDuration the old hardcoded
     // BALL_MOVE_DURATION/SHOT_MOVE_DURATION/PLAYER_MOVE_DURATION produced.
-    const moveDuration = via ? intent.timing.duration - SEGMENT_GAP : intent.timing.duration
+    const moveDuration = hasVia ? intent.timing.duration - SEGMENT_GAP : intent.timing.duration
 
     if (isBallArrow(arrow)) {
       if (!ballToken) {
@@ -128,7 +140,18 @@ export function buildScenarioAnimator({
       }
 
       const isShot = arrow.type === 'shot'
-      const moveEase = isShot ? 'power3.out' : 'power1.inOut'
+      const endTween = getBallPlaybackTween(
+        plan,
+        intent.timing.startProgress,
+        intent.timing.endProgress,
+        canvasW,
+        canvasH,
+        padding,
+      )
+
+      if (!endTween) {
+        return
+      }
 
       rememberInitialPosition(ballToken)
       timeline.set(ballToken.position, start, `+=${delay}`)
@@ -152,22 +175,48 @@ export function buildScenarioAnimator({
         }
       }
 
-      if (via) {
+      if (hasVia) {
+        const segmentDuration = moveDuration / 2
+        const viaProgress = getProgressAtTime(intent.timing.startTime + segmentDuration)
+        const secondSegmentStartProgress = getProgressAtTime(
+          intent.timing.startTime + segmentDuration + SEGMENT_GAP,
+        )
+        const viaTween = getBallPlaybackTween(
+          plan,
+          intent.timing.startProgress,
+          viaProgress,
+          canvasW,
+          canvasH,
+          padding,
+        )
+        const finalTween = getBallPlaybackTween(
+          plan,
+          secondSegmentStartProgress,
+          intent.timing.endProgress,
+          canvasW,
+          canvasH,
+          padding,
+        )
+
+        if (!viaTween || !finalTween) {
+          return
+        }
+
         timeline.to(ballToken.position, {
-          ...via,
-          duration: moveDuration / 2,
-          ease: moveEase,
+          ...ballTweenToPosition(viaTween),
+          duration: viaTween.durationSeconds,
+          ease: viaTween.ease,
         })
         timeline.to(ballToken.position, {
-          ...end,
-          duration: moveDuration / 2,
-          ease: moveEase,
+          ...ballTweenToPosition(finalTween),
+          duration: finalTween.durationSeconds,
+          ease: finalTween.ease,
         }, `+=${SEGMENT_GAP}`)
       } else {
         timeline.to(ballToken.position, {
-          ...end,
-          duration: moveDuration,
-          ease: moveEase,
+          ...ballTweenToPosition(endTween),
+          duration: endTween.durationSeconds,
+          ease: endTween.ease,
         })
       }
 
@@ -188,6 +237,9 @@ export function buildScenarioAnimator({
 
       rememberInitialPosition(playerToken)
       timeline.set(playerToken.position, start, `+=${delay}`)
+
+      const via = arrow.via ? pointToPosition(arrow.via, canvasW, canvasH, padding) : undefined
+      const end = pointToPosition(arrow.to, canvasW, canvasH, padding)
 
       if (via) {
         timeline.to(playerToken.position, {
