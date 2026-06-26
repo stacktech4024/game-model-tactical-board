@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js'
+import { Container, Sprite } from 'pixi.js'
 import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import {
@@ -10,6 +10,7 @@ import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../dom
 import {
   getBallPlaybackTween,
   getPlayerPlaybackTween,
+  getRotationFromPitchVector,
   type BallPlaybackTween,
   type PlayerPlaybackTween,
 } from './snapshotPlaybackAdapter'
@@ -35,6 +36,8 @@ export type BuildScenarioAnimatorArgs = {
   formationPositions: FormationPositions
   homePlayerTokens: Map<number, Container>
   awayPlayerTokens?: Map<number, Container>
+  homePlayerSprites?: Map<number, Sprite>
+  awayPlayerSprites?: Map<number, Sprite>
   ballToken: Container | undefined
   canvasW: number
   canvasH: number
@@ -91,6 +94,8 @@ export function buildScenarioAnimator({
   formationPositions,
   homePlayerTokens,
   awayPlayerTokens,
+  homePlayerSprites,
+  awayPlayerSprites,
   ballToken,
   canvasW,
   canvasH,
@@ -99,6 +104,7 @@ export function buildScenarioAnimator({
 }: BuildScenarioAnimatorArgs): ScenarioAnimator {
   let state: AnimatorState = 'idle'
   const initialPositions = new Map<Container, TokenPosition>()
+  const initialRotations = new Map<Sprite, number>()
   const plan = buildScenarioPlan(scenario, formationPositions)
   const intentByArrowId = new Map(plan.animationIntents.map((intent) => [intent.arrowId, intent]))
   const totalDuration = plan.animationIntents.at(-1)?.timing.endTime ?? 0
@@ -116,6 +122,14 @@ export function buildScenarioAnimator({
     }
 
     initialPositions.set(token, { x: token.position.x, y: token.position.y })
+  }
+
+  const rememberInitialRotation = (sprite: Sprite) => {
+    if (initialRotations.has(sprite)) {
+      return
+    }
+
+    initialRotations.set(sprite, sprite.rotation)
   }
 
   const getProgressAtTime = (time: number) => (
@@ -239,8 +253,15 @@ export function buildScenarioAnimator({
         return
       }
 
+      const playerSprites = arrow.side === 'away' ? awayPlayerSprites : homePlayerSprites
+      const playerSprite = playerSprites?.get(arrow.playerNumber)
+
       rememberInitialPosition(playerToken)
       timeline.set(playerToken.position, start, `+=${delay}`)
+
+      if (playerSprite) {
+        rememberInitialRotation(playerSprite)
+      }
 
       const endTween = getPlayerPlaybackTween(
         plan,
@@ -293,17 +314,54 @@ export function buildScenarioAnimator({
           duration: viaTween.durationSeconds,
           ease: viaTween.ease,
         })
+
+        if (playerSprite) {
+          const viaRotation = getRotationFromPitchVector(arrow.from, arrow.via as PitchPoint)
+
+          if (viaRotation !== undefined) {
+            timeline.to(playerSprite, {
+              rotation: viaRotation,
+              duration: viaTween.durationSeconds,
+              ease: viaTween.ease,
+            }, '<')
+          }
+        }
+
         timeline.to(playerToken.position, {
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
         }, `+=${VIA_SEGMENT_GAP}`)
+
+        if (playerSprite) {
+          const finalRotation = getRotationFromPitchVector(arrow.via as PitchPoint, arrow.to)
+
+          if (finalRotation !== undefined) {
+            timeline.to(playerSprite, {
+              rotation: finalRotation,
+              duration: finalTween.durationSeconds,
+              ease: finalTween.ease,
+            }, '<')
+          }
+        }
       } else {
         timeline.to(playerToken.position, {
           ...playbackTweenToPosition(endTween),
           duration: endTween.durationSeconds,
           ease: endTween.ease,
         })
+
+        if (playerSprite) {
+          const rotation = getRotationFromPitchVector(arrow.from, arrow.to)
+
+          if (rotation !== undefined) {
+            timeline.to(playerSprite, {
+              rotation,
+              duration: endTween.durationSeconds,
+              ease: endTween.ease,
+            }, '<')
+          }
+        }
       }
     }
   })
@@ -316,6 +374,9 @@ export function buildScenarioAnimator({
   const restoreInitialPositions = () => {
     initialPositions.forEach((position, token) => {
       token.position.set(position.x, position.y)
+    })
+    initialRotations.forEach((rotation, sprite) => {
+      sprite.rotation = rotation
     })
   }
 

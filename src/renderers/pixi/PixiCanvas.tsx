@@ -357,6 +357,8 @@ export function PixiCanvas({
         : undefined
       const homePlayerTokenRefs = new Map<number, Container>()
       const awayPlayerTokenRefs = new Map<number, Container>()
+      const homePlayerSpriteRefs = new Map<number, Sprite>()
+      const awayPlayerSpriteRefs = new Map<number, Sprite>()
       const homeIdleAnchorRefs = new Map<number, Container>()
       const awayIdleAnchorRefs = new Map<number, Container>()
       const playerVisuals = new Map<number, PlayerPhaseVisual>()
@@ -442,6 +444,7 @@ export function PixiCanvas({
           awayPlayerTokenRefs,
           undefined,
           awayIdleAnchorRefs,
+          awayPlayerSpriteRefs,
         )
         awayPlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
           const awayPlayer = OPPOSITION_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
@@ -477,6 +480,7 @@ export function PixiCanvas({
         homePlayerTokenRefs,
         undefined,
         homeIdleAnchorRefs,
+        homePlayerSpriteRefs,
       )
       homePlayerTokenRefs.forEach((tokenContainer, playerNumber) => {
         const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
@@ -536,6 +540,8 @@ export function PixiCanvas({
         formationPositions: activePositions,
         homePlayerTokens: homePlayerTokenRefs,
         awayPlayerTokens: awayPlayerTokenRefs,
+        homePlayerSprites: homePlayerSpriteRefs,
+        awayPlayerSprites: awayPlayerSpriteRefs,
         ballToken,
         canvasW: width,
         canvasH: height,
