@@ -5,8 +5,11 @@ import test from 'node:test'
 
 import { FORMATION_POSITIONS } from '../../../data/formations.ts'
 import { SCENARIOS } from '../../../data/scenarios.ts'
+import { pitchToScreen } from '../../../domain/pitch/coordTransforms.ts'
+import { compareSnapshotToLivePositions } from '../../../domain/simulation/snapshotComparisonLogger.ts'
 import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan.ts'
 import type { ScenarioPlan, TeamSide } from '../../../domain/simulation/worldTypes.ts'
+import { getWorldSnapshotAtProgress } from '../../../domain/simulation/worldSnapshot.ts'
 import { getBallPlaybackTween, getPlayerPlaybackTween } from './snapshotPlaybackAdapter.ts'
 import type { ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes.ts'
 
@@ -18,6 +21,7 @@ const KNOWN_PLAYER_EASE_VALUES = new Set<string>(['power2.inOut'])
 const CANVAS_W = 1280
 const CANVAS_H = 720
 const PADDING = 40
+const ENDPOINT_EPSILON = 1e-9
 
 function buildPlanForScenario(scenario: ScenarioDefinition): ScenarioPlan {
   const formationPositions: FormationPositions = FORMATION_POSITIONS[scenario.formationMode]
@@ -119,6 +123,60 @@ test('getPlayerPlaybackTween produces finite player tween parameters for every s
         assert.ok(tween.durationSeconds >= 0, `${context}: durationSeconds is negative`)
         assert.ok(KNOWN_PLAYER_EASE_VALUES.has(tween.ease), `${context}: unknown ease ${tween.ease}`)
       })
+    })
+  })
+})
+
+test('snapshot playback adapter positions produce no unexplained comparison mismatches for every sampled real scenario', () => {
+  SCENARIOS.forEach((scenario) => {
+    const plan = buildPlanForScenario(scenario)
+
+    SAMPLE_PROGRESS_VALUES.forEach((progress) => {
+      const snapshot = getWorldSnapshotAtProgress(plan, progress)
+      const ballTween = getBallPlaybackTween(plan, progress, progress, CANVAS_W, CANVAS_H, PADDING)
+      const liveHomePlayerScreenPositions = new Map<number, { sx: number; sy: number }>()
+
+      snapshot.players
+        .filter((player) => player.side === 'home')
+        .forEach((player) => {
+          const playerTween = getPlayerPlaybackTween(
+            plan,
+            player.side,
+            player.number,
+            progress,
+            progress,
+            CANVAS_W,
+            CANVAS_H,
+            PADDING,
+          )
+
+          if (playerTween) {
+            liveHomePlayerScreenPositions.set(player.number, playerTween.targetScreenPosition)
+            return
+          }
+
+          liveHomePlayerScreenPositions.set(
+            player.number,
+            pitchToScreen(player.position.x, player.position.y, CANVAS_W, CANVAS_H, PADDING),
+          )
+        })
+
+      const rows = compareSnapshotToLivePositions({
+        plan,
+        progress,
+        canvasWidth: CANVAS_W,
+        canvasHeight: CANVAS_H,
+        canvasPadding: PADDING,
+        liveHomePlayerScreenPositions,
+        liveBallScreenPosition: ballTween?.targetScreenPosition,
+      })
+      const mismatches = rows.filter((row) => row.deltaPx >= ENDPOINT_EPSILON)
+
+      assert.deepEqual(
+        mismatches,
+        [],
+        `scenario ${scenario.id} @ progress ${progress}: expected adapter-fed comparison to match snapshot positions`,
+      )
     })
   })
 })
