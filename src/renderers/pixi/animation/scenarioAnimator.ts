@@ -1,7 +1,11 @@
 import { Container } from 'pixi.js'
 import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
-import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan'
+import {
+  buildScenarioPlan,
+  VIA_SEGMENT_GAP,
+  type FormationPositions,
+} from '../../../domain/simulation/scenarioPlan'
 import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes'
 import {
   getBallPlaybackTween,
@@ -13,11 +17,6 @@ import {
 const SHOT_IMPACT_SCALE = 1.25
 const SHOT_IMPACT_DURATION = 0.12
 const DEFAULT_ARROW_DELAY = 0
-// Mirrors scenarioPlan.ts's VIA_SEGMENT_GAP. Can't be sourced from there:
-// scenarioPlan.ts doesn't export it, and a ScheduledAnimationIntent only
-// exposes the gap already baked into timing.duration, not the gap value
-// itself (see the moveDuration derivation below).
-const SEGMENT_GAP = 0.16
 
 export type AnimatorState = 'idle' | 'playing' | 'paused' | 'complete'
 
@@ -133,11 +132,11 @@ export function buildScenarioAnimator({
     const delay = arrow.delay ?? DEFAULT_ARROW_DELAY
     const start = pointToPosition(arrow.from, canvasW, canvasH, padding)
     const hasVia = Boolean(arrow.via)
-    // scenarioPlan.ts bakes SEGMENT_GAP into timing.duration for via arrows
+    // scenarioPlan.ts bakes VIA_SEGMENT_GAP into timing.duration for via arrows
     // (duration = moveDuration + VIA_SEGMENT_GAP), so subtract it back out
     // to recover the same per-segment moveDuration the old hardcoded
     // BALL_MOVE_DURATION/SHOT_MOVE_DURATION/PLAYER_MOVE_DURATION produced.
-    const moveDuration = hasVia ? intent.timing.duration - SEGMENT_GAP : intent.timing.duration
+    const moveDuration = hasVia ? intent.timing.duration - VIA_SEGMENT_GAP : intent.timing.duration
 
     if (isBallArrow(arrow)) {
       if (!ballToken) {
@@ -184,7 +183,7 @@ export function buildScenarioAnimator({
         const segmentDuration = moveDuration / 2
         const viaProgress = getProgressAtTime(intent.timing.startTime + segmentDuration)
         const secondSegmentStartProgress = getProgressAtTime(
-          intent.timing.startTime + segmentDuration + SEGMENT_GAP,
+          intent.timing.startTime + segmentDuration + VIA_SEGMENT_GAP,
         )
         const viaTween = getBallPlaybackTween(
           plan,
@@ -216,7 +215,7 @@ export function buildScenarioAnimator({
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
-        }, `+=${SEGMENT_GAP}`)
+        }, `+=${VIA_SEGMENT_GAP}`)
       } else {
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(endTween),
@@ -262,7 +261,7 @@ export function buildScenarioAnimator({
         const segmentDuration = moveDuration / 2
         const viaProgress = getProgressAtTime(intent.timing.startTime + segmentDuration)
         const secondSegmentStartProgress = getProgressAtTime(
-          intent.timing.startTime + segmentDuration + SEGMENT_GAP,
+          intent.timing.startTime + segmentDuration + VIA_SEGMENT_GAP,
         )
         const viaTween = getPlayerPlaybackTween(
           plan,
@@ -298,7 +297,7 @@ export function buildScenarioAnimator({
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
-        }, `+=${SEGMENT_GAP}`)
+        }, `+=${VIA_SEGMENT_GAP}`)
       } else {
         timeline.to(playerToken.position, {
           ...playbackTweenToPosition(endTween),

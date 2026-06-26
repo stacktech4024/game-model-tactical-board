@@ -21,7 +21,7 @@ const PASS_MOVE_DURATION = 0.7
 const DRIBBLE_MOVE_DURATION = 0.7
 const SHOT_MOVE_DURATION = 0.4
 const PLAYER_MOVE_DURATION = 1.15
-const VIA_SEGMENT_GAP = 0.16
+export const VIA_SEGMENT_GAP = 0.16
 
 function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
