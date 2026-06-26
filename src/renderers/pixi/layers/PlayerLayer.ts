@@ -120,6 +120,7 @@ function addToken(
   tokenRefs?: Map<number, Container>,
   activeZones?: Set<number>,
   idleAnchorRefs?: Map<number, Container>,
+  spriteRefs?: Map<number, Sprite>,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
   const pitchScale = getPitchScale(canvasW, canvasH, padding)
@@ -172,6 +173,10 @@ function addToken(
   container.addChild(tokenContainer)
   tokenRefs?.set(player.number, tokenContainer)
   idleAnchorRefs?.set(player.number, visualGroup)
+  // tokenSprite is the only node future orientation tweens should rotate -
+  // numberText, visualGroup, and tokenContainer must stay unrotated (see
+  // Phase 3C audit). Exposed here, not yet consumed by any GSAP writer.
+  spriteRefs?.set(player.number, tokenSprite)
 }
 
 export function drawPlayers(
@@ -185,10 +190,12 @@ export function drawPlayers(
   tokenRefs?: Map<number, Container>,
   activeZones?: Set<number>,
   idleAnchorRefs?: Map<number, Container>,
+  spriteRefs?: Map<number, Sprite>,
 ): void {
   container.removeChildren()
   tokenRefs?.clear()
   idleAnchorRefs?.clear()
+  spriteRefs?.clear()
 
   players.forEach((player) => {
     const position = positions[player.number]
@@ -208,6 +215,7 @@ export function drawPlayers(
       tokenRefs,
       activeZones,
       idleAnchorRefs,
+      spriteRefs,
     )
   })
 }

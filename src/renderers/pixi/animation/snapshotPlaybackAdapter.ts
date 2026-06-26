@@ -1,4 +1,5 @@
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms.ts'
+import type { PitchPoint } from '../../../domain/pitch/coordTransforms.ts'
 import { getWorldSnapshotAtProgress } from '../../../domain/simulation/worldSnapshot.ts'
 import type { ScenarioPlan, TeamSide } from '../../../domain/simulation/worldTypes.ts'
 
@@ -112,4 +113,31 @@ export function getPlayerPlaybackTween(
     durationSeconds: Math.max(0, progressTarget - progressNow) * totalDuration,
     ease: activePlayerIntent?.easeHint ?? DEFAULT_PLAYER_EASE,
   }
+}
+
+// Not wired into playback yet (Phase 3D-1: foundation only). Future
+// orientation tweens will call this to derive a tokenSprite.rotation value
+// directly from a movement segment's from/to pitch points.
+//
+// pitchToScreen flips the y-axis (screen y grows downward; pitch y grows
+// "up the pitch"), so the screen-space direction for a pitch vector (dx, dy)
+// is (dx, -dy). Pixi's rotation convention already matches this: rotating the
+// Shapers rest pose (which faces along the local +x axis) by this radian
+// value points it at (cos(rotation), sin(rotation)) in screen space - the
+// same target direction. This produces the identical value PlayerLayer.ts's
+// static (facingAngle + SHAPER_FORWARD_ROTATION_OFFSET_DEGREES) formula
+// would for an equivalent direction (e.g. a (0, +1) "up the pitch" pitch
+// vector yields -90deg, matching facingAngle 0).
+//
+// Returns undefined for a zero-length vector (no movement, no defined
+// facing direction) rather than calling atan2 on a degenerate input.
+export function getRotationFromPitchVector(from: PitchPoint, to: PitchPoint): number | undefined {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+
+  if (dx === 0 && dy === 0) {
+    return undefined
+  }
+
+  return Math.atan2(-dy, dx)
 }

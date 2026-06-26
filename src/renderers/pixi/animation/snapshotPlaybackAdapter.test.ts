@@ -10,7 +10,7 @@ import { compareSnapshotToLivePositions } from '../../../domain/simulation/snaps
 import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan.ts'
 import type { ScenarioPlan, TeamSide } from '../../../domain/simulation/worldTypes.ts'
 import { getWorldSnapshotAtProgress } from '../../../domain/simulation/worldSnapshot.ts'
-import { getBallPlaybackTween, getPlayerPlaybackTween } from './snapshotPlaybackAdapter.ts'
+import { getBallPlaybackTween, getPlayerPlaybackTween, getRotationFromPitchVector } from './snapshotPlaybackAdapter.ts'
 import type { ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes.ts'
 
 const SAMPLE_PROGRESS_VALUES = [0, 0.25, 0.5, 0.75, 1]
@@ -178,5 +178,60 @@ test('snapshot playback adapter positions produce no unexplained comparison mism
         `scenario ${scenario.id} @ progress ${progress}: expected adapter-fed comparison to match snapshot positions`,
       )
     })
+  })
+})
+
+test('getRotationFromPitchVector returns undefined for a zero-length vector without producing NaN', () => {
+  const point = { x: 12, y: 34 }
+
+  assert.equal(getRotationFromPitchVector(point, point), undefined)
+  assert.equal(getRotationFromPitchVector({ x: 0, y: 0 }, { x: 0, y: 0 }), undefined)
+})
+
+test('getRotationFromPitchVector matches the static facingAngle rotation convention from PlayerLayer.ts', () => {
+  const SHAPER_FORWARD_ROTATION_OFFSET_DEGREES = -90
+  const origin = { x: 0, y: 0 }
+
+  const facingAngleRotation = (facingAngle: number) => (
+    ((facingAngle + SHAPER_FORWARD_ROTATION_OFFSET_DEGREES) * Math.PI) / 180
+  )
+
+  // facingAngle 0 = "facing up the pitch" = increasing pitch y.
+  assert.ok(
+    Math.abs(
+      (getRotationFromPitchVector(origin, { x: 0, y: 1 }) ?? NaN) - facingAngleRotation(0),
+    ) < 1e-9,
+  )
+  // facingAngle 90 = facing along increasing pitch x, no y change.
+  assert.ok(
+    Math.abs(
+      (getRotationFromPitchVector(origin, { x: 1, y: 0 }) ?? NaN) - facingAngleRotation(90),
+    ) < 1e-9,
+  )
+  // facingAngle 180 = facing down the pitch = decreasing pitch y.
+  assert.ok(
+    Math.abs(
+      (getRotationFromPitchVector(origin, { x: 0, y: -1 }) ?? NaN) - facingAngleRotation(180),
+    ) < 1e-9,
+  )
+  // facingAngle -90 = facing along decreasing pitch x.
+  assert.ok(
+    Math.abs(
+      (getRotationFromPitchVector(origin, { x: -1, y: 0 }) ?? NaN) - facingAngleRotation(-90),
+    ) < 1e-9,
+  )
+})
+
+test('getRotationFromPitchVector is finite for every direction and magnitude, never NaN', () => {
+  const origin = { x: 0, y: 0 }
+  const samplePoints = [
+    { x: 5, y: 0 }, { x: -5, y: 0 }, { x: 0, y: 5 }, { x: 0, y: -5 },
+    { x: 3, y: 4 }, { x: -3, y: -4 }, { x: 0.001, y: -0.001 }, { x: 1000, y: -1000 },
+  ]
+
+  samplePoints.forEach((point) => {
+    const rotation = getRotationFromPitchVector(origin, point)
+
+    assert.ok(Number.isFinite(rotation), `expected finite rotation for vector ${JSON.stringify(point)}, got ${rotation}`)
   })
 })
