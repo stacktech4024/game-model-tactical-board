@@ -3,7 +3,12 @@ import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan'
 import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes'
-import { getBallPlaybackTween, type BallPlaybackTween } from './snapshotPlaybackAdapter'
+import {
+  getBallPlaybackTween,
+  getPlayerPlaybackTween,
+  type BallPlaybackTween,
+  type PlayerPlaybackTween,
+} from './snapshotPlaybackAdapter'
 
 const SHOT_IMPACT_SCALE = 1.25
 const SHOT_IMPACT_DURATION = 0.12
@@ -75,7 +80,7 @@ function pointToPosition(
   return { x: screenPoint.sx, y: screenPoint.sy }
 }
 
-function ballTweenToPosition(tween: BallPlaybackTween): TokenPosition {
+function playbackTweenToPosition(tween: BallPlaybackTween | PlayerPlaybackTween): TokenPosition {
   return {
     x: tween.targetScreenPosition.sx,
     y: tween.targetScreenPosition.sy,
@@ -203,18 +208,18 @@ export function buildScenarioAnimator({
         }
 
         timeline.to(ballToken.position, {
-          ...ballTweenToPosition(viaTween),
+          ...playbackTweenToPosition(viaTween),
           duration: viaTween.durationSeconds,
           ease: viaTween.ease,
         })
         timeline.to(ballToken.position, {
-          ...ballTweenToPosition(finalTween),
+          ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
         }, `+=${SEGMENT_GAP}`)
       } else {
         timeline.to(ballToken.position, {
-          ...ballTweenToPosition(endTween),
+          ...playbackTweenToPosition(endTween),
           duration: endTween.durationSeconds,
           ease: endTween.ease,
         })
@@ -238,25 +243,67 @@ export function buildScenarioAnimator({
       rememberInitialPosition(playerToken)
       timeline.set(playerToken.position, start, `+=${delay}`)
 
-      const via = arrow.via ? pointToPosition(arrow.via, canvasW, canvasH, padding) : undefined
-      const end = pointToPosition(arrow.to, canvasW, canvasH, padding)
+      const endTween = getPlayerPlaybackTween(
+        plan,
+        intent.side,
+        arrow.playerNumber,
+        intent.timing.startProgress,
+        intent.timing.endProgress,
+        canvasW,
+        canvasH,
+        padding,
+      )
 
-      if (via) {
+      if (!endTween) {
+        return
+      }
+
+      if (hasVia) {
+        const segmentDuration = moveDuration / 2
+        const viaProgress = getProgressAtTime(intent.timing.startTime + segmentDuration)
+        const secondSegmentStartProgress = getProgressAtTime(
+          intent.timing.startTime + segmentDuration + SEGMENT_GAP,
+        )
+        const viaTween = getPlayerPlaybackTween(
+          plan,
+          intent.side,
+          arrow.playerNumber,
+          intent.timing.startProgress,
+          viaProgress,
+          canvasW,
+          canvasH,
+          padding,
+        )
+        const finalTween = getPlayerPlaybackTween(
+          plan,
+          intent.side,
+          arrow.playerNumber,
+          secondSegmentStartProgress,
+          intent.timing.endProgress,
+          canvasW,
+          canvasH,
+          padding,
+        )
+
+        if (!viaTween || !finalTween) {
+          return
+        }
+
         timeline.to(playerToken.position, {
-          ...via,
-          duration: moveDuration / 2,
-          ease: 'power2.inOut',
+          ...playbackTweenToPosition(viaTween),
+          duration: viaTween.durationSeconds,
+          ease: viaTween.ease,
         })
         timeline.to(playerToken.position, {
-          ...end,
-          duration: moveDuration / 2,
-          ease: 'power2.inOut',
+          ...playbackTweenToPosition(finalTween),
+          duration: finalTween.durationSeconds,
+          ease: finalTween.ease,
         }, `+=${SEGMENT_GAP}`)
       } else {
         timeline.to(playerToken.position, {
-          ...end,
-          duration: moveDuration,
-          ease: 'power2.inOut',
+          ...playbackTweenToPosition(endTween),
+          duration: endTween.durationSeconds,
+          ease: endTween.ease,
         })
       }
     }
