@@ -533,6 +533,7 @@ export function PixiCanvas({
 
       scenarioAnimator = buildScenarioAnimator({
         scenario: selectedScenario,
+        formationPositions: activePositions,
         homePlayerTokens: homePlayerTokenRefs,
         awayPlayerTokens: awayPlayerTokenRefs,
         ballToken,

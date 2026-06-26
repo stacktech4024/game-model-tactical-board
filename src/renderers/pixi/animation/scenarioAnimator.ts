@@ -1,14 +1,16 @@
 import { Container } from 'pixi.js'
 import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { buildScenarioPlan, type FormationPositions } from '../../../domain/simulation/scenarioPlan'
 import type { PitchPoint, ScenarioArrow, ScenarioDefinition } from '../../../domain/scenarios/scenarioTypes'
 
-const BALL_MOVE_DURATION = 0.7
-const SHOT_MOVE_DURATION = 0.4
 const SHOT_IMPACT_SCALE = 1.25
 const SHOT_IMPACT_DURATION = 0.12
-const PLAYER_MOVE_DURATION = 1.15
 const DEFAULT_ARROW_DELAY = 0
+// Mirrors scenarioPlan.ts's VIA_SEGMENT_GAP. Can't be sourced from there:
+// scenarioPlan.ts doesn't export it, and a ScheduledAnimationIntent only
+// exposes the gap already baked into timing.duration, not the gap value
+// itself (see the moveDuration derivation below).
 const SEGMENT_GAP = 0.16
 
 export type AnimatorState = 'idle' | 'playing' | 'paused' | 'complete'
@@ -25,6 +27,7 @@ export type ScenarioAnimator = {
 
 export type BuildScenarioAnimatorArgs = {
   scenario: ScenarioDefinition
+  formationPositions: FormationPositions
   homePlayerTokens: Map<number, Container>
   awayPlayerTokens?: Map<number, Container>
   ballToken: Container | undefined
@@ -73,6 +76,7 @@ function pointToPosition(
 
 export function buildScenarioAnimator({
   scenario,
+  formationPositions,
   homePlayerTokens,
   awayPlayerTokens,
   ballToken,
@@ -83,6 +87,8 @@ export function buildScenarioAnimator({
 }: BuildScenarioAnimatorArgs): ScenarioAnimator {
   let state: AnimatorState = 'idle'
   const initialPositions = new Map<Container, TokenPosition>()
+  const plan = buildScenarioPlan(scenario, formationPositions)
+  const intentByArrowId = new Map(plan.animationIntents.map((intent) => [intent.arrowId, intent]))
   const timeline = gsap.timeline({
     paused: true,
     onComplete: () => {
@@ -100,10 +106,21 @@ export function buildScenarioAnimator({
   }
 
   getSortedArrows(scenario.arrows).forEach((arrow) => {
+    const intent = intentByArrowId.get(arrow.id)
+
+    if (!intent) {
+      return
+    }
+
     const delay = arrow.delay ?? DEFAULT_ARROW_DELAY
     const start = pointToPosition(arrow.from, canvasW, canvasH, padding)
     const via = arrow.via ? pointToPosition(arrow.via, canvasW, canvasH, padding) : undefined
     const end = pointToPosition(arrow.to, canvasW, canvasH, padding)
+    // scenarioPlan.ts bakes SEGMENT_GAP into timing.duration for via arrows
+    // (duration = moveDuration + VIA_SEGMENT_GAP), so subtract it back out
+    // to recover the same per-segment moveDuration the old hardcoded
+    // BALL_MOVE_DURATION/SHOT_MOVE_DURATION/PLAYER_MOVE_DURATION produced.
+    const moveDuration = via ? intent.timing.duration - SEGMENT_GAP : intent.timing.duration
 
     if (isBallArrow(arrow)) {
       if (!ballToken) {
@@ -111,7 +128,6 @@ export function buildScenarioAnimator({
       }
 
       const isShot = arrow.type === 'shot'
-      const moveDuration = isShot ? SHOT_MOVE_DURATION : BALL_MOVE_DURATION
       const moveEase = isShot ? 'power3.out' : 'power1.inOut'
 
       rememberInitialPosition(ballToken)
@@ -176,18 +192,18 @@ export function buildScenarioAnimator({
       if (via) {
         timeline.to(playerToken.position, {
           ...via,
-          duration: PLAYER_MOVE_DURATION / 2,
+          duration: moveDuration / 2,
           ease: 'power2.inOut',
         })
         timeline.to(playerToken.position, {
           ...end,
-          duration: PLAYER_MOVE_DURATION / 2,
+          duration: moveDuration / 2,
           ease: 'power2.inOut',
         }, `+=${SEGMENT_GAP}`)
       } else {
         timeline.to(playerToken.position, {
           ...end,
-          duration: PLAYER_MOVE_DURATION,
+          duration: moveDuration,
           ease: 'power2.inOut',
         })
       }
