@@ -20,7 +20,7 @@ const BOUNDARY_ALPHA = 0.5
 const BOUNDARY_WIDTH = 1
 const BOUNDARY_DASH = 6
 const BOUNDARY_GAP = 4
-const ZONE_LABEL_CONTAINER_NAME = '__zoneLabels'
+const ZONE_LABEL_CONTAINER_LABEL = '__zoneLabels'
 
 function zoneToScreenRect(
   startY: number,
@@ -115,7 +115,7 @@ function drawZoneLabels(
   padding: number,
   activeZones?: Set<number>,
 ): void {
-  const existing = stage.children.find((child) => child.name === ZONE_LABEL_CONTAINER_NAME)
+  const existing = stage.getChildByLabel(ZONE_LABEL_CONTAINER_LABEL)
 
   if (existing) {
     stage.removeChild(existing)
@@ -123,7 +123,7 @@ function drawZoneLabels(
   }
 
   const labelContainer = new Container()
-  labelContainer.name = ZONE_LABEL_CONTAINER_NAME
+  labelContainer.label = ZONE_LABEL_CONTAINER_LABEL
 
   PITCH.ZONES.forEach((zone, index) => {
     const isOutOfActiveZone = Boolean(activeZones?.size) && !activeZones?.has(index + 1)
