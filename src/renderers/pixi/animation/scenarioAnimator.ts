@@ -34,6 +34,7 @@ export type ScenarioAnimator = {
 export type BuildScenarioAnimatorArgs = {
   scenario: ScenarioDefinition
   formationPositions: FormationPositions
+  awayFormationPositions?: FormationPositions
   homePlayerTokens: Map<number, Container>
   awayPlayerTokens?: Map<number, Container>
   homePlayerSprites?: Map<number, Sprite>
@@ -92,6 +93,7 @@ function playbackTweenToPosition(tween: BallPlaybackTween | PlayerPlaybackTween)
 export function buildScenarioAnimator({
   scenario,
   formationPositions,
+  awayFormationPositions,
   homePlayerTokens,
   awayPlayerTokens,
   homePlayerSprites,
@@ -105,7 +107,7 @@ export function buildScenarioAnimator({
   let state: AnimatorState = 'idle'
   const initialPositions = new Map<Container, TokenPosition>()
   const initialRotations = new Map<Sprite, number>()
-  const plan = buildScenarioPlan(scenario, formationPositions)
+  const plan = buildScenarioPlan(scenario, formationPositions, awayFormationPositions)
   const intentByArrowId = new Map(plan.animationIntents.map((intent) => [intent.arrowId, intent]))
   const totalDuration = plan.animationIntents.at(-1)?.timing.endTime ?? 0
   const timeline = gsap.timeline({

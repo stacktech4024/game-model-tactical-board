@@ -74,7 +74,10 @@ function getArrowEaseHint(arrow: ScenarioArrow): IntentEaseHint {
   }
 }
 
-function buildInitialPlayers(formationPositions: FormationPositions): PlayerState[] {
+function buildInitialPlayersForSide(
+  side: TeamSide,
+  formationPositions: FormationPositions,
+): PlayerState[] {
   return Object.entries(formationPositions)
     .reduce<PlayerState[]>((players, [number, position]) => {
       if (!position) {
@@ -84,8 +87,8 @@ function buildInitialPlayers(formationPositions: FormationPositions): PlayerStat
       const playerNumber = Number(number)
 
       players.push({
-        id: `home-${playerNumber}`,
-        side: 'home',
+        id: `${side}-${playerNumber}`,
+        side,
         number: playerNumber,
         position: copyPoint(position),
       })
@@ -93,6 +96,16 @@ function buildInitialPlayers(formationPositions: FormationPositions): PlayerStat
       return players
     }, [])
     .sort((a, b) => a.number - b.number)
+}
+
+function buildInitialPlayers(
+  homeFormationPositions: FormationPositions,
+  awayFormationPositions: FormationPositions = {},
+): PlayerState[] {
+  return [
+    ...buildInitialPlayersForSide('home', homeFormationPositions),
+    ...buildInitialPlayersForSide('away', awayFormationPositions),
+  ]
 }
 
 function buildInitialBall(scenario: ScenarioDefinition): BallState | undefined {
@@ -170,12 +183,13 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
 export function buildScenarioPlan(
   scenario: ScenarioDefinition,
   formationPositions: FormationPositions,
+  awayFormationPositions?: FormationPositions,
 ): ScenarioPlan {
   return {
     scenarioId: scenario.id,
     title: scenario.title,
     moment: scenario.moment,
-    initialPlayers: buildInitialPlayers(formationPositions),
+    initialPlayers: buildInitialPlayers(formationPositions, awayFormationPositions),
     initialBall: buildInitialBall(scenario),
     animationIntents: buildAnimationIntents(scenario),
     phaseSteps: scenario.phaseSteps.map((phaseStep) => ({

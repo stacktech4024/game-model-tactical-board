@@ -88,7 +88,7 @@ function getIntentPosition(
   progress: number,
   totalDuration: number,
 ): PitchPoint {
-  if (progress > intent.timing.endProgress) {
+  if (progress >= intent.timing.endProgress) {
     return copyPoint(intent.to)
   }
 

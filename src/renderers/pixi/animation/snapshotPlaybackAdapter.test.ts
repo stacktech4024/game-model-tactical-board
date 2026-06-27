@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { FORMATION_POSITIONS } from '../../../data/formations.ts'
+import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../../data/formations.ts'
 import { SCENARIOS } from '../../../data/scenarios.ts'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms.ts'
 import { compareSnapshotToLivePositions } from '../../../domain/simulation/snapshotComparisonLogger.ts'
@@ -25,8 +25,9 @@ const ENDPOINT_EPSILON = 1e-9
 
 function buildPlanForScenario(scenario: ScenarioDefinition): ScenarioPlan {
   const formationPositions: FormationPositions = FORMATION_POSITIONS[scenario.formationMode]
+  const awayFormationPositions: FormationPositions = OPPOSITION_POSITIONS[scenario.formationMode]
 
-  return buildScenarioPlan(scenario, formationPositions)
+  return buildScenarioPlan(scenario, formationPositions, awayFormationPositions)
 }
 
 test('getBallPlaybackTween produces finite ball tween parameters for every sampled scenario progress', () => {
