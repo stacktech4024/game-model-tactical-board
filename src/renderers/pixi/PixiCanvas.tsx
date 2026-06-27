@@ -272,11 +272,17 @@ export function PixiCanvas({
           (playerNumber) => !excluded.has(playerNumber),
         ),
       )
-    // keyPlayers in scenario data always refers to home-side numbers today -
-    // no scenario scripts away-side keyPlayers yet, so the away exclusion set
-    // stays empty until that exists (see Items D/E/B).
     const homeActivePlayerNumbers = new Set(activePhaseStep?.keyPlayers ?? [])
-    const awayActivePlayerNumbers = new Set<number>()
+    const activeArrowIds = new Set(activePhaseStep?.relatedArrows ?? [])
+    const awayActivePlayerNumbers = new Set(
+      (refs.selectedArrows ?? [])
+        .filter((arrow) => (
+          activeArrowIds.has(arrow.id) &&
+          arrow.side === 'away' &&
+          arrow.playerNumber !== undefined
+        ))
+        .map((arrow) => arrow.playerNumber as number),
+    )
     const ambientPlayerNumbers = new Set(
       Array.from(refs.homePlayerTokenRefs.keys()).filter((playerNumber) => {
         const player = PICKERING_SQUAD.find((squadPlayer) => squadPlayer.number === playerNumber)
@@ -353,7 +359,7 @@ export function PixiCanvas({
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
       const comparisonPlan = ENABLE_SNAPSHOT_COMPARISON_LOGGER
-        ? buildScenarioPlan(selectedScenario, activePositions)
+        ? buildScenarioPlan(selectedScenario, activePositions, awayPositions)
         : undefined
       const homePlayerTokenRefs = new Map<number, Container>()
       const awayPlayerTokenRefs = new Map<number, Container>()
@@ -538,6 +544,7 @@ export function PixiCanvas({
       scenarioAnimator = buildScenarioAnimator({
         scenario: selectedScenario,
         formationPositions: activePositions,
+        awayFormationPositions: awayPositions,
         homePlayerTokens: homePlayerTokenRefs,
         awayPlayerTokens: awayPlayerTokenRefs,
         homePlayerSprites: homePlayerSpriteRefs,

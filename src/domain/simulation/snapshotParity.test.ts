@@ -7,7 +7,7 @@ import test from 'node:test'
 import type { ScenarioDefinition } from '../scenarios/scenarioTypes.ts'
 import { PITCH } from '../pitch/pitchConstants.ts'
 import { SCENARIOS } from '../../data/scenarios.ts'
-import { FORMATION_POSITIONS } from '../../data/formations.ts'
+import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations.ts'
 import { buildScenarioPlan, type FormationPositions } from './scenarioPlan.ts'
 import { getWorldSnapshotAtProgress } from './worldSnapshot.ts'
 import type { ScenarioPlan } from './worldTypes.ts'
@@ -23,8 +23,9 @@ const MAX_Y = PITCH.LENGTH + GOAL_LINE_SLACK
 
 function buildPlanForScenario(scenario: ScenarioDefinition): ScenarioPlan {
   const formationPositions: FormationPositions = FORMATION_POSITIONS[scenario.formationMode]
+  const awayFormationPositions: FormationPositions = OPPOSITION_POSITIONS[scenario.formationMode]
 
-  return buildScenarioPlan(scenario, formationPositions)
+  return buildScenarioPlan(scenario, formationPositions, awayFormationPositions)
 }
 
 function getTotalDurationFromPlan(plan: ScenarioPlan): number {
@@ -344,7 +345,7 @@ test('player tokens with an intent starting at progress 0 immediately reflect th
   })
 })
 
-test('every player-movement intent resolves against the available home players for every scenario', () => {
+test('every player-movement intent resolves against the available players for every scenario', () => {
   const gaps: string[] = []
 
   SCENARIOS.forEach((scenario) => {

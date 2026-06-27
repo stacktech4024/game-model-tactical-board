@@ -149,6 +149,39 @@ test('buildScenarioPlan includes initial home player positions from formation po
   ])
 })
 
+test('buildScenarioPlan includes initial away player positions when away formation positions are provided', () => {
+  const homeFormationPositions: FormationPositions = {
+    6: { x: 32, y: 52 },
+  }
+  const awayFormationPositions: FormationPositions = {
+    7: { x: 54, y: 56 },
+    11: { x: 14, y: 56 },
+  }
+
+  const plan = buildScenarioPlan(makeScenario(), homeFormationPositions, awayFormationPositions)
+
+  assert.deepEqual(plan.initialPlayers, [
+    {
+      id: 'home-6',
+      side: 'home',
+      number: 6,
+      position: { x: 32, y: 52 },
+    },
+    {
+      id: 'away-7',
+      side: 'away',
+      number: 7,
+      position: { x: 54, y: 56 },
+    },
+    {
+      id: 'away-11',
+      side: 'away',
+      number: 11,
+      position: { x: 14, y: 56 },
+    },
+  ])
+})
+
 test('buildScenarioPlan sorts animation intents deterministically from scenario arrows', () => {
   const plan = buildScenarioPlan(makeScenario(), {})
 
