@@ -84,6 +84,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play wide',
         order: 1,
         delay: 0,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 3 },
       },
       {
@@ -105,6 +106,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Lay off #6',
         order: 3,
         delay: 0.2,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 11 },
       },
       {
@@ -126,6 +128,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: '#4 slide #10',
         order: 5,
         delay: 0.1,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 4 },
       },
       {
@@ -146,6 +149,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find #9',
         order: 7,
         delay: 0.2,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 10 },
       },
       {
@@ -157,6 +161,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 8,
         delay: 0.2,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
@@ -265,6 +270,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 6,
         order: 5,
         delay: 0.05,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 6 },
       },
       {
@@ -308,6 +314,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 6,
         delay: 0.1,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
@@ -431,6 +438,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -3,
         delay: 0,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
@@ -441,6 +449,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find wide',
         order: -2,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 5 },
       },
       {
@@ -451,6 +460,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Enter block',
         order: -1,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 7 },
       },
       {
@@ -563,6 +573,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 10,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 7 },
       },
     ],
@@ -682,6 +693,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -3,
         delay: 0,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
@@ -692,6 +704,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find wide',
         order: -2,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 4 },
       },
       {
@@ -702,6 +715,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Enter block',
         order: -1,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 11 },
       },
       {
@@ -814,6 +828,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 10,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 11 },
       },
     ],
@@ -939,6 +954,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -4,
         delay: 0,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
@@ -949,6 +965,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Try central',
         order: -3,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 5 },
       },
       {
@@ -1010,6 +1027,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 3,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 10 },
       },
       {
@@ -1072,6 +1090,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 9,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'away', playerNumber: 7 },
       },
     ],
@@ -1172,6 +1191,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 8,
         order: 0,
         delay: 0,
+        releaseKind: 'loose-ball',
       },
       {
         id: 'fuse-nearest-press',
@@ -1323,6 +1343,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Combine',
         order: 2,
         delay: 0.25,
+        releaseKind: 'loose-ball',
       },
       {
         id: 'wing-back-shot-goal',
@@ -1333,6 +1354,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 3,
         delay: 0.25,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 10 },
       },
     ],
@@ -1445,6 +1467,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Corridor',
         order: 2,
         delay: 0.15,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 7 },
       },
       {
@@ -1476,6 +1499,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 5,
         delay: 0.1,
+        releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],

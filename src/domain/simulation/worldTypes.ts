@@ -2,6 +2,7 @@ import type {
   HighlightZone,
   PitchPoint,
   ScenarioArrowType,
+  ScenarioReleaseKind,
   ScenarioReleasePlayer,
   ScenarioMoment,
 } from '../scenarios/scenarioTypes'
@@ -90,6 +91,7 @@ export type AnimationIntent = {
   delay: number
   sequenceIndex: number
   easeHint?: IntentEaseHint
+  releaseKind?: ScenarioReleaseKind
   releasedBy?: ScenarioReleasePlayer
   label?: string
 }
