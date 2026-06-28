@@ -57,6 +57,11 @@ function assertReleasePlayerAtBall(plan: ScenarioPlan, expectation: ReleaseExpec
   )
 
   assert.equal(intent.type, 'ball-movement', `${plan.scenarioId} ${intent.arrowId}: expected ball movement intent`)
+  assert.deepEqual(
+    intent.releasedBy,
+    { side: expectation.side, playerNumber: expectation.playerNumber },
+    `${plan.scenarioId} ${intent.arrowId}: release-player metadata`,
+  )
   assertPointClose(
     snapshot.ball?.position,
     intent.from,
@@ -147,6 +152,40 @@ test('build-through-wide-channels keeps #4 at the forward-pass release space and
   })
   assertMarkerAtIntentTarget(scenario, plan, 'wide-build-goal-marker', 'wide-build-shot-goal')
   assertFinalBallAtIntentTarget(plan, 'wide-build-shot-goal')
+})
+
+test('metadata-bearing ball intents resolve release players at the ball release point', () => {
+  SCENARIOS.forEach((scenario) => {
+    const plan = buildPlanForScenario(scenario)
+
+    plan.animationIntents
+      .filter((intent) => intent.type === 'ball-movement' && intent.releasedBy)
+      .forEach((intent) => {
+        const releasedBy = intent.releasedBy
+
+        assert.ok(releasedBy, `${scenario.id} ${intent.arrowId}: expected release metadata`)
+
+        const snapshot = getWorldSnapshotAtProgress(plan, intent.timing.startProgress)
+        const player = snapshot.players.find(
+          (item) => item.side === releasedBy.side && item.number === releasedBy.playerNumber,
+        )
+
+        assert.ok(
+          player,
+          `${scenario.id} ${intent.arrowId}: releasing ${releasedBy.side} #${releasedBy.playerNumber} exists`,
+        )
+        assertPointClose(
+          player.position,
+          intent.from,
+          `${scenario.id} ${intent.arrowId}: releasing ${releasedBy.side} #${releasedBy.playerNumber}`,
+        )
+        assertPointClose(
+          snapshot.ball?.position,
+          intent.from,
+          `${scenario.id} ${intent.arrowId}: ball at release space`,
+        )
+      })
+  })
 })
 
 test('corner-short-decoy-wide-delivery starts with #7 and the ball at the corner before the delivery and goal', () => {

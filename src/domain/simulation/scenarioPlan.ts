@@ -171,6 +171,7 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
       delay: arrow.delay ?? 0,
       sequenceIndex,
       easeHint: getArrowEaseHint(arrow),
+      releasedBy: arrow.releasedBy ? { ...arrow.releasedBy } : undefined,
       timing: {
         ...timing,
         startProgress: totalDuration > 0 ? timing.startTime / totalDuration : 0,
