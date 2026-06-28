@@ -727,7 +727,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         id: 'wing-back-finish',
         label: 'Finish',
         coachingCue: 'Finish the central combination before the back line can recover.',
-        keyPlayers: [9],
+        keyPlayers: [10],
         zoneFocus: [4],
         channelFocus: [3],
         relatedArrows: ['wing-back-shot-goal', 'wing-back-away-six-drop'],
