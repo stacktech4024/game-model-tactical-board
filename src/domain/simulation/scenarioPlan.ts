@@ -35,12 +35,13 @@ export type ArrowSpeedProfile = {
   maxDurationSeconds: number
 }
 
-// ~20 m/s is a brisk, controlled ground pass - between a short crisp lay-off
-// and a hit long ball, well under max recorded pass speeds.
+// ~17 m/s sits between tracking-data's measured average ground-pass speed
+// (~16.2 m/s, Pfaff et al. 2022, Allsvenskan tracking data) and a firmly
+// struck pass - closer to a typical pass than the original 20 m/s estimate.
 export const PASS_SPEED_PROFILE: ArrowSpeedProfile = {
-  speedMetersPerSecond: 20,
+  speedMetersPerSecond: 17,
   minDurationSeconds: 0.35,
-  maxDurationSeconds: 1.4,
+  maxDurationSeconds: 1.5,
 }
 
 // Dribbling speed is the player-and-ball-together pace, well below a struck
@@ -60,13 +61,28 @@ export const SHOT_SPEED_PROFILE: ArrowSpeedProfile = {
   maxDurationSeconds: 0.9,
 }
 
-// ~6.5 m/s is a hard running pace for repositioning/pressing/recovering -
-// quicker than a jog, below a flat-out sprint (human sprint top speed is
-// ~12 m/s), which keeps short and long runs both inside a believable range.
-export const PLAYER_SPEED_PROFILE: ArrowSpeedProfile = {
-  speedMetersPerSecond: 6.5,
+// Two tiers replace the old single 6.5 m/s constant shared by every
+// player-movement arrow. Match-tracking data shows most off-ball movement is
+// a jog/run pace, not a sprint - a single flat speed made routine
+// repositioning (run) look as urgent as a defensive recovery sprint.
+//
+// 'run' = positional/attacking movement (overlaps, off-ball repositioning,
+// runs into space) - a purposeful run, not a sprint. ~5.5 m/s sits at the
+// commonly used high-speed-running threshold (19.8 km/h).
+export const RUN_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 5.5,
   minDurationSeconds: 0.4,
-  maxDurationSeconds: 3.0,
+  maxDurationSeconds: 3.2,
+}
+
+// 'press' / 'recovery' = urgent defensive actions (closing down, recovery
+// runs, tracking back) - meaningfully quicker than a regular run, closer to
+// the ~7 m/s (25.2 km/h) sprint threshold used in match-physical-demands
+// research, without exceeding realistic mean max sprint speed (~8.6-8.9 m/s).
+export const PRESS_RECOVERY_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 7.5,
+  minDurationSeconds: 0.3,
+  maxDurationSeconds: 2.6,
 }
 
 function copyPoint(point: PitchPoint): PitchPoint {
@@ -109,9 +125,10 @@ function getSpeedProfileForArrow(arrow: ScenarioArrow): ArrowSpeedProfile {
     case 'shot':
       return SHOT_SPEED_PROFILE
     case 'run':
+      return RUN_SPEED_PROFILE
     case 'press':
     case 'recovery':
-      return PLAYER_SPEED_PROFILE
+      return PRESS_RECOVERY_SPEED_PROFILE
   }
 }
 

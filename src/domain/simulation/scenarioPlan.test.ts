@@ -10,7 +10,8 @@ import {
   VIA_SEGMENT_GAP,
   PASS_SPEED_PROFILE,
   SHOT_SPEED_PROFILE,
-  PLAYER_SPEED_PROFILE,
+  RUN_SPEED_PROFILE,
+  PRESS_RECOVERY_SPEED_PROFILE,
   type FormationPositions,
 } from './scenarioPlan.ts'
 
@@ -403,21 +404,57 @@ test('buildScenarioPlan clamps shot duration within the shot speed profile bound
   assert.ok(shotIntent.timing.duration <= SHOT_SPEED_PROFILE.maxDurationSeconds)
 })
 
-test('buildScenarioPlan scales run, press, and recovery duration with distance, clamped to the player speed profile', () => {
+test('buildScenarioPlan scales run duration with distance, clamped to the run speed profile', () => {
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const arrowsById = new Map((scenario.arrows ?? []).map((arrow) => [arrow.id, arrow]))
+  const intent = plan.animationIntents.find((item) => item.arrowId === 'early-run')
+  const arrow = arrowsById.get('early-run')
+
+  assert.ok(intent)
+  assert.ok(arrow)
+  assert.equal(round(intent.timing.duration), round(getArrowMoveDuration(arrow)))
+  assert.ok(intent.timing.duration >= RUN_SPEED_PROFILE.minDurationSeconds)
+  assert.ok(intent.timing.duration <= RUN_SPEED_PROFILE.maxDurationSeconds)
+})
+
+test('buildScenarioPlan scales press and recovery duration with distance, clamped to the press/recovery sprint profile', () => {
   const scenario = makeScenario()
   const plan = buildScenarioPlan(scenario, {})
   const arrowsById = new Map((scenario.arrows ?? []).map((arrow) => [arrow.id, arrow]))
 
-  ;['early-run', 'press', 'recovery'].forEach((arrowId) => {
+  ;['press', 'recovery'].forEach((arrowId) => {
     const intent = plan.animationIntents.find((item) => item.arrowId === arrowId)
     const arrow = arrowsById.get(arrowId)
 
     assert.ok(intent, `Expected intent ${arrowId}`)
     assert.ok(arrow, `Expected fixture arrow ${arrowId}`)
     assert.equal(round(intent.timing.duration), round(getArrowMoveDuration(arrow)))
-    assert.ok(intent.timing.duration >= PLAYER_SPEED_PROFILE.minDurationSeconds)
-    assert.ok(intent.timing.duration <= PLAYER_SPEED_PROFILE.maxDurationSeconds)
+    assert.ok(intent.timing.duration >= PRESS_RECOVERY_SPEED_PROFILE.minDurationSeconds)
+    assert.ok(intent.timing.duration <= PRESS_RECOVERY_SPEED_PROFILE.maxDurationSeconds)
   })
+})
+
+test('buildScenarioPlan gives press/recovery a faster speed than run, for the same distance', () => {
+  const distance = 10
+  const runArrow = {
+    id: 'speed-tier-run',
+    type: 'run' as const,
+    from: { x: 0, y: 0 },
+    to: { x: 0, y: distance },
+    playerNumber: 4,
+    order: 1,
+  }
+  const recoveryArrow = {
+    id: 'speed-tier-recovery',
+    type: 'recovery' as const,
+    from: { x: 0, y: 0 },
+    to: { x: 0, y: distance },
+    playerNumber: 5,
+    order: 1,
+  }
+
+  assert.ok(getArrowMoveDuration(recoveryArrow) < getArrowMoveDuration(runArrow))
 })
 
 test('buildScenarioPlan includes the 0.16 segment gap for via-point intents', () => {
