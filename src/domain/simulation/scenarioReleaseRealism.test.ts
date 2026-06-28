@@ -25,11 +25,13 @@ type ReleaseMetadataGap = {
 }
 
 const KNOWN_RELEASE_METADATA_GAPS: ReleaseMetadataGap[] = [
-  // The loose pass starts from a turnover space rather than an exact player
-  // position; resolving it needs scenario authoring work around who loses it.
+  // This represents a loose turnover ball, not a clean player-controlled
+  // release. The arrow names #8 as the turnover focus, but #8 is not at the
+  // ball-start coordinate; resolving it needs an authored regain/loss touch.
   { scenarioId: 'protect-lead-in-back-five', arrowId: 'fuse-loose-pass', arrowType: 'pass' },
-  // The wing-back progression currently starts after both wing-backs have
-  // advanced, leaving no exact player at the original ball-start coordinate.
+  // This progression starts from the original ball space after both wing-backs
+  // have already advanced. Assigning a release player would require changing
+  // the timing or adding an earlier support touch.
   { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-combine-central', arrowType: 'pass' },
 ]
 
