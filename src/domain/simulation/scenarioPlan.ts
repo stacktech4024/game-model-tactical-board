@@ -1,10 +1,11 @@
 import type {
+  AuthoredScenarioArrow,
   PitchPoint,
   ScenarioArrow,
+  ScenarioBallArrow,
   ScenarioDefinition,
 } from '../scenarios/scenarioTypes'
 import type {
-  AnimationIntentType,
   BallState,
   IntentEaseHint,
   PlayerState,
@@ -16,7 +17,6 @@ import type {
 export type FormationPositions = Partial<Record<number, PitchPoint>>
 
 const BALL_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['pass', 'dribble', 'shot'])
-const PLAYER_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['run', 'press', 'recovery'])
 const PASS_MOVE_DURATION = 0.7
 const DRIBBLE_MOVE_DURATION = 0.7
 const SHOT_MOVE_DURATION = 0.4
@@ -27,16 +27,8 @@ function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
 }
 
-function getIntentType(arrow: ScenarioArrow): AnimationIntentType {
-  if (BALL_INTENT_ARROW_TYPES.has(arrow.type)) {
-    return 'ball-movement'
-  }
-
-  if (PLAYER_INTENT_ARROW_TYPES.has(arrow.type)) {
-    return 'player-movement'
-  }
-
-  return 'player-movement'
+function isBallArrow(arrow: AuthoredScenarioArrow): arrow is ScenarioBallArrow {
+  return BALL_INTENT_ARROW_TYPES.has(arrow.type)
 }
 
 function getArrowSide(arrow: ScenarioArrow): TeamSide {
@@ -157,29 +149,53 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
   const totalDuration = currentTime
 
   return scheduledArrows
-    .map(({ arrow, timing }, sequenceIndex) => ({
-      id: `intent-${arrow.id}`,
-      arrowId: arrow.id,
-      type: getIntentType(arrow),
-      arrowType: arrow.type,
-      side: getArrowSide(arrow),
-      playerNumber: arrow.playerNumber,
-      from: copyPoint(arrow.from),
-      via: arrow.via ? copyPoint(arrow.via) : undefined,
-      to: copyPoint(arrow.to),
-      order: arrow.order ?? Number.MAX_SAFE_INTEGER,
-      delay: arrow.delay ?? 0,
-      sequenceIndex,
-      easeHint: getArrowEaseHint(arrow),
-      releaseKind: arrow.releaseKind,
-      releasedBy: arrow.releasedBy ? { ...arrow.releasedBy } : undefined,
-      timing: {
-        ...timing,
-        startProgress: totalDuration > 0 ? timing.startTime / totalDuration : 0,
-        endProgress: totalDuration > 0 ? timing.endTime / totalDuration : 0,
-      },
-      label: arrow.label,
-    }))
+    .map(({ arrow, timing }, sequenceIndex) => {
+      const baseIntent = {
+        id: `intent-${arrow.id}`,
+        arrowId: arrow.id,
+        arrowType: arrow.type,
+        side: getArrowSide(arrow),
+        playerNumber: arrow.playerNumber,
+        from: copyPoint(arrow.from),
+        via: arrow.via ? copyPoint(arrow.via) : undefined,
+        to: copyPoint(arrow.to),
+        order: arrow.order ?? Number.MAX_SAFE_INTEGER,
+        delay: arrow.delay ?? 0,
+        sequenceIndex,
+        easeHint: getArrowEaseHint(arrow),
+        timing: {
+          ...timing,
+          startProgress: totalDuration > 0 ? timing.startTime / totalDuration : 0,
+          endProgress: totalDuration > 0 ? timing.endTime / totalDuration : 0,
+        },
+        label: arrow.label,
+      }
+
+      if (isBallArrow(arrow)) {
+        if (arrow.releaseKind === 'player') {
+          return {
+            ...baseIntent,
+            type: 'ball-movement',
+            arrowType: arrow.type,
+            releaseKind: 'player',
+            releasedBy: { ...arrow.releasedBy },
+          }
+        }
+
+        return {
+          ...baseIntent,
+          type: 'ball-movement',
+          arrowType: arrow.type,
+          releaseKind: 'loose-ball',
+        }
+      }
+
+      return {
+        ...baseIntent,
+        type: 'player-movement',
+        arrowType: arrow.type,
+      }
+    })
 }
 
 export function buildScenarioPlan(

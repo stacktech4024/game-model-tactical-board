@@ -40,6 +40,9 @@ export type ScenarioArrowType =
   | 'recovery'
   | 'shot'
 
+export type ScenarioBallArrowType = 'pass' | 'dribble' | 'shot'
+export type ScenarioPlayerArrowType = 'run' | 'press' | 'recovery'
+
 export type ScenarioReleasePlayer = {
   side: 'home' | 'away'
   playerNumber: number
@@ -47,7 +50,7 @@ export type ScenarioReleasePlayer = {
 
 export type ScenarioReleaseKind = 'player' | 'loose-ball'
 
-export type ScenarioArrow = {
+type BaseScenarioArrow = {
   id: string
   type: ScenarioArrowType
   from: PitchPoint
@@ -60,9 +63,36 @@ export type ScenarioArrow = {
   // Which team's token this arrow moves. Omitted means 'home', preserving
   // behavior for every existing arrow in scenarios.ts.
   side?: 'home' | 'away'
+}
+
+export type PlayerReleaseMetadata = {
+  releaseKind: 'player'
+  releasedBy: ScenarioReleasePlayer
+}
+
+export type LooseBallReleaseMetadata = {
+  releaseKind: 'loose-ball'
+  releasedBy?: never
+}
+
+export type BallReleaseMetadata = PlayerReleaseMetadata | LooseBallReleaseMetadata
+
+export type ScenarioArrow = BaseScenarioArrow & {
   releaseKind?: ScenarioReleaseKind
   releasedBy?: ScenarioReleasePlayer
 }
+
+export type ScenarioBallArrow = Omit<BaseScenarioArrow, 'type'> & {
+  type: ScenarioBallArrowType
+} & BallReleaseMetadata
+
+export type ScenarioPlayerArrow = Omit<BaseScenarioArrow, 'type'> & {
+  type: ScenarioPlayerArrowType
+  releaseKind?: never
+  releasedBy?: never
+}
+
+export type AuthoredScenarioArrow = ScenarioBallArrow | ScenarioPlayerArrow
 
 export type ScenarioMarkerTone =
   | 'primary'
@@ -118,7 +148,7 @@ export type ScenarioDefinition = {
     y: number
   }
   annotations?: ScenarioAnnotations
-  arrows?: ScenarioArrow[]
+  arrows?: AuthoredScenarioArrow[]
   markers?: ScenarioMarker[]
 }
 

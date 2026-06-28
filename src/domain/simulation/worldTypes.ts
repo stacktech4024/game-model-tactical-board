@@ -1,9 +1,10 @@
 import type {
+  BallReleaseMetadata,
   HighlightZone,
   PitchPoint,
+  ScenarioBallArrowType,
   ScenarioArrowType,
-  ScenarioReleaseKind,
-  ScenarioReleasePlayer,
+  ScenarioPlayerArrowType,
   ScenarioMoment,
 } from '../scenarios/scenarioTypes'
 
@@ -77,10 +78,9 @@ export type IntentPlaybackState = 'pending' | 'active' | 'completed'
 // eased-vs-linear divergence without the domain layer importing GSAP.
 export type IntentEaseHint = 'linear' | 'power1.inOut' | 'power2.inOut' | 'power3.out'
 
-export type AnimationIntent = {
+type BaseAnimationIntent = {
   id: EntityId
   arrowId: string
-  type: AnimationIntentType
   arrowType: ScenarioArrowType
   side: TeamSide
   playerNumber?: number
@@ -91,10 +91,22 @@ export type AnimationIntent = {
   delay: number
   sequenceIndex: number
   easeHint?: IntentEaseHint
-  releaseKind?: ScenarioReleaseKind
-  releasedBy?: ScenarioReleasePlayer
   label?: string
 }
+
+export type BallMovementIntent = BaseAnimationIntent & {
+  type: 'ball-movement'
+  arrowType: ScenarioBallArrowType
+} & BallReleaseMetadata
+
+export type PlayerMovementIntent = BaseAnimationIntent & {
+  type: 'player-movement'
+  arrowType: ScenarioPlayerArrowType
+  releaseKind?: never
+  releasedBy?: never
+}
+
+export type AnimationIntent = BallMovementIntent | PlayerMovementIntent
 
 export type ScheduledAnimationIntent = AnimationIntent & {
   timing: PlannedIntentTiming
