@@ -18,6 +18,28 @@ type ReleaseExpectation = {
   playerNumber: number
 }
 
+type ReleaseMetadataGap = {
+  scenarioId: string
+  arrowId: string
+  arrowType: string
+}
+
+const KNOWN_RELEASE_METADATA_GAPS: ReleaseMetadataGap[] = [
+  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-pass-to-left', arrowType: 'pass' },
+  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-cross-inside', arrowType: 'pass' },
+  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-finish-nine', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-gk-to-five', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-five-to-seven', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-seven-entry', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-gk-to-four', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-four-to-eleven', arrowType: 'pass' },
+  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-eleven-entry', arrowType: 'pass' },
+  { scenarioId: 'central-denial-wide-trap', arrowId: 'trap-opponent-gk-to-five', arrowType: 'pass' },
+  { scenarioId: 'protect-lead-in-back-five', arrowId: 'fuse-loose-pass', arrowType: 'pass' },
+  { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-combine-central', arrowType: 'pass' },
+  { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-shot-goal', arrowType: 'shot' },
+]
+
 function getScenario(id: string): ScenarioDefinition {
   const scenario = SCENARIOS.find((item) => item.id === id)
 
@@ -134,6 +156,20 @@ function assertScenarioTextIncludes(scenario: ScenarioDefinition, terms: string[
   })
 }
 
+function getReleaseMetadataGaps(): ReleaseMetadataGap[] {
+  return SCENARIOS.flatMap((scenario) => {
+    const plan = buildPlanForScenario(scenario)
+
+    return plan.animationIntents
+      .filter((intent) => intent.type === 'ball-movement' && !intent.releasedBy)
+      .map((intent) => ({
+        scenarioId: scenario.id,
+        arrowId: intent.arrowId,
+        arrowType: intent.arrowType,
+      }))
+  })
+}
+
 test('build-through-wide-channels keeps #4 at the forward-pass release space and preserves the goal outcome', () => {
   const scenario = getScenario('build-through-wide-channels')
   const plan = buildPlanForScenario(scenario)
@@ -152,6 +188,14 @@ test('build-through-wide-channels keeps #4 at the forward-pass release space and
   })
   assertMarkerAtIntentTarget(scenario, plan, 'wide-build-goal-marker', 'wide-build-shot-goal')
   assertFinalBallAtIntentTarget(plan, 'wide-build-shot-goal')
+})
+
+test('ball movement intents without release metadata are explicitly tracked', () => {
+  assert.deepEqual(
+    getReleaseMetadataGaps(),
+    KNOWN_RELEASE_METADATA_GAPS,
+    'New ball movement intents should include releasedBy, or be added to the documented gap list with a release-player decision.',
+  )
 })
 
 test('metadata-bearing ball intents resolve release players at the ball release point', () => {
