@@ -53,6 +53,8 @@ function makeScenario(): ScenarioDefinition {
         playerNumber: 6,
         order: 2,
         delay: 0.2,
+        releaseKind: 'player',
+        releasedBy: { side: 'home', playerNumber: 6 },
       },
       {
         id: 'early-run',
@@ -86,6 +88,8 @@ function makeScenario(): ScenarioDefinition {
         to: { x: 25, y: 36 },
         playerNumber: 7,
         order: 5,
+        releaseKind: 'player',
+        releasedBy: { side: 'home', playerNumber: 7 },
       },
       {
         id: 'shot',
@@ -94,6 +98,8 @@ function makeScenario(): ScenarioDefinition {
         to: { x: 34, y: 106 },
         playerNumber: 9,
         order: 6,
+        releaseKind: 'player',
+        releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
   }
@@ -251,6 +257,8 @@ test('buildScenarioPlan places missing arrow order after explicit orders', () =>
       type: 'pass',
       from: { x: 10, y: 20 },
       to: { x: 20, y: 30 },
+      releaseKind: 'player',
+      releasedBy: { side: 'home', playerNumber: 6 },
     },
     {
       id: 'explicit-order',
@@ -277,6 +285,8 @@ test('buildScenarioPlan preserves original array order for equal explicit orders
       from: { x: 10, y: 20 },
       to: { x: 20, y: 30 },
       order: 1,
+      releaseKind: 'player',
+      releasedBy: { side: 'home', playerNumber: 6 },
     },
     {
       id: 'second',
@@ -303,6 +313,8 @@ test('buildScenarioPlan assigns pass and dribble intents 0.7 duration', () => {
       from: { x: 10, y: 20 },
       to: { x: 20, y: 30 },
       order: 1,
+      releaseKind: 'player',
+      releasedBy: { side: 'home', playerNumber: 6 },
     },
     {
       id: 'dribble',
@@ -311,6 +323,8 @@ test('buildScenarioPlan assigns pass and dribble intents 0.7 duration', () => {
       to: { x: 25, y: 36 },
       playerNumber: 7,
       order: 2,
+      releaseKind: 'player',
+      releasedBy: { side: 'home', playerNumber: 7 },
     },
   ])
   const plan = buildScenarioPlan(scenario, {})

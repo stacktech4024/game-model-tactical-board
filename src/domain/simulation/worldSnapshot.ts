@@ -125,10 +125,9 @@ function copyAnimationIntent(
   intent: ScheduledAnimationIntent,
   progress: number,
 ): SnapshotAnimationIntent {
-  return {
+  const baseIntent = {
     id: intent.id,
     arrowId: intent.arrowId,
-    type: intent.type,
     arrowType: intent.arrowType,
     side: intent.side,
     playerNumber: intent.playerNumber,
@@ -138,8 +137,6 @@ function copyAnimationIntent(
     order: intent.order,
     delay: intent.delay,
     sequenceIndex: intent.sequenceIndex,
-    releaseKind: intent.releaseKind,
-    releasedBy: intent.releasedBy ? { ...intent.releasedBy } : undefined,
     timing: {
       startTime: intent.timing.startTime,
       endTime: intent.timing.endTime,
@@ -149,6 +146,31 @@ function copyAnimationIntent(
     },
     playbackState: getIntentPlaybackState(intent, progress),
     label: intent.label,
+  }
+
+  if (intent.type === 'ball-movement') {
+    if (intent.releaseKind === 'player') {
+      return {
+        ...baseIntent,
+        type: 'ball-movement',
+        arrowType: intent.arrowType,
+        releaseKind: 'player',
+        releasedBy: { ...intent.releasedBy },
+      }
+    }
+
+    return {
+      ...baseIntent,
+      type: 'ball-movement',
+      arrowType: intent.arrowType,
+      releaseKind: 'loose-ball',
+    }
+  }
+
+  return {
+    ...baseIntent,
+    type: 'player-movement',
+    arrowType: intent.arrowType,
   }
 }
 
