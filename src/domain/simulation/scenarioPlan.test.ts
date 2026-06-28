@@ -4,7 +4,15 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import type { ScenarioDefinition } from '../scenarios/scenarioTypes.ts'
-import { buildScenarioPlan, type FormationPositions } from './scenarioPlan.ts'
+import {
+  buildScenarioPlan,
+  getArrowMoveDuration,
+  VIA_SEGMENT_GAP,
+  PASS_SPEED_PROFILE,
+  SHOT_SPEED_PROFILE,
+  PLAYER_SPEED_PROFILE,
+  type FormationPositions,
+} from './scenarioPlan.ts'
 
 function round(value: number): number {
   return Number(value.toFixed(6))
@@ -203,7 +211,24 @@ test('buildScenarioPlan sorts animation intents deterministically from scenario 
 })
 
 test('buildScenarioPlan assigns deterministic timing windows to intents', () => {
-  const plan = buildScenarioPlan(makeScenario(), {})
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const arrowsById = new Map((scenario.arrows ?? []).map((arrow) => [arrow.id, arrow]))
+  const fullDurationFor = (arrowId: string): number => {
+    const arrow = arrowsById.get(arrowId)
+
+    assert.ok(arrow, `Expected fixture arrow ${arrowId}`)
+
+    return getArrowMoveDuration(arrow) + (arrow.via ? VIA_SEGMENT_GAP : 0)
+  }
+
+  const earlyRunEnd = fullDurationFor('early-run')
+  const latePassStart = earlyRunEnd + 0.2
+  const latePassEnd = latePassStart + fullDurationFor('late-pass')
+  const pressEnd = latePassEnd + fullDurationFor('press')
+  const recoveryEnd = pressEnd + fullDurationFor('recovery')
+  const dribbleEnd = recoveryEnd + fullDurationFor('dribble')
+  const shotEnd = dribbleEnd + fullDurationFor('shot')
 
   assert.deepEqual(
     plan.animationIntents.map((intent) => ({
@@ -213,12 +238,12 @@ test('buildScenarioPlan assigns deterministic timing windows to intents', () => 
       duration: round(intent.timing.duration),
     })),
     [
-      { arrowId: 'early-run', startTime: 0, endTime: 1.15, duration: 1.15 },
-      { arrowId: 'late-pass', startTime: 1.35, endTime: 2.05, duration: 0.7 },
-      { arrowId: 'press', startTime: 2.05, endTime: 3.2, duration: 1.15 },
-      { arrowId: 'recovery', startTime: 3.2, endTime: 4.35, duration: 1.15 },
-      { arrowId: 'dribble', startTime: 4.35, endTime: 5.21, duration: 0.86 },
-      { arrowId: 'shot', startTime: 5.21, endTime: 5.61, duration: 0.4 },
+      { arrowId: 'early-run', startTime: 0, endTime: round(earlyRunEnd), duration: round(fullDurationFor('early-run')) },
+      { arrowId: 'late-pass', startTime: round(latePassStart), endTime: round(latePassEnd), duration: round(fullDurationFor('late-pass')) },
+      { arrowId: 'press', startTime: round(latePassEnd), endTime: round(pressEnd), duration: round(fullDurationFor('press')) },
+      { arrowId: 'recovery', startTime: round(pressEnd), endTime: round(recoveryEnd), duration: round(fullDurationFor('recovery')) },
+      { arrowId: 'dribble', startTime: round(recoveryEnd), endTime: round(dribbleEnd), duration: round(fullDurationFor('dribble')) },
+      { arrowId: 'shot', startTime: round(dribbleEnd), endTime: round(shotEnd), duration: round(fullDurationFor('shot')) },
     ],
   )
 })
@@ -231,7 +256,25 @@ test('buildScenarioPlan timing windows cover normalized progress from 0 to 1', (
 })
 
 test('buildScenarioPlan timing windows follow sorted intent order', () => {
-  const plan = buildScenarioPlan(makeScenario(), {})
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const arrowsById = new Map((scenario.arrows ?? []).map((arrow) => [arrow.id, arrow]))
+  const fullDurationFor = (arrowId: string): number => {
+    const arrow = arrowsById.get(arrowId)
+
+    assert.ok(arrow, `Expected fixture arrow ${arrowId}`)
+
+    return getArrowMoveDuration(arrow) + (arrow.via ? VIA_SEGMENT_GAP : 0)
+  }
+
+  const earlyRunEnd = fullDurationFor('early-run')
+  const latePassStart = earlyRunEnd + 0.2
+  const latePassEnd = latePassStart + fullDurationFor('late-pass')
+  const pressEnd = latePassEnd + fullDurationFor('press')
+  const recoveryEnd = pressEnd + fullDurationFor('recovery')
+  const dribbleEnd = recoveryEnd + fullDurationFor('dribble')
+  const shotEnd = dribbleEnd + fullDurationFor('shot')
+  const totalDuration = shotEnd
 
   assert.deepEqual(
     plan.animationIntents.map((intent) => ({
@@ -240,12 +283,12 @@ test('buildScenarioPlan timing windows follow sorted intent order', () => {
       endProgress: round(intent.timing.endProgress),
     })),
     [
-      { arrowId: 'early-run', startProgress: 0, endProgress: round(1.15 / 5.61) },
-      { arrowId: 'late-pass', startProgress: round(1.35 / 5.61), endProgress: round(2.05 / 5.61) },
-      { arrowId: 'press', startProgress: round(2.05 / 5.61), endProgress: round(3.2 / 5.61) },
-      { arrowId: 'recovery', startProgress: round(3.2 / 5.61), endProgress: round(4.35 / 5.61) },
-      { arrowId: 'dribble', startProgress: round(4.35 / 5.61), endProgress: round(5.21 / 5.61) },
-      { arrowId: 'shot', startProgress: round(5.21 / 5.61), endProgress: 1 },
+      { arrowId: 'early-run', startProgress: 0, endProgress: round(earlyRunEnd / totalDuration) },
+      { arrowId: 'late-pass', startProgress: round(latePassStart / totalDuration), endProgress: round(latePassEnd / totalDuration) },
+      { arrowId: 'press', startProgress: round(latePassEnd / totalDuration), endProgress: round(pressEnd / totalDuration) },
+      { arrowId: 'recovery', startProgress: round(pressEnd / totalDuration), endProgress: round(recoveryEnd / totalDuration) },
+      { arrowId: 'dribble', startProgress: round(recoveryEnd / totalDuration), endProgress: round(dribbleEnd / totalDuration) },
+      { arrowId: 'shot', startProgress: round(dribbleEnd / totalDuration), endProgress: 1 },
     ],
   )
 })
@@ -305,67 +348,103 @@ test('buildScenarioPlan preserves original array order for equal explicit orders
   )
 })
 
-test('buildScenarioPlan assigns pass and dribble intents 0.7 duration', () => {
-  const scenario = makeScenarioWithArrows([
-    {
-      id: 'pass',
-      type: 'pass',
-      from: { x: 10, y: 20 },
-      to: { x: 20, y: 30 },
-      order: 1,
-      releaseKind: 'player',
-      releasedBy: { side: 'home', playerNumber: 6 },
-    },
-    {
-      id: 'dribble',
-      type: 'dribble',
-      from: { x: 20, y: 30 },
-      to: { x: 25, y: 36 },
-      playerNumber: 7,
-      order: 2,
-      releaseKind: 'player',
-      releasedBy: { side: 'home', playerNumber: 7 },
-    },
-  ])
+test('buildScenarioPlan scales pass and dribble duration with distance, clamped to each speed profile', () => {
+  const shortPass = {
+    id: 'short-pass',
+    type: 'pass' as const,
+    from: { x: 10, y: 20 },
+    to: { x: 11, y: 20 },
+    order: 1,
+    releaseKind: 'player' as const,
+    releasedBy: { side: 'home' as const, playerNumber: 6 },
+  }
+  const longPass = {
+    id: 'long-pass',
+    type: 'pass' as const,
+    from: { x: 0, y: 0 },
+    to: { x: 0, y: 90 },
+    order: 2,
+    releaseKind: 'player' as const,
+    releasedBy: { side: 'home' as const, playerNumber: 6 },
+  }
+  const dribble = {
+    id: 'dribble',
+    type: 'dribble' as const,
+    from: { x: 20, y: 30 },
+    to: { x: 25, y: 36 },
+    playerNumber: 7,
+    order: 3,
+    releaseKind: 'player' as const,
+    releasedBy: { side: 'home' as const, playerNumber: 7 },
+  }
+  const scenario = makeScenarioWithArrows([shortPass, longPass, dribble])
   const plan = buildScenarioPlan(scenario, {})
   const durationsByArrow = Object.fromEntries(
     plan.animationIntents.map((intent) => [intent.arrowId, round(intent.timing.duration)]),
   )
 
-  assert.equal(durationsByArrow.pass, 0.7)
-  assert.equal(durationsByArrow.dribble, 0.7)
+  // Short pass distance/speed falls under the min clamp.
+  assert.equal(durationsByArrow['short-pass'], PASS_SPEED_PROFILE.minDurationSeconds)
+  // Long pass distance/speed exceeds the max clamp.
+  assert.equal(durationsByArrow['long-pass'], PASS_SPEED_PROFILE.maxDurationSeconds)
+  // Dribble duration matches the dribble profile's distance/speed math directly.
+  assert.equal(durationsByArrow.dribble, round(getArrowMoveDuration(dribble)))
+  // A longer pass takes meaningfully longer than a short one - this is the
+  // entire point of the fix, distance must affect duration.
+  assert.ok(durationsByArrow['long-pass'] > durationsByArrow['short-pass'])
 })
 
-test('buildScenarioPlan assigns shot intents 0.4 duration', () => {
+test('buildScenarioPlan clamps shot duration within the shot speed profile bounds', () => {
   const plan = buildScenarioPlan(makeScenario(), {})
   const shotIntent = plan.animationIntents.find((intent) => intent.arrowType === 'shot')
 
-  assert.equal(round(shotIntent?.timing.duration ?? 0), 0.4)
+  assert.ok(shotIntent)
+  assert.ok(shotIntent.timing.duration >= SHOT_SPEED_PROFILE.minDurationSeconds)
+  assert.ok(shotIntent.timing.duration <= SHOT_SPEED_PROFILE.maxDurationSeconds)
 })
 
-test('buildScenarioPlan assigns run, press, and recovery intents 1.15 duration', () => {
-  const plan = buildScenarioPlan(makeScenario(), {})
-  const durationsByArrowType = Object.fromEntries(
-    plan.animationIntents.map((intent) => [intent.arrowType, round(intent.timing.duration)]),
-  )
+test('buildScenarioPlan scales run, press, and recovery duration with distance, clamped to the player speed profile', () => {
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const arrowsById = new Map((scenario.arrows ?? []).map((arrow) => [arrow.id, arrow]))
 
-  assert.equal(durationsByArrowType.run, 1.15)
-  assert.equal(durationsByArrowType.press, 1.15)
-  assert.equal(durationsByArrowType.recovery, 1.15)
+  ;['early-run', 'press', 'recovery'].forEach((arrowId) => {
+    const intent = plan.animationIntents.find((item) => item.arrowId === arrowId)
+    const arrow = arrowsById.get(arrowId)
+
+    assert.ok(intent, `Expected intent ${arrowId}`)
+    assert.ok(arrow, `Expected fixture arrow ${arrowId}`)
+    assert.equal(round(intent.timing.duration), round(getArrowMoveDuration(arrow)))
+    assert.ok(intent.timing.duration >= PLAYER_SPEED_PROFILE.minDurationSeconds)
+    assert.ok(intent.timing.duration <= PLAYER_SPEED_PROFILE.maxDurationSeconds)
+  })
 })
 
 test('buildScenarioPlan includes the 0.16 segment gap for via-point intents', () => {
-  const plan = buildScenarioPlan(makeScenario(), {})
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const dribbleArrow = scenario.arrows?.find((arrow) => arrow.id === 'dribble')
   const dribbleIntent = plan.animationIntents.find((intent) => intent.arrowId === 'dribble')
 
-  assert.equal(round(dribbleIntent?.timing.duration ?? 0), 0.86)
+  assert.ok(dribbleArrow)
+  assert.ok(dribbleIntent)
+  assert.equal(
+    round(dribbleIntent.timing.duration),
+    round(getArrowMoveDuration(dribbleArrow) + VIA_SEGMENT_GAP),
+  )
 })
 
 test('buildScenarioPlan shifts intent start time by delay relative to the accumulated timeline', () => {
-  const plan = buildScenarioPlan(makeScenario(), {})
+  const scenario = makeScenario()
+  const plan = buildScenarioPlan(scenario, {})
+  const earlyRunArrow = scenario.arrows?.find((arrow) => arrow.id === 'early-run')
   const delayedIntent = plan.animationIntents.find((intent) => intent.arrowId === 'late-pass')
 
-  assert.equal(round(delayedIntent?.timing.startTime ?? 0), 1.35)
+  assert.ok(earlyRunArrow)
+  assert.equal(
+    round(delayedIntent?.timing.startTime ?? 0),
+    round(getArrowMoveDuration(earlyRunArrow) + 0.2),
+  )
 })
 
 test('buildScenarioPlan maps pass, dribble, and shot as ball-related intents', () => {
