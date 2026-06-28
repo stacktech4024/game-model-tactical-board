@@ -89,12 +89,48 @@ export function createAmbientShapeShift({
 
   return {
     update: (targetPlayerNumbers: Set<number>, zoneFocus: HighlightZone[] | undefined) => {
-      lastTargets.forEach((_, playerNumber) => {
-        if (!targetPlayerNumbers.has(playerNumber)) {
-          activeTweens.get(playerNumber)?.kill()
-          activeTweens.delete(playerNumber)
-          lastTargets.delete(playerNumber)
+      // A player leaving the ambient pool (e.g. becoming the active releasedBy
+      // player for an upcoming shot) must return to their true formation
+      // anchor. Without this, they stay frozen wherever the zone-focus drift
+      // last left them - which can be up to MAX_SHIFT_METERS away from where
+      // a scripted action (like a shot) expects them to be.
+      lastTargets.forEach((lastTarget, playerNumber) => {
+        if (targetPlayerNumbers.has(playerNumber)) {
+          return
         }
+
+        activeTweens.get(playerNumber)?.kill()
+        activeTweens.delete(playerNumber)
+        lastTargets.delete(playerNumber)
+
+        const token = playerTokens.get(playerNumber)
+        const anchor = formationPositions[playerNumber]
+
+        if (!token || !anchor) {
+          return
+        }
+
+        const anchorScreen = pitchToScreen(anchor.x, anchor.y, canvasW, canvasH, padding)
+        const distanceMeters = Math.hypot(lastTarget.x - anchor.x, lastTarget.y - anchor.y)
+        const duration = clamp(
+          distanceMeters / METERS_PER_SECOND,
+          MIN_DURATION_SECONDS,
+          MAX_DURATION_SECONDS,
+        )
+
+        activeTweens.set(
+          playerNumber,
+          gsap.to(token.position, {
+            x: anchorScreen.sx,
+            y: anchorScreen.sy,
+            duration,
+            ease: 'power2.out',
+            paused: !isRunning,
+            onComplete: () => {
+              activeTweens.delete(playerNumber)
+            },
+          }),
+        )
       })
 
       targetPlayerNumbers.forEach((playerNumber) => {
