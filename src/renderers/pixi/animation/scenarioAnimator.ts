@@ -178,9 +178,21 @@ export function buildScenarioAnimator({
 
       // A shot needs a visible "this player struck it" cue, or the ball
       // just appears to glide there on its own.
-      if (isShot && arrow.playerNumber) {
-        const strikerTokens = arrow.side === 'away' ? awayPlayerTokens : homePlayerTokens
-        const strikerToken = strikerTokens?.get(arrow.playerNumber)
+      //
+      // releasedBy (when present) is the domain-verified player actually
+      // standing at the ball's release point - it can differ from the
+      // arrow's own playerNumber label, which is sometimes just the
+      // descriptive name on the arrow (see e.g. wing-back-shot-goal, where
+      // releasedBy correctly points to #10 even though the arrow is
+      // labeled #9). Prefer releasedBy so the highlighted token matches
+      // where the shot actually originates; fall back to arrow.playerNumber
+      // only for loose-ball releases, which have no specific release player.
+      const strikerSide = intent.releasedBy?.side ?? arrow.side
+      const strikerPlayerNumber = intent.releasedBy?.playerNumber ?? arrow.playerNumber
+
+      if (isShot && strikerPlayerNumber) {
+        const strikerTokens = strikerSide === 'away' ? awayPlayerTokens : homePlayerTokens
+        const strikerToken = strikerTokens?.get(strikerPlayerNumber)
 
         if (strikerToken) {
           rememberInitialPosition(strikerToken)

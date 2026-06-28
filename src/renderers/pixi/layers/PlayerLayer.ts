@@ -15,9 +15,9 @@ type FormationPosition = {
 
 type PositionMap = Record<number, FormationPosition>
 
-const PLAYER_RADIUS_PER_PITCH_METRE = 1.9
-const MIN_HOME_OUTFIELD_RADIUS = 9
-const MAX_HOME_OUTFIELD_RADIUS = 14
+const PLAYER_RADIUS_PER_PITCH_METRE = 1.4
+const MIN_HOME_OUTFIELD_RADIUS = 7
+const MAX_HOME_OUTFIELD_RADIUS = 10.5
 const GOALKEEPER_RADIUS_RATIO = 1.15
 const AWAY_RADIUS_RATIO = 0.88
 const GK_NUMBER_COLOR = 0x111111

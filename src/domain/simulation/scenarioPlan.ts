@@ -17,11 +17,57 @@ import type {
 export type FormationPositions = Partial<Record<number, PitchPoint>>
 
 const BALL_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['pass', 'dribble', 'shot'])
-const PASS_MOVE_DURATION = 0.7
-const DRIBBLE_MOVE_DURATION = 0.7
-const SHOT_MOVE_DURATION = 0.4
-const PLAYER_MOVE_DURATION = 1.15
 export const VIA_SEGMENT_GAP = 0.16
+
+// Distance-based duration replaces the old flat per-type constants
+// (PASS_MOVE_DURATION/DRIBBLE_MOVE_DURATION/SHOT_MOVE_DURATION/PLAYER_MOVE_DURATION).
+// Those produced identical durations regardless of how far an arrow actually
+// traveled, so a 5m recovery shuffle and a 35m switch of play took the same
+// time - short actions looked frozen, long actions looked like teleports.
+//
+// Each profile models a real-world speed in metres per second (pitch
+// coordinates are already in metres, see pitchConstants.ts PITCH.LENGTH/WIDTH),
+// with min/max clamps so very short moves don't feel instant and very long
+// moves don't feel sluggish.
+export type ArrowSpeedProfile = {
+  speedMetersPerSecond: number
+  minDurationSeconds: number
+  maxDurationSeconds: number
+}
+
+// ~20 m/s is a brisk, controlled ground pass - between a short crisp lay-off
+// and a hit long ball, well under max recorded pass speeds.
+export const PASS_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 20,
+  minDurationSeconds: 0.35,
+  maxDurationSeconds: 1.4,
+}
+
+// Dribbling speed is the player-and-ball-together pace, well below a struck
+// pass - roughly a controlled running pace with the ball at feet.
+export const DRIBBLE_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 5,
+  minDurationSeconds: 0.3,
+  maxDurationSeconds: 2.5,
+}
+
+// ~28 m/s (100.8 km/h) sits just under the hardest strikes ever recorded
+// (~30-35 m/s), giving headroom for the longer-range max clamp without ever
+// implying a physically impossible shot speed.
+export const SHOT_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 28,
+  minDurationSeconds: 0.25,
+  maxDurationSeconds: 0.9,
+}
+
+// ~6.5 m/s is a hard running pace for repositioning/pressing/recovering -
+// quicker than a jog, below a flat-out sprint (human sprint top speed is
+// ~12 m/s), which keeps short and long runs both inside a believable range.
+export const PLAYER_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 6.5,
+  minDurationSeconds: 0.4,
+  maxDurationSeconds: 3.0,
+}
 
 function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
@@ -35,19 +81,45 @@ function getArrowSide(arrow: ScenarioArrow): TeamSide {
   return arrow.side ?? 'home'
 }
 
-function getArrowMoveDuration(arrow: ScenarioArrow): number {
+function distanceBetween(a: PitchPoint, b: PitchPoint): number {
+  return Math.hypot(a.x - b.x, a.y - b.y)
+}
+
+// Total straight-line path length for the arrow, including the via-point
+// detour if present. This is the distance actually traveled on screen, not
+// just the from->to displacement.
+function getArrowPathDistance(arrow: ScenarioArrow): number {
+  if (arrow.via) {
+    return distanceBetween(arrow.from, arrow.via) + distanceBetween(arrow.via, arrow.to)
+  }
+
+  return distanceBetween(arrow.from, arrow.to)
+}
+
+function clampDuration(value: number, profile: ArrowSpeedProfile): number {
+  return Math.min(profile.maxDurationSeconds, Math.max(profile.minDurationSeconds, value))
+}
+
+function getSpeedProfileForArrow(arrow: ScenarioArrow): ArrowSpeedProfile {
   switch (arrow.type) {
     case 'pass':
-      return PASS_MOVE_DURATION
+      return PASS_SPEED_PROFILE
     case 'dribble':
-      return DRIBBLE_MOVE_DURATION
+      return DRIBBLE_SPEED_PROFILE
     case 'shot':
-      return SHOT_MOVE_DURATION
+      return SHOT_SPEED_PROFILE
     case 'run':
     case 'press':
     case 'recovery':
-      return PLAYER_MOVE_DURATION
+      return PLAYER_SPEED_PROFILE
   }
+}
+
+export function getArrowMoveDuration(arrow: ScenarioArrow): number {
+  const profile = getSpeedProfileForArrow(arrow)
+  const distance = getArrowPathDistance(arrow)
+
+  return clampDuration(distance / profile.speedMetersPerSecond, profile)
 }
 
 // Mirrors the GSAP ease scenarioAnimator.ts applies for each arrow type, as
