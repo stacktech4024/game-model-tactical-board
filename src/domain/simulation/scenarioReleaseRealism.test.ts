@@ -18,13 +18,13 @@ type ReleaseExpectation = {
   playerNumber: number
 }
 
-type ReleaseMetadataGap = {
+type LooseBallRelease = {
   scenarioId: string
   arrowId: string
   arrowType: string
 }
 
-const KNOWN_RELEASE_METADATA_GAPS: ReleaseMetadataGap[] = [
+const KNOWN_LOOSE_BALL_RELEASES: LooseBallRelease[] = [
   // This represents a loose turnover ball, not a clean player-controlled
   // release. The arrow names #8 as the turnover focus, but #8 is not at the
   // ball-start coordinate; resolving it needs an authored regain/loss touch.
@@ -74,6 +74,7 @@ function assertReleasePlayerAtBall(plan: ScenarioPlan, expectation: ReleaseExpec
   )
 
   assert.equal(intent.type, 'ball-movement', `${plan.scenarioId} ${intent.arrowId}: expected ball movement intent`)
+  assert.equal(intent.releaseKind, 'player', `${plan.scenarioId} ${intent.arrowId}: release kind`)
   assert.deepEqual(
     intent.releasedBy,
     { side: expectation.side, playerNumber: expectation.playerNumber },
@@ -151,12 +152,12 @@ function assertScenarioTextIncludes(scenario: ScenarioDefinition, terms: string[
   })
 }
 
-function getReleaseMetadataGaps(): ReleaseMetadataGap[] {
+function getLooseBallReleases(): LooseBallRelease[] {
   return SCENARIOS.flatMap((scenario) => {
     const plan = buildPlanForScenario(scenario)
 
     return plan.animationIntents
-      .filter((intent) => intent.type === 'ball-movement' && !intent.releasedBy)
+      .filter((intent) => intent.type === 'ball-movement' && intent.releaseKind === 'loose-ball')
       .map((intent) => ({
         scenarioId: scenario.id,
         arrowId: intent.arrowId,
@@ -185,24 +186,38 @@ test('build-through-wide-channels keeps #4 at the forward-pass release space and
   assertFinalBallAtIntentTarget(plan, 'wide-build-shot-goal')
 })
 
-test('ball movement intents without release metadata are explicitly tracked', () => {
+test('loose-ball movement intents are explicitly tracked', () => {
   assert.deepEqual(
-    getReleaseMetadataGaps(),
-    KNOWN_RELEASE_METADATA_GAPS,
-    'New ball movement intents should include releasedBy, or be added to the documented gap list with a release-player decision.',
+    getLooseBallReleases(),
+    KNOWN_LOOSE_BALL_RELEASES,
+    'New loose-ball movement intents should be explicitly documented here with an authoring decision.',
   )
 })
 
-test('metadata-bearing ball intents resolve release players at the ball release point', () => {
+test('every ball movement intent declares a release kind and follows its release metadata policy', () => {
   SCENARIOS.forEach((scenario) => {
     const plan = buildPlanForScenario(scenario)
 
     plan.animationIntents
-      .filter((intent) => intent.type === 'ball-movement' && intent.releasedBy)
+      .filter((intent) => intent.type === 'ball-movement')
       .forEach((intent) => {
+        assert.ok(
+          intent.releaseKind === 'player' || intent.releaseKind === 'loose-ball',
+          `${scenario.id} ${intent.arrowId}: expected releaseKind to be player or loose-ball`,
+        )
+
+        if (intent.releaseKind === 'loose-ball') {
+          assert.equal(
+            intent.releasedBy,
+            undefined,
+            `${scenario.id} ${intent.arrowId}: loose-ball releases should not claim a release player`,
+          )
+          return
+        }
+
         const releasedBy = intent.releasedBy
 
-        assert.ok(releasedBy, `${scenario.id} ${intent.arrowId}: expected release metadata`)
+        assert.ok(releasedBy, `${scenario.id} ${intent.arrowId}: player releases require releasedBy metadata`)
 
         const snapshot = getWorldSnapshotAtProgress(plan, intent.timing.startProgress)
         const player = snapshot.players.find(
