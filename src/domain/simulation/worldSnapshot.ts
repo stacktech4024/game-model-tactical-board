@@ -138,6 +138,7 @@ function copyAnimationIntent(
     order: intent.order,
     delay: intent.delay,
     sequenceIndex: intent.sequenceIndex,
+    releasedBy: intent.releasedBy ? { ...intent.releasedBy } : undefined,
     timing: {
       startTime: intent.timing.startTime,
       endTime: intent.timing.endTime,

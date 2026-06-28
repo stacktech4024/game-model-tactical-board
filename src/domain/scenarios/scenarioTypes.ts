@@ -40,6 +40,11 @@ export type ScenarioArrowType =
   | 'recovery'
   | 'shot'
 
+export type ScenarioReleasePlayer = {
+  side: 'home' | 'away'
+  playerNumber: number
+}
+
 export type ScenarioArrow = {
   id: string
   type: ScenarioArrowType
@@ -53,6 +58,7 @@ export type ScenarioArrow = {
   // Which team's token this arrow moves. Omitted means 'home', preserving
   // behavior for every existing arrow in scenarios.ts.
   side?: 'home' | 'away'
+  releasedBy?: ScenarioReleasePlayer
 }
 
 export type ScenarioMarkerTone =

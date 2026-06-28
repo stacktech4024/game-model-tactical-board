@@ -124,6 +124,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: '#4 slide #10',
         order: 5,
         delay: 0.1,
+        releasedBy: { side: 'home', playerNumber: 4 },
       },
       {
         id: 'wide-build-nine-step-to-finish',
@@ -153,6 +154,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 8,
         delay: 0.2,
+        releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
     markers: [
@@ -260,6 +262,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 6,
         order: 5,
         delay: 0.05,
+        releasedBy: { side: 'home', playerNumber: 6 },
       },
       {
         id: 'counter-right-wing-run',
@@ -302,6 +305,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 6,
         delay: 0.1,
+        releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
     markers: [
@@ -553,6 +557,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 10,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 7 },
       },
     ],
     markers: [
@@ -800,6 +805,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 10,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 11 },
       },
     ],
     markers: [
@@ -933,6 +939,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Try central',
         order: -3,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 5 },
       },
       {
         id: 'trap-six-screen-central',
@@ -993,6 +1000,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 3,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 10 },
       },
       {
         id: 'trap-away-seven-receive-wide',
@@ -1054,6 +1062,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         side: 'away',
         order: 9,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 7 },
       },
     ],
     markers: [
@@ -1425,6 +1434,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Corridor',
         order: 2,
         delay: 0.15,
+        releasedBy: { side: 'home', playerNumber: 7 },
       },
       {
         id: 'corner-nine-attack-corridor',
@@ -1455,6 +1465,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 5,
         delay: 0.1,
+        releasedBy: { side: 'home', playerNumber: 9 },
       },
     ],
     markers: [
