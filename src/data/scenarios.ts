@@ -69,7 +69,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         relatedArrows: ['wide-build-shot-goal'],
       },
     ],
-    ballStart: { x: 12, y: 24 },
+    ballStart: { x: 10, y: 28 },
     annotations: {
       highlightZones: [1, 2, 3],
       highlightChannels: ['wide-left', 'wide-right'],
@@ -78,12 +78,13 @@ export const SCENARIOS: ScenarioDefinition[] = [
       {
         id: 'wide-build-pass-to-left',
         type: 'pass',
-        from: { x: 12, y: 24 },
+        from: { x: 10, y: 28 },
         via: { x: 8, y: 44 },
         to: { x: 10, y: 62 },
         label: 'Play wide',
         order: 1,
         delay: 0,
+        releasedBy: { side: 'home', playerNumber: 3 },
       },
       {
         id: 'wide-build-rb-advance',
@@ -104,6 +105,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Lay off #6',
         order: 3,
         delay: 0.2,
+        releasedBy: { side: 'home', playerNumber: 11 },
       },
       {
         id: 'wide-build-four-step-to-release',
@@ -144,6 +146,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find #9',
         order: 7,
         delay: 0.2,
+        releasedBy: { side: 'home', playerNumber: 10 },
       },
       {
         id: 'wide-build-shot-goal',
@@ -428,6 +431,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -3,
         delay: 0,
+        releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
         id: 'compact-opponent-five-to-seven',
@@ -437,6 +441,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find wide',
         order: -2,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 5 },
       },
       {
         id: 'compact-opponent-seven-entry',
@@ -446,6 +451,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Enter block',
         order: -1,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 7 },
       },
       {
         id: 'compact-away-seven-receive-wide',
@@ -676,6 +682,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -3,
         delay: 0,
+        releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
         id: 'compact-left-opponent-four-to-eleven',
@@ -685,6 +692,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Find wide',
         order: -2,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 4 },
       },
       {
         id: 'compact-left-opponent-eleven-entry',
@@ -694,6 +702,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Enter block',
         order: -1,
         delay: 0.15,
+        releasedBy: { side: 'away', playerNumber: 11 },
       },
       {
         id: 'compact-left-away-eleven-receive-wide',
@@ -930,6 +939,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Play out',
         order: -4,
         delay: 0,
+        releasedBy: { side: 'away', playerNumber: 1 },
       },
       {
         id: 'trap-opponent-five-to-ten',
@@ -1323,6 +1333,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         playerNumber: 9,
         order: 3,
         delay: 0.25,
+        releasedBy: { side: 'home', playerNumber: 10 },
       },
     ],
     markers: [
