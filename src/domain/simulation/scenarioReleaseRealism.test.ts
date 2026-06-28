@@ -291,93 +291,77 @@ test('counter-quickly-on-turnover has #6 secure and release before #9 finishes i
   assertFinalBallAtIntentTarget(plan, 'counter-shot-goal')
 })
 
-test('compact-defensive-block keeps away #7 at the wide release point and preserves the forced-back outcome', () => {
-  const scenario = getScenario('compact-defensive-block')
-  const plan = buildPlanForScenario(scenario)
-
-  assertPhaseLabels(scenario, ['Opponent build-up', 'Protect middle', 'Force wide', 'Contain wide'])
-  assertPlayerArrives(plan, 'compact-away-seven-receive-wide', 'away', 7)
-  assertReleasePlayerAtBall(plan, {
-    arrowId: 'compact-opponent-forced-back',
-    side: 'away',
-    playerNumber: 7,
-  })
+test('main attacking scenarios include believable away off-ball defensive movement', () => {
   ;[
-    'compact-two-step-wide',
-    'compact-six-screen-inside',
-    'compact-eight-screen-central',
-    'compact-four-cover-slide',
-    'compact-five-balance-slide',
-    'compact-three-tuck-in',
-    'compact-seven-block-switch',
-    'compact-ten-shade-pivot',
-    'compact-eleven-tuck-balance',
-  ].forEach((arrowId) => assert.equal(getIntent(plan, arrowId).type, 'player-movement'))
-  assertMarkerAtIntentTarget(scenario, plan, 'compact-contained-marker', 'compact-opponent-forced-back')
-  assertFinalBallAtIntentTarget(plan, 'compact-opponent-forced-back')
-  assertScenarioTextIncludes(scenario, ['DENY', 'DELAY', 'DIRECT', 'BALANCE'])
+    {
+      scenarioId: 'build-through-wide-channels',
+      arrowIds: [
+        'wide-build-away-eleven-press',
+        'wide-build-away-eight-screen',
+        'wide-build-away-five-track-nine',
+        'wide-build-away-two-tuck',
+      ],
+    },
+    {
+      scenarioId: 'counter-quickly-on-turnover',
+      arrowIds: [
+        'counter-away-ten-counterpress',
+        'counter-away-six-screen',
+        'counter-away-two-recover',
+        'counter-away-five-track-nine',
+      ],
+    },
+    {
+      scenarioId: 'back-five-to-wing-back-attack',
+      arrowIds: [
+        'wing-back-away-three-delay',
+        'wing-back-away-eight-screen',
+        'wing-back-away-four-track-ten',
+        'wing-back-away-six-drop',
+      ],
+    },
+    {
+      scenarioId: 'corner-short-decoy-wide-delivery',
+      arrowIds: [
+        'corner-away-three-step-short',
+        'corner-away-four-near-post',
+        'corner-away-two-back-post',
+        'corner-away-five-track-nine',
+      ],
+    },
+  ].forEach(({ scenarioId, arrowIds }) => {
+    const plan = buildPlanForScenario(getScenario(scenarioId))
+
+    arrowIds.forEach((arrowId) => {
+      const intent = getIntent(plan, arrowId)
+
+      assert.equal(intent.type, 'player-movement', `${scenarioId} ${arrowId}: expected player movement`)
+      assert.equal(intent.side, 'away', `${scenarioId} ${arrowId}: expected away movement`)
+      assertPlayerArrives(plan, arrowId, 'away', intent.playerNumber!)
+    })
+  })
 })
 
-test('compact-defensive-block-opposite-side keeps away #11 at the wide release point and preserves the forced-back outcome', () => {
-  const scenario = getScenario('compact-defensive-block-opposite-side')
+test('protect-lead-in-back-five shows opponent support and home rest-defence cover without changing the loose-ball policy', () => {
+  const scenario = getScenario('protect-lead-in-back-five')
   const plan = buildPlanForScenario(scenario)
 
-  assertPhaseLabels(scenario, ['Opponent build-up', 'Protect middle', 'Force wide', 'Contain wide'])
-  assertPlayerArrives(plan, 'compact-left-away-eleven-receive-wide', 'away', 11)
-  assertReleasePlayerAtBall(plan, {
-    arrowId: 'compact-left-opponent-forced-back',
-    side: 'away',
-    playerNumber: 11,
-  })
-  ;[
-    'compact-left-three-step-wide',
-    'compact-left-six-screen-inside',
-    'compact-left-eight-screen-central',
-    'compact-left-four-cover-slide',
-    'compact-left-five-balance-slide',
-    'compact-left-two-tuck-in',
-    'compact-left-eleven-block-switch',
-    'compact-left-ten-shade-pivot',
-    'compact-left-seven-tuck-balance',
-  ].forEach((arrowId) => assert.equal(getIntent(plan, arrowId).type, 'player-movement'))
-  assertMarkerAtIntentTarget(scenario, plan, 'compact-left-contained-marker', 'compact-left-opponent-forced-back')
-  assertFinalBallAtIntentTarget(plan, 'compact-left-opponent-forced-back')
-  assertScenarioTextIncludes(scenario, ['DENY', 'DELAY', 'DIRECT', 'BALANCE', 'CONTROL & RESTRAINT'])
-})
+  ;['fuse-away-two-collect', 'fuse-away-six-support', 'fuse-away-nine-outlet'].forEach((arrowId) => {
+    const intent = getIntent(plan, arrowId)
 
-test('central-denial-wide-trap denies central access before guiding wide and containing the opponent', () => {
-  const scenario = getScenario('central-denial-wide-trap')
-  const plan = buildPlanForScenario(scenario)
+    assert.equal(intent.type, 'player-movement', `${scenario.id} ${arrowId}: expected player movement`)
+    assert.equal(intent.side, 'away', `${scenario.id} ${arrowId}: expected away movement`)
+    assertPlayerArrives(plan, arrowId, 'away', intent.playerNumber!)
+  })
 
-  assertPhaseLabels(scenario, ['Central threat', 'Guide wide', 'Wide trap', 'Contain wide'])
-  assertReleasePlayerAtBall(plan, {
-    arrowId: 'trap-opponent-five-to-ten',
-    side: 'away',
-    playerNumber: 5,
+  ;['fuse-four-cover', 'fuse-five-cover', 'fuse-two-tuck'].forEach((arrowId) => {
+    const intent = getIntent(plan, arrowId)
+
+    assert.equal(intent.type, 'player-movement', `${scenario.id} ${arrowId}: expected player movement`)
+    assert.equal(intent.side, 'home', `${scenario.id} ${arrowId}: expected home movement`)
+    assertPlayerArrives(plan, arrowId, 'home', intent.playerNumber!)
   })
-  assertPlayerArrives(plan, 'trap-six-screen-central', 'home', 6)
-  assertPlayerArrives(plan, 'trap-eight-screen-half-space', 'home', 8)
-  assertPlayerArrives(plan, 'trap-ten-shade-pivot', 'home', 10)
-  assertReleasePlayerAtBall(plan, {
-    arrowId: 'trap-opponent-ten-to-seven',
-    side: 'away',
-    playerNumber: 10,
-  })
-  assertPlayerArrives(plan, 'trap-away-seven-receive-wide', 'away', 7)
-  assertReleasePlayerAtBall(plan, {
-    arrowId: 'trap-opponent-forced-back',
-    side: 'away',
-    playerNumber: 7,
-  })
-  ;[
-    'trap-seven-block-switch',
-    'trap-eleven-lock-inside',
-    'trap-two-step-wide',
-    'trap-five-cover-slide',
-    'trap-four-balance-slide',
-    'trap-three-tuck-in',
-  ].forEach((arrowId) => assert.equal(getIntent(plan, arrowId).type, 'player-movement'))
-  assertMarkerAtIntentTarget(scenario, plan, 'trap-contained-marker', 'trap-opponent-forced-back')
-  assertFinalBallAtIntentTarget(plan, 'trap-opponent-forced-back')
-  assertScenarioTextIncludes(scenario, ['DENY', 'DELAY', 'DIRECT', 'BALANCE', 'CONTROL & RESTRAINT'])
+
+  assert.deepEqual(getLooseBallReleases(), KNOWN_LOOSE_BALL_RELEASES)
+  assertScenarioTextIncludes(scenario, ['press', 'cover', 'counter'])
 })
