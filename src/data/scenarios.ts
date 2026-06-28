@@ -733,7 +733,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         relatedArrows: ['wing-back-shot-goal', 'wing-back-away-six-drop'],
       },
     ],
-    ballStart: { x: 12, y: 58 },
+    ballStart: { x: 8, y: 58 },
     annotations: {
       highlightZones: [2, 3, 4],
       highlightChannels: ['wide-left', 'wide-right'],
@@ -797,7 +797,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
       {
         id: 'wing-back-combine-central',
         type: 'pass',
-        from: { x: 12, y: 58 },
+        from: { x: 8, y: 58 },
         via: { x: 20, y: 72 },
         to: { x: 29, y: 84 },
         label: 'Combine',
