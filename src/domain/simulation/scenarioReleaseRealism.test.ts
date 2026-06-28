@@ -25,19 +25,12 @@ type ReleaseMetadataGap = {
 }
 
 const KNOWN_RELEASE_METADATA_GAPS: ReleaseMetadataGap[] = [
-  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-pass-to-left', arrowType: 'pass' },
-  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-cross-inside', arrowType: 'pass' },
-  { scenarioId: 'build-through-wide-channels', arrowId: 'wide-build-finish-nine', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-gk-to-five', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-five-to-seven', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block', arrowId: 'compact-opponent-seven-entry', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-gk-to-four', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-four-to-eleven', arrowType: 'pass' },
-  { scenarioId: 'compact-defensive-block-opposite-side', arrowId: 'compact-left-opponent-eleven-entry', arrowType: 'pass' },
-  { scenarioId: 'central-denial-wide-trap', arrowId: 'trap-opponent-gk-to-five', arrowType: 'pass' },
+  // The loose pass starts from a turnover space rather than an exact player
+  // position; resolving it needs scenario authoring work around who loses it.
   { scenarioId: 'protect-lead-in-back-five', arrowId: 'fuse-loose-pass', arrowType: 'pass' },
+  // The wing-back progression currently starts after both wing-backs have
+  // advanced, leaving no exact player at the original ball-start coordinate.
   { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-combine-central', arrowType: 'pass' },
-  { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-shot-goal', arrowType: 'shot' },
 ]
 
 function getScenario(id: string): ScenarioDefinition {
