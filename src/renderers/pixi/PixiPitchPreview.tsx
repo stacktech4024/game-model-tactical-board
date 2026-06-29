@@ -55,7 +55,7 @@ export type PixiPitchPreviewProps = {
   routes?: PixiPitchPreviewRoute[]
 }
 
-const PITCH_PADDING = 32
+export const PITCH_PADDING = 32
 
 function percentageToPitchPosition(x: number, y: number) {
   return {
