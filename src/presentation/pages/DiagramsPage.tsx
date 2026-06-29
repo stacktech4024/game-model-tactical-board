@@ -36,10 +36,10 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
 function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
   if (scenario.id === 'build-through-wide-channels') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+      <div className="presentation-diagram-card__preview">
         <PixiPitchPreview
-          width={160}
-          height={247}
+          width={300}
+          height={463}
           players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
           ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
           routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
@@ -50,10 +50,10 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'counter-quickly-on-turnover') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+      <div className="presentation-diagram-card__preview">
         <PixiPitchPreview
-          width={160}
-          height={247}
+          width={300}
+          height={463}
           players={ATTACKING_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
@@ -64,10 +64,10 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'protect-lead-in-back-five') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+      <div className="presentation-diagram-card__preview">
         <PixiPitchPreview
-          width={160}
-          height={247}
+          width={300}
+          height={463}
           players={DEFENSIVE_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
@@ -78,10 +78,10 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'back-five-to-wing-back-attack') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+      <div className="presentation-diagram-card__preview">
         <PixiPitchPreview
-          width={160}
-          height={247}
+          width={300}
+          height={463}
           players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
           ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
           routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
@@ -92,10 +92,10 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'corner-short-decoy-wide-delivery') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+      <div className="presentation-diagram-card__preview">
         <PixiPitchPreview
-          width={160}
-          height={247}
+          width={300}
+          height={463}
           players={CORNER_PIXI_SCENARIO.players}
           ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
           routes={CORNER_PIXI_SCENARIO.routes}

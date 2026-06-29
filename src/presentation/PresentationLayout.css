@@ -1076,6 +1076,23 @@
   display: block;
 }
 
+.presentation-diagram-card__preview {
+  display: grid;
+  place-items: center;
+  padding: 20px 16px;
+}
+
+.presentation-diagram-card__preview .pixi-pitch-preview {
+  width: 100%;
+  max-width: 420px;
+}
+
+.presentation-diagram-card__preview .pixi-pitch-preview canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+}
+
 .presentation-diagram-card__live-preview,
 .diagram-modal__live-preview {
   display: grid;
