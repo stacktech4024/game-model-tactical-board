@@ -441,6 +441,50 @@
   color: #f8fafc;
 }
 
+.players-detail__traits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.players-detail__trait {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 26px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.55);
+  text-align: center;
+}
+
+.players-detail__trait-icon {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.players-detail__trait-label {
+  color: #e5eef9;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .players-detail__traits {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .players-detail__trait {
+    padding: 16px 8px;
+  }
+
+  .players-detail__trait-icon {
+    font-size: 2rem;
+  }
+}
+
 .fullback-visual-card,
 .method-detail,
 .method-check-card,

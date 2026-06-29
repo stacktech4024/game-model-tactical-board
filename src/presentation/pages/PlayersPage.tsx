@@ -155,6 +155,16 @@ export function PlayersPage() {
               <p><strong>Style:</strong> {selectedProfile.style}</p>
               <p><strong>In possession:</strong> {selectedProfile.attackingOrg}</p>
               <p><strong>Out of possession:</strong> {selectedProfile.defensiveOrg}</p>
+              <div className="players-detail__traits" aria-label={`${selectedProfile.fullName} key qualities`}>
+                {selectedProfile.traits.map((trait) => (
+                  <div key={trait.label} className="players-detail__trait">
+                    <span className="players-detail__trait-icon" aria-hidden="true">
+                      {trait.icon}
+                    </span>
+                    <span className="players-detail__trait-label">{trait.label}</span>
+                  </div>
+                ))}
+              </div>
             </>
           ) : (
             <>
