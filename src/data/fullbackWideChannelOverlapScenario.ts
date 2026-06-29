@@ -5,7 +5,7 @@ export const FULLBACK_WIDE_CHANNEL_OVERLAP_SCENARIO: ScenarioDefinition = {
   title: 'Wide channel overlap',
   moment: 'Attacking Transition',
   momentOfGame: 'Attacking Transition',
-  formationMode: 'attacking-433',
+  formationMode: 'attacking-442',
   zoneFocus: 'Zone 3 to Zone 4',
   fieldGeography: {
     zones: [3, 4],
@@ -13,7 +13,7 @@ export const FULLBACK_WIDE_CHANNEL_OVERLAP_SCENARIO: ScenarioDefinition = {
     description: 'Transition from Channel 2 into Channel 1 width, then Zone 3 entry into Zone 4 cutback space.',
   },
   system: {
-    shape: '1-4-3-3 transition attack',
+    shape: '1-4-4-2 transition attack',
     description: '#7 holds the wide channel, #2 overlaps from deep, #10 arrives late at the box edge, and #9 attacks near post as the secondary option.',
   },
   strategy: 'Exploit the first wide-channel advantage after regain with overlap timing and a cutback to the late runner.',
