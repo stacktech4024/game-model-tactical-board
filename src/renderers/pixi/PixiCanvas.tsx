@@ -31,6 +31,7 @@ import type { FormationPositionMap } from '../../data/formations'
 import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants'
 import { getPitchScale, screenToPitch } from '../../domain/pitch/coordTransforms'
 import { buildScenarioPlan } from '../../domain/simulation/scenarioPlan'
+import { getWorldSnapshotAtProgress } from '../../domain/simulation/worldSnapshot'
 import {
   logSnapshotComparison,
   type LiveScreenPosition,
@@ -358,9 +359,24 @@ export function PixiCanvas({
       const stage: Container = app.stage
       const activePositions = FORMATION_POSITIONS[selectedFormation]
       const awayPositions = OPPOSITION_POSITIONS[selectedFormation]
-      const comparisonPlan = ENABLE_SNAPSHOT_COMPARISON_LOGGER
-        ? buildScenarioPlan(selectedScenario, activePositions, awayPositions)
-        : undefined
+      const scenarioPlan = buildScenarioPlan(selectedScenario, activePositions, awayPositions)
+      const comparisonPlan = ENABLE_SNAPSHOT_COMPARISON_LOGGER ? scenarioPlan : undefined
+
+      // Some scenarios script a player away from their resting formation slot
+      // from the very first frame (e.g. a corner taker standing at the corner
+      // flag, far from their average position). Drawing tokens at the raw
+      // formation position would show them in the wrong spot until the
+      // animation snapped them over on Play - read the scenario's actual
+      // progress-0 snapshot instead so the resting view already matches.
+      const initialSnapshot = getWorldSnapshotAtProgress(scenarioPlan, 0)
+      const initialHomePositions: FormationPositionMap = { ...activePositions }
+      const initialAwayPositions: FormationPositionMap = { ...awayPositions }
+
+      initialSnapshot.players.forEach((player) => {
+        const target = player.side === 'away' ? initialAwayPositions : initialHomePositions
+
+        target[player.number] = { x: player.position.x, y: player.position.y }
+      })
       const homePlayerTokenRefs = new Map<number, Container>()
       const awayPlayerTokenRefs = new Map<number, Container>()
       const homePlayerSpriteRefs = new Map<number, Sprite>()
@@ -442,7 +458,7 @@ export function PixiCanvas({
         drawPlayers(
           awayPlayerLayer,
           OPPOSITION_SQUAD,
-          awayPositions,
+          initialAwayPositions,
           width,
           height,
           pitchPadding,
@@ -468,7 +484,7 @@ export function PixiCanvas({
 
           awayPlayerVisuals.set(playerNumber, {
             ...visual,
-            zoneNumber: getZoneNumberForY(awayPositions[playerNumber]?.y ?? 0),
+            zoneNumber: getZoneNumberForY(initialAwayPositions[playerNumber]?.y ?? 0),
           })
         })
       } else {
@@ -478,7 +494,7 @@ export function PixiCanvas({
       drawPlayers(
         playerLayer,
         PICKERING_SQUAD,
-        activePositions,
+        initialHomePositions,
         width,
         height,
         pitchPadding,
@@ -504,7 +520,7 @@ export function PixiCanvas({
 
         playerVisuals.set(playerNumber, {
           ...visual,
-          zoneNumber: getZoneNumberForY(activePositions[playerNumber]?.y ?? 0),
+          zoneNumber: getZoneNumberForY(initialHomePositions[playerNumber]?.y ?? 0),
         })
       })
       drawScenarioMarkers(markerLayer, showMarkers ? selectedMarkers : undefined, width, height, pitchPadding)
