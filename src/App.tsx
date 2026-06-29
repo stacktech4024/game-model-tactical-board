@@ -5,6 +5,7 @@ import { IntroPage } from './presentation/pages/IntroPage'
 import { GameAnalysisPage } from './presentation/pages/GameAnalysisPage'
 import { DiagramsPage } from './presentation/pages/DiagramsPage'
 import { LiveBoardPage } from './presentation/pages/LiveBoardPage'
+import { PlayersPage } from './presentation/pages/PlayersPage'
 import { SkillsPage } from './presentation/pages/SkillsPage'
 import { MethodologyPage } from './presentation/pages/MethodologyPage'
 import { ClosingPage } from './presentation/pages/ClosingPage'
@@ -19,6 +20,7 @@ function App() {
       <Route path="/presentation/game-analysis" element={<GameAnalysisPage />} />
       <Route path="/presentation/diagrams" element={<DiagramsPage />} />
       <Route path="/presentation/live-board" element={<LiveBoardPage />} />
+      <Route path="/presentation/players" element={<PlayersPage />} />
       <Route path="/presentation/skills" element={<SkillsPage />} />
       <Route path="/presentation/methodology" element={<MethodologyPage />} />
       <Route path="/presentation/closing" element={<ClosingPage />} />

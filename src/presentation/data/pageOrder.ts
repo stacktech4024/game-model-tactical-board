@@ -4,6 +4,7 @@ export type PresentationPageId =
   | 'game-analysis'
   | 'diagrams'
   | 'live-board'
+  | 'players'
   | 'skills'
   | 'methodology'
   | 'closing'
@@ -14,6 +15,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'game-analysis',
   'diagrams',
   'live-board',
+  'players',
   'skills',
   'methodology',
   'closing',
@@ -25,6 +27,7 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   'game-analysis': 'Game analysis',
   diagrams: 'Moment diagrams',
   'live-board': 'Live tactical board',
+  players: 'Squad roles',
   skills: 'Skill development',
   methodology: 'Training methodology',
   closing: 'Closing',
