@@ -148,7 +148,7 @@ export function PixiPitchPreview({
       }
 
       destroyed = true
-      app.destroy(true)
+      app.destroy({ removeView: true })
     }
 
     const mount = async () => {

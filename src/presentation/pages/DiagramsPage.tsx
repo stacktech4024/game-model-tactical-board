@@ -6,6 +6,8 @@ import { PresentationLayout } from '../PresentationLayout'
 import { BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO } from '../data/buildThroughWideChannelsPixiAdapter'
 import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionPixiAdapter'
 import { DEFENSIVE_TRANSITION_PIXI_SCENARIO } from '../data/defensiveTransitionPixiAdapter'
+import { CORNER_PIXI_SCENARIO } from '../data/cornerPixiAdapter'
+import { WING_BACK_ATTACK_PIXI_SCENARIO } from '../data/wingBackAttackPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 
 const DIAGRAM_SCENARIO_IDS = [
@@ -74,6 +76,34 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
     )
   }
 
+  if (scenario.id === 'back-five-to-wing-back-attack') {
+    return (
+      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+        <PixiPitchPreview
+          width={160}
+          height={247}
+          players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
+          ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
+          routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
+  if (scenario.id === 'corner-short-decoy-wide-delivery') {
+    return (
+      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+        <PixiPitchPreview
+          width={160}
+          height={247}
+          players={CORNER_PIXI_SCENARIO.players}
+          ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
+          routes={CORNER_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="presentation-diagram-card__live-preview">
       <span>Live board scenario</span>
@@ -87,6 +117,8 @@ export function DiagramsPage() {
   const [buildThroughWideChannelsCue, setBuildThroughWideChannelsCue] = useState('Secure build-up')
   const [attackingTransitionCue, setAttackingTransitionCue] = useState('Regain')
   const [defensiveTransitionCue, setDefensiveTransitionCue] = useState('Ball lost')
+  const [wingBackAttackCue, setWingBackAttackCue] = useState('Secure base')
+  const [cornerCue, setCornerCue] = useState('Short touch decoy')
 
   const handleScenarioSelect = (scenario: ScenarioDefinition) => {
     setSelectedScenario(scenario)
@@ -101,6 +133,14 @@ export function DiagramsPage() {
 
     if (scenario.id === 'protect-lead-in-back-five') {
       setDefensiveTransitionCue('Ball lost')
+    }
+
+    if (scenario.id === 'back-five-to-wing-back-attack') {
+      setWingBackAttackCue('Secure base')
+    }
+
+    if (scenario.id === 'corner-short-decoy-wide-delivery') {
+      setCornerCue('Short touch decoy')
     }
   }
 
@@ -250,6 +290,74 @@ export function DiagramsPage() {
                         style={{ background: '#22c55e' }}
                       />
                       Recovery
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : selectedScenario.id === 'back-five-to-wing-back-attack' ? (
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div className="transition-modal-pitch__preview">
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
+                    ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
+                    steps={WING_BACK_ATTACK_PIXI_SCENARIO.steps}
+                    routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
+                    repeatDelay={1.2}
+                    onCueChange={setWingBackAttackCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {wingBackAttackCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {WING_BACK_ATTACK_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                      Pass
+                    </span>
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                      Player run
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : selectedScenario.id === 'corner-short-decoy-wide-delivery' ? (
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div className="transition-modal-pitch__preview">
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={CORNER_PIXI_SCENARIO.players}
+                    ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
+                    steps={CORNER_PIXI_SCENARIO.steps}
+                    routes={CORNER_PIXI_SCENARIO.routes}
+                    repeatDelay={1.2}
+                    onCueChange={setCornerCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {cornerCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {CORNER_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                      Pass
+                    </span>
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                      Player run
                     </span>
                   </div>
                 </div>
