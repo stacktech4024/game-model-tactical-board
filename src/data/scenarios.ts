@@ -1000,7 +1000,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
       {
         id: 'corner-nine-attack-corridor',
         type: 'run',
-        from: { x: 40, y: 84 },
+        from: { x: 35, y: 89 },
         to: { x: 31, y: 95 },
         label: '#9 attack',
         playerNumber: 9,
@@ -1037,7 +1037,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Header',
         playerNumber: 9,
         order: 4,
-        delay: 0.05,
+        delay: 0,
         releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 9 },
       },
