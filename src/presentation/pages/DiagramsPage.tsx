@@ -3,14 +3,10 @@ import { Link } from 'react-router-dom'
 import { SCENARIOS } from '../../data/scenarios'
 import type { ScenarioDefinition } from '../../domain/scenarios/scenarioTypes'
 import { PresentationLayout } from '../PresentationLayout'
+import { BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO } from '../data/buildThroughWideChannelsPixiAdapter'
 import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionPixiAdapter'
 import { DEFENSIVE_TRANSITION_PIXI_SCENARIO } from '../data/defensiveTransitionPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
-import diagram1 from '../../assets/diagram1_attacking_org.png'
-
-const DIAGRAM_IMAGE_BY_SCENARIO_ID: Record<string, string> = {
-  'build-through-wide-channels': diagram1,
-}
 
 const DIAGRAM_SCENARIO_IDS = [
   'build-through-wide-channels',
@@ -36,6 +32,20 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
 }
 
 function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
+  if (scenario.id === 'build-through-wide-channels') {
+    return (
+      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+        <PixiPitchPreview
+          width={160}
+          height={247}
+          players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
+          ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
+          routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
   if (scenario.id === 'counter-quickly-on-turnover') {
     return (
       <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
@@ -64,10 +74,6 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
     )
   }
 
-  if (DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]) {
-    return <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
-  }
-
   return (
     <div className="presentation-diagram-card__live-preview">
       <span>Live board scenario</span>
@@ -78,11 +84,16 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
 export function DiagramsPage() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioDefinition | null>(null)
+  const [buildThroughWideChannelsCue, setBuildThroughWideChannelsCue] = useState('Secure build-up')
   const [attackingTransitionCue, setAttackingTransitionCue] = useState('Regain')
   const [defensiveTransitionCue, setDefensiveTransitionCue] = useState('Ball lost')
 
   const handleScenarioSelect = (scenario: ScenarioDefinition) => {
     setSelectedScenario(scenario)
+
+    if (scenario.id === 'build-through-wide-channels') {
+      setBuildThroughWideChannelsCue('Secure build-up')
+    }
 
     if (scenario.id === 'counter-quickly-on-turnover') {
       setAttackingTransitionCue('Regain')
@@ -135,7 +146,41 @@ export function DiagramsPage() {
             >
               Close
             </button>
-            {selectedScenario.id === 'counter-quickly-on-turnover' ? (
+            {selectedScenario.id === 'build-through-wide-channels' ? (
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div className="transition-modal-pitch__preview">
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
+                    ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
+                    steps={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.steps}
+                    routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
+                    repeatDelay={1.2}
+                    onCueChange={setBuildThroughWideChannelsCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {buildThroughWideChannelsCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                      Pass
+                    </span>
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                      Player run
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : selectedScenario.id === 'counter-quickly-on-turnover' ? (
               <div
                 className="transition-modal-pitch"
                 style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
@@ -209,11 +254,6 @@ export function DiagramsPage() {
                   </div>
                 </div>
               </div>
-            ) : DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id] ? (
-              <img
-                src={DIAGRAM_IMAGE_BY_SCENARIO_ID[selectedScenario.id]}
-                alt={`${selectedScenario.title} expanded diagram`}
-              />
             ) : (
               <div className="diagram-modal__live-preview">
                 <span>Open this set-piece in the live board</span>
