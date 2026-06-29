@@ -14,10 +14,12 @@ type PositionalProfileGroup = 'GK' | 'CB' | 'FB' | 'CDM' | 'CAM' | 'WF' | 'ST'
 const BOARD_WIDTH = 480
 const BOARD_HEIGHT = 741
 
-// Resting 1-4-4-2 shape, reusing the same real formation data the tactical
-// board itself uses - keeps this page's pitch geometry consistent with
-// everywhere else instead of inventing a separate layout.
-const REST_FORMATION = FORMATION_POSITIONS['attacking-442']
+// Resting 1-4-1-2-3 shape, reusing the same real formation data the
+// tactical board itself uses - keeps this page's pitch geometry consistent
+// with everywhere else instead of inventing a separate layout. #6 sits
+// alone as the deep pivot, #8/#10 as the two midfielders ahead of him,
+// #7/#9/#11 across the front three.
+const REST_FORMATION = FORMATION_POSITIONS['attacking-433']
 
 // How far in front of a selected player (in pitch metres, toward the
 // attacking goal) the ball sits - just enough to read as "at his feet"
