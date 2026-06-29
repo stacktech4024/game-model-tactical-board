@@ -114,7 +114,7 @@ export function PixiPitchPreview({
   height,
   players,
   ballPosition,
-  steps,
+  steps = [],
   repeatDelay = 1.5,
   onCueChange,
   routes,

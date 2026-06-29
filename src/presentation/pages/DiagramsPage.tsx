@@ -7,22 +7,16 @@ import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionP
 import { DEFENSIVE_TRANSITION_PIXI_SCENARIO } from '../data/defensiveTransitionPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import diagram1 from '../../assets/diagram1_attacking_org.png'
-import diagram2 from '../../assets/diagram2_defending_org.png'
-import diagram3 from '../../assets/diagram3_attacking_transition.png'
-import diagram4 from '../../assets/diagram4_defensive_transition.png'
 
 const DIAGRAM_IMAGE_BY_SCENARIO_ID: Record<string, string> = {
   'build-through-wide-channels': diagram1,
-  'compact-defensive-block': diagram2,
-  'counter-quickly-on-turnover': diagram3,
-  'protect-lead-in-back-five': diagram4,
 }
 
 const DIAGRAM_SCENARIO_IDS = [
   'build-through-wide-channels',
-  'compact-defensive-block',
   'counter-quickly-on-turnover',
   'protect-lead-in-back-five',
+  'back-five-to-wing-back-attack',
   'corner-short-decoy-wide-delivery',
 ]
 
@@ -39,6 +33,47 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
   }
 
   return `/presentation/live-board?${params.toString()}`
+}
+
+function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
+  if (scenario.id === 'counter-quickly-on-turnover') {
+    return (
+      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+        <PixiPitchPreview
+          width={160}
+          height={247}
+          players={ATTACKING_TRANSITION_PIXI_SCENARIO.players}
+          ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
+          routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
+  if (scenario.id === 'protect-lead-in-back-five') {
+    return (
+      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
+        <PixiPitchPreview
+          width={160}
+          height={247}
+          players={DEFENSIVE_TRANSITION_PIXI_SCENARIO.players}
+          ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
+          routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
+  if (DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]) {
+    return <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
+  }
+
+  return (
+    <div className="presentation-diagram-card__live-preview">
+      <span>Live board scenario</span>
+      <strong>{scenario.setPieceType}</strong>
+    </div>
+  )
 }
 
 export function DiagramsPage() {
@@ -72,14 +107,7 @@ export function DiagramsPage() {
             className="presentation-diagram-card presentation-diagram-card--button"
             onClick={() => handleScenarioSelect(scenario)}
           >
-            {DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id] ? (
-              <img src={DIAGRAM_IMAGE_BY_SCENARIO_ID[scenario.id]} alt={`${scenario.title} diagram`} />
-            ) : (
-              <div className="presentation-diagram-card__live-preview">
-                <span>Live board scenario</span>
-                <strong>{scenario.setPieceType}</strong>
-              </div>
-            )}
+            <DiagramCardPreview scenario={scenario} />
             <span className="presentation-diagram-card__caption">{scenario.momentOfGame}</span>
           </button>
         ))}
