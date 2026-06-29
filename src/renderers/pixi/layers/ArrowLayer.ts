@@ -14,6 +14,8 @@ const ARROW_COLORS: Record<ScenarioArrowType, number> = {
   press: 0xef4444,
   recovery: 0x22c55e,
   shot: 0xa855f7,
+  cross: 0xfb923c,
+  header: 0xc026d3,
 }
 
 export function drawScenarioArrows(

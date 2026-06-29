@@ -39,8 +39,10 @@ export type ScenarioArrowType =
   | 'press'
   | 'recovery'
   | 'shot'
+  | 'cross'
+  | 'header'
 
-export type ScenarioBallArrowType = 'pass' | 'dribble' | 'shot'
+export type ScenarioBallArrowType = 'pass' | 'dribble' | 'shot' | 'cross' | 'header'
 export type ScenarioPlayerArrowType = 'run' | 'press' | 'recovery'
 
 export type ScenarioReleasePlayer = {
