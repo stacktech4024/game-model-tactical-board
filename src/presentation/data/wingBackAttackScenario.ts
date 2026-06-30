@@ -1,78 +1,76 @@
-export type WingBackAttackPoint = {
+export type WingBackPreviewPoint = {
   x: number
   y: number
 }
 
-export type WingBackAttackPlayer = {
+export type WingBackPreviewPlayer = {
   id: string
   label: string
   role: string
-  start: WingBackAttackPoint
+  start: WingBackPreviewPoint
   tone?: 'primary' | 'support' | 'opponent'
 }
 
-export type WingBackAttackMovement = {
+export type WingBackPreviewMovement = {
   id: string
   playerId?: string
-  from: WingBackAttackPoint
-  to: WingBackAttackPoint
+  from: WingBackPreviewPoint
+  to: WingBackPreviewPoint
   kind: 'pass' | 'run' | 'support'
 }
 
-export const WING_BACK_ATTACK_PLAYERS: WingBackAttackPlayer[] = [
-  { id: 'centre-back', label: '5', role: 'Back three anchor', start: { x: 50, y: 80 }, tone: 'support' },
-  { id: 'left-wing-back', label: '3', role: 'Left wing-back', start: { x: 16, y: 68 } },
-  { id: 'right-wing-back', label: '2', role: 'Right wing-back', start: { x: 84, y: 68 } },
-  { id: 'eight', label: '8', role: 'Central support', start: { x: 50, y: 60 }, tone: 'support' },
-  { id: 'ten', label: '10', role: 'Combination forward', start: { x: 42, y: 35 } },
-  { id: 'nine', label: '9', role: 'Central finisher', start: { x: 50, y: 22 } },
-  { id: 'opponent-left', label: '', role: 'Recovering opponent', start: { x: 30, y: 30 }, tone: 'opponent' },
-  { id: 'opponent-right', label: '', role: 'Recovering opponent', start: { x: 60, y: 60 }, tone: 'opponent' },
+export const WING_BACK_PREVIEW_PLAYERS: WingBackPreviewPlayer[] = [
+  { id: 'centre-back', label: '5', role: 'Back-three passer', start: { x: 50, y: 78 } },
+  { id: 'left-wing-back', label: '3', role: 'Left wing-back', start: { x: 14, y: 62 } },
+  { id: 'right-wing-back', label: '2', role: 'Right wing-back', start: { x: 84, y: 62 } },
+  { id: 'ten', label: '10', role: 'Central finisher', start: { x: 54, y: 32 } },
+  { id: 'opponent-tracker', label: '', role: 'Tracks left wing-back', start: { x: 16, y: 58 }, tone: 'opponent' },
+  { id: 'opponent-screen', label: '', role: 'Screens the middle', start: { x: 50, y: 50 }, tone: 'opponent' },
 ]
 
-export const WING_BACK_ATTACK_BALL_START: WingBackAttackPoint = { x: 50, y: 80 }
+export const WING_BACK_PREVIEW_BALL_START: WingBackPreviewPoint = { x: 50, y: 78 }
 
-export const WING_BACK_ATTACK_MOVEMENTS: WingBackAttackMovement[] = [
+export const WING_BACK_PREVIEW_MOVEMENTS: WingBackPreviewMovement[] = [
   {
-    id: 'release-left-wing-back',
-    from: { x: 50, y: 80 },
-    to: { x: 16, y: 68 },
+    id: 'release-left',
+    from: { x: 50, y: 78 },
+    to: { x: 14, y: 62 },
     kind: 'pass',
-  },
-  {
-    id: 'left-wing-back-high',
-    playerId: 'left-wing-back',
-    from: { x: 16, y: 68 },
-    to: { x: 12, y: 25 },
-    kind: 'run',
   },
   {
     id: 'right-wing-back-high',
     playerId: 'right-wing-back',
-    from: { x: 84, y: 68 },
-    to: { x: 88, y: 25 },
+    from: { x: 84, y: 62 },
+    to: { x: 88, y: 30 },
     kind: 'run',
   },
   {
-    id: 'eight-support',
-    playerId: 'eight',
-    from: { x: 50, y: 60 },
-    to: { x: 46, y: 45 },
-    kind: 'support',
+    id: 'left-wing-back-carries',
+    playerId: 'left-wing-back',
+    from: { x: 14, y: 62 },
+    to: { x: 10, y: 30 },
+    kind: 'run',
   },
   {
-    id: 'wide-to-ten',
-    from: { x: 12, y: 25 },
-    to: { x: 42, y: 22 },
+    id: 'combine-central',
+    from: { x: 10, y: 30 },
+    to: { x: 46, y: 22 },
     kind: 'pass',
   },
   {
-    id: 'ten-to-nine',
-    from: { x: 42, y: 22 },
-    to: { x: 50, y: 10 },
+    id: 'ten-arrives',
+    playerId: 'ten',
+    from: { x: 54, y: 32 },
+    to: { x: 46, y: 18 },
+    kind: 'run',
+  },
+  {
+    id: 'finish',
+    from: { x: 46, y: 22 },
+    to: { x: 50, y: 8 },
     kind: 'pass',
   },
 ]
 
-export const WING_BACK_ATTACK_CAPTION =
-  'Back three secures the base while both wing-backs release high and wide, then combine centrally for the finish.'
+export const WING_BACK_PREVIEW_CAPTION =
+  'Secure the base with the back three, release both wing-backs high, then combine centrally to finish.'

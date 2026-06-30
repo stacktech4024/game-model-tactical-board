@@ -323,6 +323,17 @@ export function PlayersPage() {
                   </span>
                 </button>
               )}
+              <div className="players-detail__traits" aria-label={`${selectedProfile.fullName} key qualities`}>
+                {selectedProfile.traits.map((trait) => (
+                  <div key={trait.label} className="players-detail__trait">
+                    <span className="players-detail__trait-icon" aria-hidden="true">
+                      {trait.icon}
+                    </span>
+                    <span className="players-detail__trait-label">{trait.label}</span>
+                  </div>
+                ))}
+              </div>
+
             </>
           ) : (
             <>
