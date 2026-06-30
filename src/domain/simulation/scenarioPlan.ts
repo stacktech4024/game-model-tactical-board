@@ -16,7 +16,7 @@ import type {
 
 export type FormationPositions = Partial<Record<number, PitchPoint>>
 
-const BALL_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['pass', 'dribble', 'shot'])
+const BALL_INTENT_ARROW_TYPES = new Set<ScenarioArrow['type']>(['pass', 'dribble', 'shot', 'cross', 'header'])
 export const VIA_SEGMENT_GAP = 0.16
 
 // Distance-based duration replaces the old flat per-type constants
@@ -89,6 +89,27 @@ function copyPoint(point: PitchPoint): PitchPoint {
   return { x: point.x, y: point.y }
 }
 
+// A lofted corner/out-swinging delivery hangs in the air far longer than a
+// driven ground pass covers the same plan-view distance - the ball is
+// travelling a curved 3D arc, not a straight line, even though the x/y path
+// authored here is the same shape a flat pass would use. ~15 m/s and a much
+// higher duration ceiling give the aerial-lift visual (see BallLayer) enough
+// hang time to read clearly instead of resolving in well under a second.
+export const CROSS_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 15,
+  minDurationSeconds: 0.6,
+  maxDurationSeconds: 2.5,
+}
+
+// A header is a touched/glanced redirect, not a fully-struck shot - meaningfully
+// slower than SHOT_SPEED_PROFILE's firmly-struck-shot pace, but still a quick,
+// decisive contact rather than a controlled pass.
+export const HEADER_SPEED_PROFILE: ArrowSpeedProfile = {
+  speedMetersPerSecond: 18,
+  minDurationSeconds: 0.2,
+  maxDurationSeconds: 1.0,
+}
+
 function isBallArrow(arrow: AuthoredScenarioArrow): arrow is ScenarioBallArrow {
   return BALL_INTENT_ARROW_TYPES.has(arrow.type)
 }
@@ -124,6 +145,10 @@ function getSpeedProfileForArrow(arrow: ScenarioArrow): ArrowSpeedProfile {
       return DRIBBLE_SPEED_PROFILE
     case 'shot':
       return SHOT_SPEED_PROFILE
+    case 'cross':
+      return CROSS_SPEED_PROFILE
+    case 'header':
+      return HEADER_SPEED_PROFILE
     case 'run':
       return RUN_SPEED_PROFILE
     case 'press':
@@ -145,8 +170,10 @@ function getArrowEaseHint(arrow: ScenarioArrow): IntentEaseHint {
   switch (arrow.type) {
     case 'pass':
     case 'dribble':
+    case 'cross':
       return 'power1.inOut'
     case 'shot':
+    case 'header':
       return 'power3.out'
     case 'run':
     case 'press':

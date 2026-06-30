@@ -1,6 +1,7 @@
 import { Container, Sprite } from 'pixi.js'
 import { gsap } from 'gsap'
 import { pitchToScreen } from '../../../domain/pitch/coordTransforms'
+import { applyBallAerialLift, getAerialLiftAtProgress, resetBallAerialLift } from '../layers/BallLayer'
 import {
   buildScenarioPlan,
   VIA_SEGMENT_GAP,
@@ -52,7 +53,13 @@ type TokenPosition = {
 }
 
 function isBallArrow(arrow: ScenarioArrow): boolean {
-  return arrow.type === 'pass' || arrow.type === 'dribble' || arrow.type === 'shot'
+  return (
+    arrow.type === 'pass' ||
+    arrow.type === 'dribble' ||
+    arrow.type === 'shot' ||
+    arrow.type === 'cross' ||
+    arrow.type === 'header'
+  )
 }
 
 function isPlayerArrow(arrow: ScenarioArrow): boolean {
@@ -160,6 +167,8 @@ export function buildScenarioAnimator({
       }
 
       const isShot = arrow.type === 'shot'
+      const isAerial = arrow.type === 'cross' || arrow.type === 'header'
+      const hasStrikeImpactCue = isShot || arrow.type === 'header'
       const endTween = getBallPlaybackTween(
         plan,
         intent.timing.startProgress,
@@ -176,8 +185,13 @@ export function buildScenarioAnimator({
       rememberInitialPosition(ballToken)
       timeline.set(ballToken.position, start, `+=${delay}`)
 
-      // A shot needs a visible "this player struck it" cue, or the ball
-      // just appears to glide there on its own.
+      if (isAerial) {
+        resetBallAerialLift(ballToken)
+      }
+
+      // A shot (or a header, which strikes the ball just as decisively)
+      // needs a visible "this player struck it" cue, or the ball just
+      // appears to glide there on its own.
       //
       // releasedBy (when present) is the domain-verified player actually
       // standing at the ball's release point - it can differ from the
@@ -190,7 +204,7 @@ export function buildScenarioAnimator({
       const strikerSide = intent.releasedBy?.side ?? arrow.side
       const strikerPlayerNumber = intent.releasedBy?.playerNumber ?? arrow.playerNumber
 
-      if (isShot && strikerPlayerNumber) {
+      if (hasStrikeImpactCue && strikerPlayerNumber) {
         const strikerTokens = strikerSide === 'away' ? awayPlayerTokens : homePlayerTokens
         const strikerToken = strikerTokens?.get(strikerPlayerNumber)
 
@@ -234,21 +248,46 @@ export function buildScenarioAnimator({
           return
         }
 
+        // The two legs of a via arrow are one continuous flight, not two
+        // independent ones - mapping each leg's local tween progress back
+        // onto its share of the whole arrow's flight-duration fraction
+        // keeps the aerial-lift arc as a single hump that peaks once, near
+        // the via bend, instead of rising and falling twice.
+        const firstLegLocalSpan = segmentDuration / intent.timing.duration
+        const secondLegLocalStart = (segmentDuration + VIA_SEGMENT_GAP) / intent.timing.duration
+
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(viaTween),
           duration: viaTween.durationSeconds,
           ease: viaTween.ease,
+          onUpdate: isAerial
+            ? function (this: gsap.core.Tween) {
+                const localFlightProgress = firstLegLocalSpan * this.progress()
+                applyBallAerialLift(ballToken, getAerialLiftAtProgress(localFlightProgress))
+              }
+            : undefined,
         })
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
+          onUpdate: isAerial
+            ? function (this: gsap.core.Tween) {
+                const localFlightProgress = secondLegLocalStart + (1 - secondLegLocalStart) * this.progress()
+                applyBallAerialLift(ballToken, getAerialLiftAtProgress(localFlightProgress))
+              }
+            : undefined,
         }, `+=${VIA_SEGMENT_GAP}`)
       } else {
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(endTween),
           duration: endTween.durationSeconds,
           ease: endTween.ease,
+          onUpdate: isAerial
+            ? function (this: gsap.core.Tween) {
+                applyBallAerialLift(ballToken, getAerialLiftAtProgress(this.progress()))
+              }
+            : undefined,
         })
       }
 
@@ -392,6 +431,10 @@ export function buildScenarioAnimator({
     initialRotations.forEach((rotation, sprite) => {
       sprite.rotation = rotation
     })
+
+    if (ballToken) {
+      resetBallAerialLift(ballToken)
+    }
   }
 
   return {

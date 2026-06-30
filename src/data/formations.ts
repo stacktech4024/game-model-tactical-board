@@ -15,6 +15,15 @@ type Formation = {
 
 export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
   // Back four, flat midfield four, and two forwards with a support striker.
+  //
+  // NOTE: the away (defending) shape below is an intentional packed
+  // corner-defending box - all ten outfield players sit deep around the
+  // box except #9, left forward as the lone out-ball/counter outlet. This
+  // shape is shared with 'build-through-wide-channels', which also uses
+  // 'attacking-442' for its away side; that scenario is open play, but the
+  // away team defending deep inside its own box reads as plausible there
+  // too. Do not "fix" this back to a high, spread-out shape without
+  // checking both scenarios.
   'attacking-442': {
     label: 'Attacking 1-4-4-2',
     home: {
@@ -32,15 +41,15 @@ export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
     },
     away: {
       1: { x: 34, y: 99 },
-      2: { x: 57, y: 82 },
-      3: { x: 11, y: 82 },
-      4: { x: 26, y: 84 },
-      5: { x: 42, y: 84 },
-      6: { x: 29, y: 70 },
-      8: { x: 39, y: 70 },
-      11: { x: 15, y: 62 },
-      10: { x: 34, y: 60 },
-      7: { x: 53, y: 62 },
+      2: { x: 54, y: 90 },
+      3: { x: 14, y: 90 },
+      4: { x: 27, y: 87 },
+      5: { x: 41, y: 87 },
+      6: { x: 34, y: 92 },
+      8: { x: 44, y: 84 },
+      11: { x: 18, y: 84 },
+      10: { x: 34, y: 80 },
+      7: { x: 50, y: 84 },
       9: { x: 34, y: 48 },
     },
   },
