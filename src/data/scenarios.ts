@@ -984,7 +984,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         to: { x: 21, y: 88 },
         label: '2nd ball',
         playerNumber: 10,
-        order: 3,
+        order: 2,
         delay: 0.05,
       },
       {
@@ -1005,7 +1005,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Track #9',
         playerNumber: 5,
         side: 'away',
-        order: 3,
+        order: 2,
         delay: 0.05,
       },
       {
@@ -1016,7 +1016,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Screen zone',
         playerNumber: 6,
         side: 'away',
-        order: 3,
+        order: 2,
         delay: 0.1,
       },
       {
@@ -1027,7 +1027,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Hold width',
         playerNumber: 8,
         side: 'away',
-        order: 3,
+        order: 2,
         delay: 0.1,
       },
       {
@@ -1038,7 +1038,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         label: 'Hold width',
         playerNumber: 7,
         side: 'away',
-        order: 3,
+        order: 2,
         delay: 0.15,
       },
       {
@@ -1048,7 +1048,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         via: { x: 12, y: 101 },
         to: { x: 31, y: 95 },
         label: 'Cross',
-        order: 2,
+        order: 3,
         delay: 0.15,
         releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 7 },
@@ -1060,7 +1060,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
         to: { x: 31.2, y: 106 },
         label: 'Header',
         playerNumber: 9,
-        order: 4,
+        order: 5,
         delay: 0,
         releaseKind: 'player',
         releasedBy: { side: 'home', playerNumber: 9 },
