@@ -57,6 +57,13 @@ export type PixiPitchPreviewProps = {
 
 export const PITCH_PADDING = 32
 
+// Stable reference for the no-op default — using an inline `[]` default parameter
+// creates a NEW array on every call, which breaks the mount effect's dependency
+// array below and forces a full canvas destroy/recreate on every parent re-render
+// (e.g. every cue-text update while a modal preview is animating elsewhere on the
+// page), which is what produced the flashing.
+const EMPTY_STEPS: PixiPitchPreviewStep[] = []
+
 function percentageToPitchPosition(x: number, y: number) {
   return {
     x: (x * PITCH.WIDTH) / 100,
@@ -114,7 +121,7 @@ export function PixiPitchPreview({
   height,
   players,
   ballPosition,
-  steps = [],
+  steps = EMPTY_STEPS,
   repeatDelay = 1.5,
   onCueChange,
   routes,
@@ -148,7 +155,7 @@ export function PixiPitchPreview({
       }
 
       destroyed = true
-      app.destroy(true)
+      app.destroy({ removeView: true })
     }
 
     const mount = async () => {
