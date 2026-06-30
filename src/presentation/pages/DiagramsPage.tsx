@@ -6,7 +6,9 @@ import { PresentationLayout } from '../PresentationLayout'
 import { BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO } from '../data/buildThroughWideChannelsPixiAdapter'
 import { ATTACKING_TRANSITION_PIXI_SCENARIO } from '../data/attackingTransitionPixiAdapter'
 import { DEFENSIVE_TRANSITION_PIXI_SCENARIO } from '../data/defensiveTransitionPixiAdapter'
+import { WING_BACK_ATTACK_PIXI_SCENARIO } from '../data/wingBackAttackPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
+import { ResponsivePixiPitchPreview } from '../components/ResponsivePixiPitchPreview'
 
 const DIAGRAM_SCENARIO_IDS = [
   'build-through-wide-channels',
@@ -34,10 +36,8 @@ function getBoardUrl(scenario: ScenarioDefinition): string {
 function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
   if (scenario.id === 'build-through-wide-channels') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
-        <PixiPitchPreview
-          width={160}
-          height={247}
+      <div style={{ width: '100%' }}>
+        <ResponsivePixiPitchPreview
           players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
           ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
           routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
@@ -48,10 +48,8 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'counter-quickly-on-turnover') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
-        <PixiPitchPreview
-          width={160}
-          height={247}
+      <div style={{ width: '100%' }}>
+        <ResponsivePixiPitchPreview
           players={ATTACKING_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
@@ -62,13 +60,23 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
 
   if (scenario.id === 'protect-lead-in-back-five') {
     return (
-      <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
-        <PixiPitchPreview
-          width={160}
-          height={247}
+      <div style={{ width: '100%' }}>
+        <ResponsivePixiPitchPreview
           players={DEFENSIVE_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
+        />
+      </div>
+    )
+  }
+
+  if (scenario.id === 'back-five-to-wing-back-attack') {
+    return (
+      <div style={{ width: '100%' }}>
+        <ResponsivePixiPitchPreview
+          players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
+          ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
+          routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
         />
       </div>
     )
@@ -87,6 +95,7 @@ export function DiagramsPage() {
   const [buildThroughWideChannelsCue, setBuildThroughWideChannelsCue] = useState('Secure build-up')
   const [attackingTransitionCue, setAttackingTransitionCue] = useState('Regain')
   const [defensiveTransitionCue, setDefensiveTransitionCue] = useState('Ball lost')
+  const [wingBackAttackCue, setWingBackAttackCue] = useState('Secure base')
 
   const handleScenarioSelect = (scenario: ScenarioDefinition) => {
     setSelectedScenario(scenario)
@@ -101,6 +110,10 @@ export function DiagramsPage() {
 
     if (scenario.id === 'protect-lead-in-back-five') {
       setDefensiveTransitionCue('Ball lost')
+    }
+
+    if (scenario.id === 'back-five-to-wing-back-attack') {
+      setWingBackAttackCue('Secure base')
     }
   }
 
@@ -250,6 +263,40 @@ export function DiagramsPage() {
                         style={{ background: '#22c55e' }}
                       />
                       Recovery
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : selectedScenario.id === 'back-five-to-wing-back-attack' ? (
+              <div
+                className="transition-modal-pitch"
+                style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+              >
+                <div className="transition-modal-pitch__preview">
+                  <PixiPitchPreview
+                    width={480}
+                    height={741}
+                    players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
+                    ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
+                    steps={WING_BACK_ATTACK_PIXI_SCENARIO.steps}
+                    routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
+                    repeatDelay={1.2}
+                    onCueChange={setWingBackAttackCue}
+                  />
+                  <div className="mini-pitch__cue" aria-live="polite">
+                    {wingBackAttackCue}
+                  </div>
+                  <div className="mini-pitch__caption">
+                    {WING_BACK_ATTACK_PIXI_SCENARIO.caption}
+                  </div>
+                  <div className="mini-pitch__legend" aria-label="Diagram key">
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                      Pass
+                    </span>
+                    <span>
+                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                      Player run
                     </span>
                   </div>
                 </div>
