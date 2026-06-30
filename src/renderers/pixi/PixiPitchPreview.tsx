@@ -21,6 +21,11 @@ type PixiPitchPreviewPlayer = {
   x: number
   y: number
   tone?: 'primary' | 'keeper' | 'opponent'
+  // Static facing override in degrees, same convention as SquadPlayer.facingAngle:
+  // 0 = facing up the pitch (increasing pitch y), 90 = facing increasing pitch x.
+  // Only applies before a player's first scripted movement begins - once a step
+  // or route moves them, facing is driven by that movement's direction instead.
+  facingAngle?: number
 }
 
 export type PixiPitchPreviewStep = {
@@ -107,6 +112,7 @@ function buildPlayerAdapter(players: PixiPitchPreviewPlayer[]) {
       position: isGoalkeeper ? 'GK' : 'CM',
       isGoalkeeper,
       side: isOpponent ? 'away' : 'home',
+      facingAngle: player.facingAngle,
     })
     positions[number] = percentageToPitchPosition(player.x, player.y)
     labels.set(number, player.label)
