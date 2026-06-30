@@ -26,7 +26,7 @@ export function PhilosophyPage() {
   return (
     <PresentationLayout pageId="philosophy">
       <p className="presentation-eyebrow">Section 1 — the why</p>
-      <h1 className="presentation-title">Who we are</h1>
+      <h1 className="presentation-title">Our identity</h1>
       <p className="presentation-body">
         Club identity comes first, then the personal coaching philosophy that puts it into practice -
         everything in how we train and play traces back to these three commitments.

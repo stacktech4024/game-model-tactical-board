@@ -26,7 +26,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
 export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   cover: 'Cover',
   intro: 'Intro',
-  philosophy: 'Club & coaching philosophy',
+  philosophy: 'Our identity',
   'game-analysis': 'Game analysis',
   diagrams: 'Moment diagrams',
   'live-board': 'Live tactical board',
