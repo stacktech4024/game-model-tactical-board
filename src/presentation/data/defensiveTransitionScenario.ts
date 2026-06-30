@@ -29,7 +29,9 @@ export const DEFENSIVE_TRANSITION_PLAYERS: DefensiveTransitionPlayer[] = [
   { id: 'right-centre-back', label: '5', role: 'Compact back line', start: { x: 59, y: 81 } },
   { id: 'right-back', label: '2', role: 'Compact back line', start: { x: 76, y: 79 } },
   { id: 'opponent-carrier', label: '', role: 'Ball carrier', start: { x: 72, y: 43 }, tone: 'opponent' },
+  { id: 'opponent-support', label: '', role: 'Immediate support', start: { x: 61, y: 49 }, tone: 'opponent' },
   { id: 'opponent-outlet', label: '', role: 'Counter-attacking outlet', start: { x: 84, y: 35 }, tone: 'opponent' },
+  { id: 'opponent-runner', label: '', role: 'Central runner', start: { x: 47, y: 34 }, tone: 'opponent' },
 ]
 
 export const DEFENSIVE_TRANSITION_BALL: DefensiveTransitionPoint = { x: 72, y: 43 }

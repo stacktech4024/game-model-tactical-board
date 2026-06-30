@@ -68,12 +68,16 @@ export function getPlayerFocusMetrics(tokenRadius: number) {
   }
 }
 
-export function getPlayerTokenRadius(player: SquadPlayer, pitchScale: number): number {
+export function getPlayerTokenRadius(
+  player: SquadPlayer,
+  pitchScale: number,
+  tokenScale = 1,
+): number {
   const outfieldRadius = clamp(
     pitchScale * PLAYER_RADIUS_PER_PITCH_METRE,
     MIN_HOME_OUTFIELD_RADIUS,
     MAX_HOME_OUTFIELD_RADIUS,
-  )
+  ) * tokenScale
 
   if (player.side === 'away') {
     return outfieldRadius * AWAY_RADIUS_RATIO
@@ -121,12 +125,13 @@ function addToken(
   activeZones?: Set<number>,
   idleAnchorRefs?: Map<number, Container>,
   spriteRefs?: Map<number, Sprite>,
+  tokenScale = 1,
 ): void {
   const screenPosition = pitchToScreen(position.x, position.y, canvasW, canvasH, padding)
   const pitchScale = getPitchScale(canvasW, canvasH, padding)
   const tokenContainer = new Container()
   const visualGroup = new Container()
-  const tokenRadius = getPlayerTokenRadius(player, pitchScale)
+  const tokenRadius = getPlayerTokenRadius(player, pitchScale, tokenScale)
   const numberFontSize = clamp(tokenRadius * 0.85, player.side === 'away' ? 8 : 9, 12)
   const tokenSprite = new Sprite(getTokenTexture(player))
   const numberText = new Text({
@@ -191,6 +196,7 @@ export function drawPlayers(
   activeZones?: Set<number>,
   idleAnchorRefs?: Map<number, Container>,
   spriteRefs?: Map<number, Sprite>,
+  tokenScale = 1,
 ): void {
   container.removeChildren()
   tokenRefs?.clear()
@@ -216,6 +222,7 @@ export function drawPlayers(
       activeZones,
       idleAnchorRefs,
       spriteRefs,
+      tokenScale,
     )
   })
 }

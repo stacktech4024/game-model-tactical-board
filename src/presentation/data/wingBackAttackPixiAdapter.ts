@@ -28,71 +28,58 @@ function getMovement(id: string): WingBackPreviewMovement {
   return movement
 }
 
-const releaseLeft = getMovement('release-left')
-const rightWingBackHigh = getMovement('right-wing-back-high')
-const leftWingBackCarries = getMovement('left-wing-back-carries')
-const combineCentral = getMovement('combine-central')
-const tenArrives = getMovement('ten-arrives')
-const finish = getMovement('finish')
+const forceWidePass = getMovement('force-wide-pass')
+const widePressure = getMovement('wide-pressure')
+const tenScreen = getMovement('ten-screen')
+const sixSlide = getMovement('six-slide')
+const backLineShift = getMovement('back-line-shift')
 
 const steps: PixiPitchPreviewStep[] = [
   {
-    id: 'secure-base',
-    cue: 'Secure base',
-    emphasizePlayerId: 'centre-back',
+    id: 'compact-block',
+    cue: 'Compact block',
+    emphasizePlayerId: 'six',
     duration: 0.22,
   },
   {
-    id: 'release-left',
-    cue: 'Release left wing-back',
-    ballFrom: releaseLeft.from,
-    ballTo: releaseLeft.to,
-    playerId: rightWingBackHigh.playerId,
-    playerTo: rightWingBackHigh.to,
+    id: 'force-wide',
+    cue: 'Force play wide',
+    ballFrom: forceWidePass.from,
+    ballTo: forceWidePass.to,
+    playerId: widePressure.playerId,
+    playerTo: widePressure.to,
     duration: 0.6,
   },
   {
-    id: 'lwb-carries',
-    cue: 'Left wing-back carries forward',
-    ballFrom: leftWingBackCarries.from,
-    ballTo: leftWingBackCarries.to,
-    playerId: leftWingBackCarries.playerId,
-    playerTo: leftWingBackCarries.to,
-    duration: 0.65,
-  },
-  {
-    id: 'combine-central',
-    cue: 'Combine centrally',
-    ballFrom: combineCentral.from,
-    ballTo: combineCentral.to,
-    playerId: tenArrives.playerId,
-    playerTo: tenArrives.to,
-    duration: 0.6,
-  },
-  {
-    id: 'finish',
-    cue: 'Finish',
-    ballFrom: finish.from,
-    ballTo: finish.to,
-    emphasizePlayerId: 'ten',
-    emphasisCue: 'Finish!',
+    id: 'deny-middle',
+    cue: 'Deny Channel 2/3',
+    playerMoves: [
+      { playerId: 'ten', to: tenScreen.to },
+      { playerId: 'six', to: sixSlide.to },
+    ],
     duration: 0.5,
   },
   {
-    id: 'goal',
-    cue: 'Goal',
-    emphasizePlayerId: 'ten',
+    id: 'back-line-balance',
+    cue: 'Back line slides together',
+    playerId: backLineShift.playerId,
+    playerTo: backLineShift.to,
+    duration: 0.45,
+  },
+  {
+    id: 'outlet-ready',
+    cue: 'Outlet ready',
+    emphasizePlayerId: 'nine',
     duration: 0.3,
   },
 ]
 
 const REVEAL_STEP_BY_MOVEMENT_ID: Record<string, string> = {
-  'release-left': 'release-left',
-  'right-wing-back-high': 'release-left',
-  'left-wing-back-carries': 'lwb-carries',
-  'combine-central': 'combine-central',
-  'ten-arrives': 'combine-central',
-  finish: 'finish',
+  'force-wide-pass': 'force-wide',
+  'wide-pressure': 'force-wide',
+  'ten-screen': 'deny-middle',
+  'six-slide': 'deny-middle',
+  'back-line-shift': 'back-line-balance',
 }
 
 const routes: PixiPitchPreviewRoute[] = WING_BACK_PREVIEW_MOVEMENTS.map((movement) => ({
