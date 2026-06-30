@@ -134,6 +134,13 @@ export function PixiPitchPreview({
 }: PixiPitchPreviewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gsapContextRef = useRef<gsap.Context | null>(null)
+  // Idle-wiggle tweens are created lazily inside timeline.call() callbacks that
+  // fire AFTER gsap.context()'s synchronous setup window closes, so they are
+  // NOT auto-tracked by ctx.revert() the way synchronously-created tweens are.
+  // Left unhandled, every unmount/remount (e.g. navigating the diagrams grid)
+  // would leave an orphaned repeat:-1 tween running forever against a
+  // destroyed container. Tracked here so cleanup can kill them explicitly.
+  const idleWiggleTweensRef = useRef<Map<string, gsap.core.Tween> | null>(null)
   const onCueChangeRef = useRef(onCueChange)
 
   useEffect(() => {
@@ -154,6 +161,8 @@ export function PixiPitchPreview({
 
     gsapContextRef.current?.revert()
     gsapContextRef.current = null
+    idleWiggleTweensRef.current?.forEach((tween) => tween.kill())
+    idleWiggleTweensRef.current = null
 
     const destroyApp = () => {
       if (destroyed) {
@@ -192,6 +201,7 @@ export function PixiPitchPreview({
       const ballLayer = new Container()
       const playerLayer = new Container()
       const playerTokenRefs = new Map<number, Container>()
+      const idleAnchorRefs = new Map<number, Container>()
       const routeGraphicsByRevealStepId = new Map<string, Graphics[]>()
       const { squad, positions, labels, numbersById } = buildPlayerAdapter(players)
 
@@ -249,6 +259,8 @@ export function PixiPitchPreview({
         PITCH_PADDING,
         undefined,
         playerTokenRefs,
+        undefined,
+        idleAnchorRefs,
       )
 
       playerTokenRefs.forEach((tokenContainer, number) => {
@@ -266,14 +278,20 @@ export function PixiPitchPreview({
 
       if (steps?.length && ballToken) {
         const playerTokensById = new Map<string, Container>()
+        const idleTokensById = new Map<string, Container>()
         const initialPlayerPositions = new Map<string, { x: number; y: number }>()
 
         numbersById.forEach((number, id) => {
           const token = playerTokenRefs.get(number)
+          const idleAnchor = idleAnchorRefs.get(number)
 
           if (token) {
             playerTokensById.set(id, token)
             initialPlayerPositions.set(id, { x: token.position.x, y: token.position.y })
+          }
+
+          if (idleAnchor) {
+            idleTokensById.set(id, idleAnchor)
           }
         })
 
@@ -283,6 +301,63 @@ export function PixiPitchPreview({
         }
 
         const ctx = gsap.context(() => {
+          // Subtle idle jitter for players who are holding a marking position and
+          // haven't started their own scripted movement yet - e.g. defenders
+          // organizing for a corner, or an attacker waiting to make their run.
+          // This tweens visualGroup's LOCAL offset (idleAnchorRefs), never the
+          // token's absolute position, so it can never fight a scripted movement
+          // tween on the same property. Small and slow on purpose - this is a
+          // "holding shape, weight shifting" cue, not a run.
+          const IDLE_WIGGLE_AMPLITUDE_PX = 2.5
+          const IDLE_WIGGLE_MIN_DURATION = 0.7
+          const IDLE_WIGGLE_MAX_DURATION = 1.3
+          const IDLE_WIGGLE_MAX_START_DELAY = 0.4
+
+          const idleWiggleTweens = new Map<string, gsap.core.Tween>()
+          idleWiggleTweensRef.current = idleWiggleTweens
+
+          const stopIdleWiggle = (id: string) => {
+            idleWiggleTweens.get(id)?.kill()
+            idleWiggleTweens.delete(id)
+
+            const idleToken = idleTokensById.get(id)
+
+            if (idleToken) {
+              idleToken.position.set(0, 0)
+            }
+          }
+
+          const startIdleWiggle = (id: string) => {
+            const idleToken = idleTokensById.get(id)
+
+            if (!idleToken) {
+              return
+            }
+
+            idleToken.position.set(0, 0)
+
+            idleWiggleTweens.set(
+              id,
+              gsap.to(idleToken.position, {
+                x: () => (Math.random() * 2 - 1) * IDLE_WIGGLE_AMPLITUDE_PX,
+                y: () => (Math.random() * 2 - 1) * IDLE_WIGGLE_AMPLITUDE_PX,
+                duration: () =>
+                  IDLE_WIGGLE_MIN_DURATION +
+                  Math.random() * (IDLE_WIGGLE_MAX_DURATION - IDLE_WIGGLE_MIN_DURATION),
+                delay: Math.random() * IDLE_WIGGLE_MAX_START_DELAY,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: -1,
+              }),
+            )
+          }
+
+          const restartAllIdleWiggles = () => {
+            idleWiggleTweens.forEach((tween) => tween.kill())
+            idleWiggleTweens.clear()
+            idleTokensById.forEach((_token, id) => startIdleWiggle(id))
+          }
+
           const resetVisuals = () => {
             initialPlayerPositions.forEach((position, id) => {
               const token = playerTokensById.get(id)
@@ -298,6 +373,7 @@ export function PixiPitchPreview({
                 routeGraphics.alpha = 0
               })
             })
+            restartAllIdleWiggles()
           }
 
           resetVisuals()
@@ -359,6 +435,12 @@ export function PixiPitchPreview({
               : undefined
 
             if (playerToken && step.playerTo) {
+              timeline.call(() => {
+                if (step.playerId) {
+                  stopIdleWiggle(step.playerId)
+                }
+              })
+
               timeline.to(playerToken.position, {
                 ...percentageToScreenPosition(
                   step.playerTo.x,
@@ -392,6 +474,10 @@ export function PixiPitchPreview({
               const moveToken = playerTokensById.get(move.playerId)
 
               if (moveToken) {
+                timeline.call(() => {
+                  stopIdleWiggle(move.playerId)
+                }, undefined, stepLabel)
+
                 timeline.to(
                   moveToken.position,
                   {
@@ -433,6 +519,8 @@ export function PixiPitchPreview({
       cancelled = true
       gsapContextRef.current?.revert()
       gsapContextRef.current = null
+      idleWiggleTweensRef.current?.forEach((tween) => tween.kill())
+      idleWiggleTweensRef.current = null
 
       if (!initialized) {
         return
