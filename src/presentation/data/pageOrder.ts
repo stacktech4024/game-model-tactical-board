@@ -1,6 +1,7 @@
 export type PresentationPageId =
   | 'cover'
   | 'intro'
+  | 'philosophy'
   | 'game-analysis'
   | 'diagrams'
   | 'live-board'
@@ -12,6 +13,7 @@ export type PresentationPageId =
 export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'cover',
   'intro',
+  'philosophy',
   'game-analysis',
   'diagrams',
   'live-board',
@@ -24,6 +26,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
 export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   cover: 'Cover',
   intro: 'Intro',
+  philosophy: 'Our identity',
   'game-analysis': 'Game analysis',
   diagrams: 'Moment diagrams',
   'live-board': 'Live tactical board',
