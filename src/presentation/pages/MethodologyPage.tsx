@@ -48,6 +48,12 @@ const RISK_ITEMS = [
   'EAP submitted with final package',
 ]
 
+const COACHING_TOOLS = [
+  'Freeze & Recreate',
+  'Natural Stoppages',
+  'Engage – Explain – Exit – Enter – Educate – Ensure',
+]
+
 export function MethodologyPage() {
   const [activeStepId, setActiveStepId] = useState(TRAINING_STEPS[0].id)
   const activeStep = TRAINING_STEPS.find((step) => step.id === activeStepId) ?? TRAINING_STEPS[0]
@@ -121,6 +127,28 @@ export function MethodologyPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="method-approach-card">
+        <h2>Preferred coaching approaches</h2>
+        <div className="presentation-chip-row">
+          {COACHING_TOOLS.map((tool) => (
+            <span key={tool} className="presentation-chip presentation-chip--small">
+              {tool}
+            </span>
+          ))}
+        </div>
+        <p>
+          I lean on Natural Stoppages and Freeze &amp; Recreate as my primary coaching tools - pausing
+          live play to re-create a moment, discuss 1-2 options with the players, then rehearse it at
+          game speed before going live again. I follow the Engage-Explain-Exit-Enter-Educate-Ensure
+          process: setting clear expectations before the session (Engage/Explain), observing without
+          over-intervening once play starts (Exit/Enter), and making sure players get a chance to
+          rehearse a corrected action rather than just hearing about it (Educate/Ensure). My preference
+          is Whole-Part-Whole for higher-ability groups who can grasp the picture quickly, and
+          Progressive Method when I need to build a skill in pieces before testing it in the full game -
+          this ties back to the considerations from Module 3 on player skill level and maturity.
+        </p>
       </section>
     </PresentationLayout>
   )

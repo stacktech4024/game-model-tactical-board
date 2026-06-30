@@ -488,7 +488,8 @@
 .fullback-visual-card,
 .method-detail,
 .method-check-card,
-.method-risk-card {
+.method-risk-card,
+.method-approach-card {
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 16px;
   background: rgba(2, 6, 23, 0.46);
@@ -987,8 +988,30 @@
 
 .method-detail,
 .method-check-card,
-.method-risk-card {
+.method-risk-card,
+.method-approach-card {
   padding: 20px;
+}
+
+.method-approach-card {
+  margin-top: 16px;
+}
+
+.method-approach-card h2 {
+  font-size: 1.45rem;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+
+.method-approach-card .presentation-chip-row {
+  margin-bottom: 14px;
+}
+
+.method-approach-card p {
+  color: #cdd8ea;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
 }
 
 .method-lower-grid {
