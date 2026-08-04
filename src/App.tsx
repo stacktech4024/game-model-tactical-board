@@ -8,7 +8,6 @@ import { AttackingTransitionPage } from './presentation/pages/AttackingTransitio
 import { DefensiveTransitionPage } from './presentation/pages/DefensiveTransitionPage'
 import { DefensiveOrganizationPage } from './presentation/pages/DefensiveOrganizationPage'
 import { SetPiecesPage } from './presentation/pages/SetPiecesPage'
-import { DiagramsPage } from './presentation/pages/DiagramsPage'
 import { LiveBoardPage } from './presentation/pages/LiveBoardPage'
 import { PlayersPage } from './presentation/pages/PlayersPage'
 import { SkillsPage } from './presentation/pages/SkillsPage'
@@ -28,7 +27,6 @@ function App() {
       <Route path="/presentation/defensive-transition" element={<DefensiveTransitionPage />} />
       <Route path="/presentation/defensive-organization" element={<DefensiveOrganizationPage />} />
       <Route path="/presentation/set-pieces" element={<SetPiecesPage />} />
-      <Route path="/presentation/diagrams" element={<DiagramsPage />} />
       <Route path="/presentation/live-board" element={<LiveBoardPage />} />
       <Route path="/presentation/players" element={<PlayersPage />} />
       <Route path="/presentation/skills" element={<SkillsPage />} />

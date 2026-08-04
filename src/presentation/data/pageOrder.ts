@@ -7,7 +7,6 @@ export type PresentationPageId =
   | 'defensive-transition'
   | 'defensive-organization'
   | 'set-pieces'
-  | 'diagrams'
   | 'live-board'
   | 'players'
   | 'skills'
@@ -23,7 +22,6 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'defensive-transition',
   'defensive-organization',
   'set-pieces',
-  'diagrams',
   'live-board',
   'players',
   'skills',
@@ -40,7 +38,6 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   'defensive-transition': 'Defensive transition',
   'defensive-organization': 'Defensive organization',
   'set-pieces': 'Set pieces',
-  diagrams: 'Moment diagrams',
   'live-board': 'Live tactical board',
   players: 'Squad roles',
   skills: 'Skill development',
