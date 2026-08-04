@@ -8,7 +8,7 @@ export type DefensiveOrganizationPlayer = {
   label: string
   role: string
   start: DefensiveOrganizationPoint
-  tone?: 'primary' | 'support' | 'opponent'
+  tone?: 'primary' | 'support' | 'opponent' | 'keeper'
 }
 
 export type DefensiveOrganizationMovement = {
@@ -20,7 +20,7 @@ export type DefensiveOrganizationMovement = {
 }
 
 export const DEFENSIVE_ORGANIZATION_PLAYERS: DefensiveOrganizationPlayer[] = [
-  { id: 'keeper', label: '1', role: 'Sweeper-keeper', start: { x: 50, y: 85 } },
+  { id: 'keeper', label: '1', role: 'Sweeper-keeper', start: { x: 50, y: 85 }, tone: 'keeper' },
   { id: 'left-centre-back', label: '4', role: 'Backline shift', start: { x: 41, y: 55 } },
   { id: 'right-centre-back', label: '5', role: 'Backline shift', start: { x: 59, y: 55 } },
   { id: 'left-back', label: '3', role: 'Cover shift', start: { x: 24, y: 53 } },

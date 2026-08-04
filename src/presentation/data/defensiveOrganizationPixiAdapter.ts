@@ -93,7 +93,7 @@ export const DEFENSIVE_ORGANIZATION_PIXI_SCENARIO: DefensiveOrganizationPixiScen
     label: player.label,
     x: player.start.x,
     y: player.start.y,
-    tone: player.tone === 'opponent' ? 'opponent' : 'primary',
+    tone: player.tone === 'opponent' || player.tone === 'keeper' ? player.tone : 'primary',
   })),
   ballPosition: DEFENSIVE_ORGANIZATION_BALL,
   steps,
