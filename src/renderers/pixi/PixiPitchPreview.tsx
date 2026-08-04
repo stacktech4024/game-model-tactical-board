@@ -58,6 +58,7 @@ export type PixiPitchPreviewProps = {
   repeatDelay?: number
   onCueChange?: (cue: string) => void
   routes?: PixiPitchPreviewRoute[]
+  tokenScale?: number
 }
 
 export const PITCH_PADDING = 32
@@ -131,6 +132,7 @@ export function PixiPitchPreview({
   repeatDelay = 1.5,
   onCueChange,
   routes,
+  tokenScale = 1,
 }: PixiPitchPreviewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gsapContextRef = useRef<gsap.Context | null>(null)
@@ -261,6 +263,8 @@ export function PixiPitchPreview({
         playerTokenRefs,
         undefined,
         idleAnchorRefs,
+        undefined,
+        tokenScale,
       )
 
       playerTokenRefs.forEach((tokenContainer, number) => {
@@ -532,7 +536,7 @@ export function PixiPitchPreview({
 
       destroyApp()
     }
-  }, [ballPosition, height, players, repeatDelay, routes, steps, width])
+  }, [ballPosition, height, players, repeatDelay, routes, steps, tokenScale, width])
 
   return <div ref={containerRef} className="pixi-pitch-preview" />
 }

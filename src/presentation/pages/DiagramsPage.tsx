@@ -24,6 +24,8 @@ const DIAGRAM_SCENARIOS = DIAGRAM_SCENARIO_IDS.map((id) =>
   SCENARIOS.find((scenario) => scenario.id === id),
 ).filter((scenario): scenario is ScenarioDefinition => Boolean(scenario))
 
+const MOMENTS_DIAGRAM_TOKEN_SCALE = 0.88
+
 function getBoardUrl(scenario: ScenarioDefinition): string {
   const step = scenario.phaseSteps[0]?.id
   const params = new URLSearchParams({ scenario: scenario.id })
@@ -45,6 +47,7 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
           players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
           ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
           routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
+          tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
         />
       </div>
     )
@@ -59,6 +62,7 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
           players={ATTACKING_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
+          tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
         />
       </div>
     )
@@ -73,6 +77,7 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
           players={DEFENSIVE_TRANSITION_PIXI_SCENARIO.players}
           ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
           routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
+          tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
         />
       </div>
     )
@@ -101,6 +106,7 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
           players={WING_BACK_ATTACK_PIXI_SCENARIO.players}
           ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
           routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
+          tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
         />
       </div>
     )
@@ -115,6 +121,7 @@ function DiagramCardPreview({ scenario }: { scenario: ScenarioDefinition }) {
           players={CORNER_PIXI_SCENARIO.players}
           ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
           routes={CORNER_PIXI_SCENARIO.routes}
+          tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
         />
       </div>
     )
@@ -220,6 +227,7 @@ export function DiagramsPage() {
                     ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
                     steps={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.steps}
                     routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
+                    tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
                     repeatDelay={1.2}
                     onCueChange={setBuildThroughWideChannelsCue}
                   />
@@ -254,6 +262,7 @@ export function DiagramsPage() {
                     ballPosition={ATTACKING_TRANSITION_PIXI_SCENARIO.ballPosition}
                     steps={ATTACKING_TRANSITION_PIXI_SCENARIO.steps}
                     routes={ATTACKING_TRANSITION_PIXI_SCENARIO.routes}
+                    tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
                     repeatDelay={1.15}
                     onCueChange={setAttackingTransitionCue}
                   />
@@ -288,6 +297,7 @@ export function DiagramsPage() {
                     ballPosition={DEFENSIVE_TRANSITION_PIXI_SCENARIO.ballPosition}
                     steps={DEFENSIVE_TRANSITION_PIXI_SCENARIO.steps}
                     routes={DEFENSIVE_TRANSITION_PIXI_SCENARIO.routes}
+                    tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
                     repeatDelay={1}
                     onCueChange={setDefensiveTransitionCue}
                   />
@@ -368,6 +378,7 @@ export function DiagramsPage() {
                     ballPosition={WING_BACK_ATTACK_PIXI_SCENARIO.ballPosition}
                     steps={WING_BACK_ATTACK_PIXI_SCENARIO.steps}
                     routes={WING_BACK_ATTACK_PIXI_SCENARIO.routes}
+                    tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
                     repeatDelay={1.2}
                     onCueChange={setWingBackAttackCue}
                   />
@@ -379,12 +390,18 @@ export function DiagramsPage() {
                   </div>
                   <div className="mini-pitch__legend" aria-label="Diagram key">
                     <span>
-                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
-                      Pass
+                      <i
+                        className="mini-pitch__legend-mark"
+                        style={{ background: '#ef4444' }}
+                      />
+                      Pressure
                     </span>
                     <span>
-                      <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
-                      Player run
+                      <i
+                        className="mini-pitch__legend-mark"
+                        style={{ background: '#22c55e' }}
+                      />
+                      Recovery
                     </span>
                   </div>
                 </div>
@@ -402,6 +419,7 @@ export function DiagramsPage() {
                     ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
                     steps={CORNER_PIXI_SCENARIO.steps}
                     routes={CORNER_PIXI_SCENARIO.routes}
+                    tokenScale={MOMENTS_DIAGRAM_TOKEN_SCALE}
                     repeatDelay={1.2}
                     onCueChange={setCornerCue}
                   />

@@ -16,61 +16,63 @@ export type WingBackPreviewMovement = {
   playerId?: string
   from: WingBackPreviewPoint
   to: WingBackPreviewPoint
-  kind: 'pass' | 'run' | 'support'
+  kind: 'pass' | 'run' | 'support' | 'press'
 }
 
 export const WING_BACK_PREVIEW_PLAYERS: WingBackPreviewPlayer[] = [
-  { id: 'centre-back', label: '5', role: 'Back-three passer', start: { x: 50, y: 78 } },
-  { id: 'left-wing-back', label: '3', role: 'Left wing-back', start: { x: 14, y: 62 } },
-  { id: 'right-wing-back', label: '2', role: 'Right wing-back', start: { x: 84, y: 62 } },
-  { id: 'ten', label: '10', role: 'Central finisher', start: { x: 54, y: 32 } },
-  { id: 'opponent-tracker', label: '', role: 'Tracks left wing-back', start: { x: 16, y: 58 }, tone: 'opponent' },
-  { id: 'opponent-screen', label: '', role: 'Screens the middle', start: { x: 50, y: 50 }, tone: 'opponent' },
+  { id: 'nine', label: '9', role: 'High outlet', start: { x: 50, y: 27 }, tone: 'support' },
+  { id: 'ten', label: '10', role: 'Screen into Channel 3', start: { x: 50, y: 42 } },
+  { id: 'left-wing', label: '11', role: 'Ball-side wide pressure', start: { x: 22, y: 48 } },
+  { id: 'six', label: '6', role: 'Central screen', start: { x: 42, y: 58 }, tone: 'support' },
+  { id: 'eight', label: '8', role: 'Balance and cover', start: { x: 58, y: 58 }, tone: 'support' },
+  { id: 'left-back', label: '3', role: 'Back-line compactness', start: { x: 24, y: 74 } },
+  { id: 'left-centre-back', label: '4', role: 'Deny central entry', start: { x: 42, y: 78 } },
+  { id: 'right-centre-back', label: '5', role: 'Deny central entry', start: { x: 58, y: 78 } },
+  { id: 'right-back', label: '2', role: 'Weak-side balance', start: { x: 76, y: 74 } },
+  { id: 'opponent-carrier', label: '', role: 'Wide ball carrier', start: { x: 16, y: 45 }, tone: 'opponent' },
+  { id: 'opponent-wide', label: '', role: 'Wide outlet', start: { x: 10, y: 32 }, tone: 'opponent' },
+  { id: 'opponent-central', label: '', role: 'Central option', start: { x: 46, y: 38 }, tone: 'opponent' },
+  { id: 'opponent-centre-back', label: '', role: 'Supporting centre-back', start: { x: 54, y: 64 }, tone: 'opponent' },
 ]
 
-export const WING_BACK_PREVIEW_BALL_START: WingBackPreviewPoint = { x: 50, y: 78 }
+export const WING_BACK_PREVIEW_BALL_START: WingBackPreviewPoint = { x: 16, y: 45 }
 
 export const WING_BACK_PREVIEW_MOVEMENTS: WingBackPreviewMovement[] = [
   {
-    id: 'release-left',
-    from: { x: 50, y: 78 },
-    to: { x: 14, y: 62 },
+    id: 'force-wide-pass',
+    from: { x: 46, y: 38 },
+    to: { x: 16, y: 45 },
     kind: 'pass',
   },
   {
-    id: 'right-wing-back-high',
-    playerId: 'right-wing-back',
-    from: { x: 84, y: 62 },
-    to: { x: 88, y: 30 },
-    kind: 'run',
+    id: 'wide-pressure',
+    playerId: 'left-wing',
+    from: { x: 22, y: 48 },
+    to: { x: 18, y: 45 },
+    kind: 'press',
   },
   {
-    id: 'left-wing-back-carries',
-    playerId: 'left-wing-back',
-    from: { x: 14, y: 62 },
-    to: { x: 10, y: 30 },
-    kind: 'run',
-  },
-  {
-    id: 'combine-central',
-    from: { x: 10, y: 30 },
-    to: { x: 46, y: 22 },
-    kind: 'pass',
-  },
-  {
-    id: 'ten-arrives',
+    id: 'ten-screen',
     playerId: 'ten',
-    from: { x: 54, y: 32 },
-    to: { x: 46, y: 18 },
-    kind: 'run',
+    from: { x: 50, y: 42 },
+    to: { x: 44, y: 43 },
+    kind: 'support',
   },
   {
-    id: 'finish',
-    from: { x: 46, y: 22 },
-    to: { x: 50, y: 8 },
-    kind: 'pass',
+    id: 'six-slide',
+    playerId: 'six',
+    from: { x: 42, y: 58 },
+    to: { x: 36, y: 55 },
+    kind: 'support',
+  },
+  {
+    id: 'back-line-shift',
+    playerId: 'left-back',
+    from: { x: 24, y: 74 },
+    to: { x: 20, y: 70 },
+    kind: 'support',
   },
 ]
 
 export const WING_BACK_PREVIEW_CAPTION =
-  'Secure the base with the back three, release both wing-backs high, then combine centrally to finish.'
+  'Stay compact, deny Channel 2/3, force the opponent wide, and keep a high outlet ready.'

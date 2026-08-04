@@ -26,8 +26,12 @@ export const ATTACKING_TRANSITION_PLAYERS: AttackingTransitionPlayer[] = [
   { id: 'left-wing', label: '11', role: 'Left transition runner', start: { x: 27, y: 38 } },
   { id: 'right-wing', label: '7', role: 'Right transition runner', start: { x: 73, y: 38 } },
   { id: 'eight', label: '8', role: 'Support underneath', start: { x: 38, y: 68 } },
+  { id: 'rest-defender', label: '4', role: 'Rest-defence cover', start: { x: 50, y: 80 }, tone: 'support' },
+  { id: 'opponent-lost-ball', label: '', role: 'Player dispossessed', start: { x: 54, y: 66 }, tone: 'opponent' },
+  { id: 'opponent-counterpress', label: '', role: 'Nearest counter-press', start: { x: 45, y: 60 }, tone: 'opponent' },
   { id: 'opponent-left', label: '', role: 'Recovering opponent', start: { x: 36, y: 34 }, tone: 'opponent' },
   { id: 'opponent-right', label: '', role: 'Recovering opponent', start: { x: 64, y: 35 }, tone: 'opponent' },
+  { id: 'opponent-cover', label: '', role: 'Covering centre-back', start: { x: 50, y: 19 }, tone: 'opponent' },
 ]
 
 export const ATTACKING_TRANSITION_BALL_START: AttackingTransitionPoint = { x: 50, y: 67 }

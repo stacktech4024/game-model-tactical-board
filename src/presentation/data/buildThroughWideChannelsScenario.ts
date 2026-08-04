@@ -21,11 +21,15 @@ export type BuildThroughWideChannelsMovement = {
 
 export const BUILD_THROUGH_WIDE_CHANNELS_PLAYERS: BuildThroughWideChannelsPlayer[] = [
   { id: 'left-back', label: '3', role: 'Build-up release', start: { x: 16, y: 73 } },
+  { id: 'six', label: '6', role: 'Underneath support', start: { x: 32, y: 62 }, tone: 'support' },
   { id: 'left-wing', label: '11', role: 'Wide-channel receiver', start: { x: 18, y: 42 } },
   { id: 'right-back', label: '2', role: 'Far-side overlap', start: { x: 78, y: 70 }, tone: 'support' },
   { id: 'centre-back', label: '4', role: 'Central release point', start: { x: 38, y: 74 } },
   { id: 'ten', label: '10', role: 'Final pass option', start: { x: 42, y: 24 } },
   { id: 'nine', label: '9', role: 'Near-post finisher', start: { x: 58, y: 20 } },
+  { id: 'opponent-nine', label: '', role: 'First pressing forward', start: { x: 27, y: 67 }, tone: 'opponent' },
+  { id: 'opponent-eight', label: '', role: 'Central midfield screen', start: { x: 38, y: 54 }, tone: 'opponent' },
+  { id: 'opponent-three', label: '', role: 'Wide-channel defender', start: { x: 20, y: 37 }, tone: 'opponent' },
   { id: 'opponent-five', label: '', role: 'Tracking centre-back', start: { x: 60, y: 20 }, tone: 'opponent' },
   { id: 'opponent-two', label: '', role: 'Weak-side fullback', start: { x: 84, y: 22 }, tone: 'opponent' },
 ]
