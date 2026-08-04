@@ -31,6 +31,7 @@ const MAIN_SCENARIO_IDS = [
   'protect-lead-in-back-five',
   'back-five-to-wing-back-attack',
   'corner-short-decoy-wide-delivery',
+  'defensive-block-force-wide',
 ] as const
 
 const REMOVED_DEFENSIVE_SCENARIO_IDS = [
@@ -160,7 +161,7 @@ function assertMovementEvidence(scenario: ScenarioDefinition, evidence: Movement
   assertArrowIsPhaseReferenced(scenario, evidence.arrowId)
 }
 
-test('scenario list contains only the retained main five scenarios', () => {
+test('scenario list contains only the retained main six scenarios', () => {
   assert.deepEqual(
     SCENARIOS.map((scenario) => scenario.id),
     MAIN_SCENARIO_IDS,
