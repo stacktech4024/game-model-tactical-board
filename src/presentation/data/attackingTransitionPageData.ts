@@ -71,6 +71,7 @@ function buildPlayers(homePositions: FormationPositionMap, awayPositions: Format
       x: start.x,
       y: start.y,
       tone: number === 1 ? 'keeper' : 'opponent',
+      side: 'away',
     })
   }
 
@@ -117,10 +118,10 @@ const zone2Away = applyOverrides(AWAY_ATTACKING_433, {
   3: { x: 39, y: 62 },
   4: { x: 35, y: 70 },
   5: { x: 65, y: 70 },
-  6: { x: 50, y: 58 },
+  6: { x: 45, y: 62 },
   7: { x: 74, y: 44 },
   8: { x: 42, y: 49 },
-  9: { x: 50, y: 38 },
+  9: { x: 50, y: 42 },
   10: { x: 57, y: 47 },
   11: { x: 26, y: 44 },
 })
@@ -131,7 +132,7 @@ const zone3Home = applyOverrides(HOME_ATTACKING_433, {
   10: { x: 56, y: 52 },
   11: { x: 22, y: 34 },
   7: { x: 78, y: 34 },
-  9: { x: 52, y: 22 },
+  9: { x: 52, y: 40 },
 })
 
 const zone3Away = applyOverrides(AWAY_ATTACKING_433, {
@@ -150,10 +151,10 @@ const zone3Away = applyOverrides(AWAY_ATTACKING_433, {
 const zone4Home = applyOverrides(HOME_ATTACKING_433, {
   6: { x: 50, y: 74 },
   8: { x: 46, y: 78 },
-  10: { x: 52, y: 84 },
+  10: { x: 48, y: 82 },
   11: { x: 26, y: 84 },
   7: { x: 74, y: 84 },
-  9: { x: 50, y: 90 },
+  9: { x: 50, y: 72 },
 })
 
 const zone4Away = applyOverrides(AWAY_ATTACKING_442, {
@@ -187,6 +188,8 @@ const zone1Steps: PixiPitchPreviewStep[] = [
       { playerId: 'home-7', to: { x: 82, y: 36 } },
       { playerId: 'home-11', to: { x: 18, y: 36 } },
       { playerId: 'home-9', to: { x: 50, y: 42 } },
+      { playerId: 'away-6', to: { x: 49, y: 25 } },
+      { playerId: 'away-10', to: { x: 45, y: 35 } },
     ],
     duration: 0.62,
   },
@@ -201,6 +204,8 @@ const zone1Steps: PixiPitchPreviewStep[] = [
       { playerId: 'home-6', to: { x: 46, y: 32 } },
       { playerId: 'home-4', to: { x: 30, y: 39 } },
       { playerId: 'home-5', to: { x: 57, y: 39 } },
+      { playerId: 'away-4', to: { x: 39, y: 36 } },
+      { playerId: 'away-5', to: { x: 61, y: 36 } },
     ],
     duration: 0.54,
   },
@@ -228,6 +233,13 @@ const zone1Routes = makeRoutes([
     type: 'recovery',
     revealOnStepId: 'zone-1-reset',
   },
+  {
+    id: 'zone-1-central-cover',
+    from: { x: 39, y: 44 },
+    to: { x: 45, y: 35 },
+    type: 'recovery',
+    revealOnStepId: 'zone-1-escape',
+  },
 ])
 
 const zone2Steps: PixiPitchPreviewStep[] = [
@@ -247,18 +259,26 @@ const zone2Steps: PixiPitchPreviewStep[] = [
     playerMoves: [
       { playerId: 'home-7', to: { x: 79, y: 40 } },
       { playerId: 'home-11', to: { x: 21, y: 40 } },
-      { playerId: 'home-9', to: { x: 50, y: 27 } },
+      { playerId: 'home-9', to: { x: 50, y: 44 } },
       { playerId: 'home-8', to: { x: 44, y: 63 } },
+      { playerId: 'away-10', to: { x: 49, y: 62 } },
+      { playerId: 'away-2', to: { x: 64, y: 54 } },
+      { playerId: 'away-3', to: { x: 36, y: 54 } },
     ],
     duration: 0.66,
   },
   {
     id: 'zone-2-target',
-    cue: '#9 stays central as the target',
+    cue: '#9 checks onside as recovering defenders track the central target',
     ballFrom: { x: 51, y: 58 },
-    ballTo: { x: 50, y: 27 },
+    ballTo: { x: 50, y: 40 },
     playerId: 'home-9',
-    playerTo: { x: 50, y: 27 },
+    playerTo: { x: 50, y: 40 },
+    playerMoves: [
+      { playerId: 'away-5', to: { x: 55, y: 48 } },
+      { playerId: 'away-4', to: { x: 43, y: 50 } },
+      { playerId: 'away-1', to: { x: 50, y: 96 } },
+    ],
     duration: 0.58,
   },
   {
@@ -305,6 +325,20 @@ const zone2Routes = makeRoutes([
     type: 'recovery',
     revealOnStepId: 'zone-2-shape',
   },
+  {
+    id: 'zone-2-counterpress',
+    from: { x: 57, y: 47 },
+    to: { x: 49, y: 62 },
+    type: 'press',
+    revealOnStepId: 'zone-2-link',
+  },
+  {
+    id: 'zone-2-track-nine',
+    from: { x: 65, y: 70 },
+    to: { x: 55, y: 48 },
+    type: 'recovery',
+    revealOnStepId: 'zone-2-target',
+  },
 ])
 
 const zone3Steps: PixiPitchPreviewStep[] = [
@@ -323,8 +357,10 @@ const zone3Steps: PixiPitchPreviewStep[] = [
     playerTo: { x: 78, y: 34 },
     playerMoves: [
       { playerId: 'home-11', to: { x: 22, y: 34 } },
-      { playerId: 'home-9', to: { x: 52, y: 22 } },
+      { playerId: 'home-9', to: { x: 52, y: 36 } },
       { playerId: 'home-10', to: { x: 56, y: 50 } },
+      { playerId: 'away-2', to: { x: 70, y: 42 } },
+      { playerId: 'away-6', to: { x: 52, y: 56 } },
     ],
     duration: 0.62,
   },
@@ -341,9 +377,14 @@ const zone3Steps: PixiPitchPreviewStep[] = [
     id: 'zone-3-finish',
     cue: '#9 pins centrally for the finish',
     ballFrom: { x: 56, y: 50 },
-    ballTo: { x: 52, y: 22 },
+    ballTo: { x: 52, y: 32 },
     playerId: 'home-9',
-    playerTo: { x: 52, y: 22 },
+    playerTo: { x: 52, y: 32 },
+    playerMoves: [
+      { playerId: 'away-4', to: { x: 40, y: 58 } },
+      { playerId: 'away-5', to: { x: 60, y: 58 } },
+      { playerId: 'away-1', to: { x: 50, y: 96 } },
+    ],
     duration: 0.5,
   },
 ]
@@ -370,6 +411,20 @@ const zone3Routes = makeRoutes([
     type: 'pass',
     revealOnStepId: 'zone-3-finish',
   },
+  {
+    id: 'zone-3-wide-pressure',
+    from: { x: 62, y: 58 },
+    to: { x: 70, y: 42 },
+    type: 'press',
+    revealOnStepId: 'zone-3-channel',
+  },
+  {
+    id: 'zone-3-track-nine',
+    from: { x: 65, y: 70 },
+    to: { x: 60, y: 58 },
+    type: 'recovery',
+    revealOnStepId: 'zone-3-finish',
+  },
 ])
 
 const zone4Steps: PixiPitchPreviewStep[] = [
@@ -381,25 +436,33 @@ const zone4Steps: PixiPitchPreviewStep[] = [
   },
   {
     id: 'zone-4-cutback',
-    cue: 'Use the nearest pass, cutback, or slip',
+    cue: 'Use the nearest cutback while the box recovers around the ball',
     ballFrom: { x: 52, y: 90 },
-    ballTo: { x: 50, y: 84 },
+    ballTo: { x: 48, y: 82 },
     playerId: 'home-10',
-    playerTo: { x: 50, y: 84 },
+    playerTo: { x: 48, y: 82 },
     playerMoves: [
-      { playerId: 'home-9', to: { x: 50, y: 90 } },
-      { playerId: 'home-7', to: { x: 76, y: 84 } },
-      { playerId: 'home-11', to: { x: 24, y: 84 } },
+      { playerId: 'home-9', to: { x: 50, y: 80 } },
+      { playerId: 'home-7', to: { x: 76, y: 86 } },
+      { playerId: 'home-11', to: { x: 24, y: 86 } },
+      { playerId: 'away-6', to: { x: 50, y: 78 } },
+      { playerId: 'away-4', to: { x: 40, y: 84 } },
+      { playerId: 'away-5', to: { x: 56, y: 84 } },
     ],
     duration: 0.56,
   },
   {
     id: 'zone-4-finish',
-    cue: '#9 or #10 finish quickly',
-    ballFrom: { x: 50, y: 84 },
-    ballTo: { x: 50, y: 96 },
+    cue: '#9 arrives after the regain; finish before the box closes',
+    ballFrom: { x: 48, y: 82 },
+    ballTo: { x: 50, y: 84 },
     playerId: 'home-9',
-    playerTo: { x: 50, y: 96 },
+    playerTo: { x: 50, y: 84 },
+    playerMoves: [
+      { playerId: 'away-2', to: { x: 60, y: 88 } },
+      { playerId: 'away-3', to: { x: 40, y: 88 } },
+      { playerId: 'away-1', to: { x: 50, y: 95 } },
+    ],
     duration: 0.42,
   },
 ]
@@ -426,6 +489,20 @@ const zone4Routes = makeRoutes([
     type: 'pass',
     revealOnStepId: 'zone-4-finish',
   },
+  {
+    id: 'zone-4-cutback-screen',
+    from: { x: 50, y: 74 },
+    to: { x: 50, y: 78 },
+    type: 'recovery',
+    revealOnStepId: 'zone-4-cutback',
+  },
+  {
+    id: 'zone-4-central-cover',
+    from: { x: 49, y: 82 },
+    to: { x: 56, y: 84 },
+    type: 'recovery',
+    revealOnStepId: 'zone-4-cutback',
+  },
 ])
 
 export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
@@ -435,7 +512,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     zoneFocus: 'Zone 1 regain',
     cue: zone1Steps[0].cue,
     caption:
-      'Win it deep, secure the ball, and escape pressure with #10 or a wide outlet before resetting into shape.',
+      'Win it deep, secure the first touch against pressure, escape through #10 or a wide outlet, then reset before the central cover closes.',
     system: {
       shape: 'Low regain escape',
       description:
@@ -465,7 +542,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     zoneFocus: 'Zone 2 regain',
     cue: zone2Steps[0].cue,
     caption:
-      'This is the main model: win it in midfield, link the first pass through #10, trigger the wide runners, and keep #9 central as the target.',
+      'This is the main model: win it in midfield, beat the counter-press through #10, release the wide runners, and let #9 check onside as defenders recover.',
     system: {
       shape: 'Immediate counter shape',
       description:
@@ -496,7 +573,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     zoneFocus: 'Zone 3 regain',
     cue: zone3Steps[0].cue,
     caption:
-      'A higher regain lets us go immediately: one wide runner attacks the channel, #10 supports underneath, and #9 pins the centre-back.',
+      'A higher regain lets us go immediately: release the wide runner, draw the wide pressure, support through #10, and attack the recovering line with #9.',
     system: {
       shape: 'High regain counter',
       description:
@@ -525,7 +602,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     zoneFocus: 'Zone 4 regain',
     cue: zone4Steps[0].cue,
     caption:
-      'The chance is already there: use the nearest pass, cutback, or slip, and let #9 and #10 decide the final action quickly.',
+      'The chance is already there: use the nearest cutback before the box closes, with #9 arriving centrally and the goalkeeper setting for the final threat.',
     system: {
       shape: 'Final-third finish',
       description:
