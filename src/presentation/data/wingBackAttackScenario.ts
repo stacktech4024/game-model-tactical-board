@@ -8,7 +8,7 @@ export type WingBackPreviewPlayer = {
   label: string
   role: string
   start: WingBackPreviewPoint
-  tone?: 'primary' | 'support' | 'opponent'
+  tone?: 'primary' | 'support' | 'opponent' | 'keeper'
 }
 
 export type WingBackPreviewMovement = {
@@ -29,10 +29,19 @@ export const WING_BACK_PREVIEW_PLAYERS: WingBackPreviewPlayer[] = [
   { id: 'left-centre-back', label: '4', role: 'Deny central entry', start: { x: 42, y: 78 } },
   { id: 'right-centre-back', label: '5', role: 'Deny central entry', start: { x: 58, y: 78 } },
   { id: 'right-back', label: '2', role: 'Weak-side balance', start: { x: 76, y: 74 } },
-  { id: 'opponent-carrier', label: '', role: 'Wide ball carrier', start: { x: 16, y: 45 }, tone: 'opponent' },
-  { id: 'opponent-wide', label: '', role: 'Wide outlet', start: { x: 10, y: 32 }, tone: 'opponent' },
-  { id: 'opponent-central', label: '', role: 'Central option', start: { x: 46, y: 38 }, tone: 'opponent' },
-  { id: 'opponent-centre-back', label: '', role: 'Supporting centre-back', start: { x: 54, y: 64 }, tone: 'opponent' },
+  { id: 'opponent-carrier', label: '3', role: 'Wide ball carrier', start: { x: 16, y: 45 }, tone: 'opponent' },
+  { id: 'opponent-wide', label: '11', role: 'Wide outlet', start: { x: 10, y: 32 }, tone: 'opponent' },
+  { id: 'opponent-central', label: '8', role: 'Central option', start: { x: 46, y: 38 }, tone: 'opponent' },
+  { id: 'opponent-centre-back', label: '5', role: 'Supporting centre-back', start: { x: 54, y: 64 }, tone: 'opponent' },
+  { id: 'keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 93 }, tone: 'keeper' },
+  { id: 'right-wing', label: '7', role: 'Holds position', start: { x: 66, y: 37 } },
+  { id: 'opponent-keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 6 }, tone: 'keeper' },
+  { id: 'opponent-two', label: '2', role: 'Holds position', start: { x: 85, y: 40 }, tone: 'opponent' },
+  { id: 'opponent-four', label: '4', role: 'Holds position', start: { x: 37, y: 20 }, tone: 'opponent' },
+  { id: 'opponent-six', label: '6', role: 'Holds position', start: { x: 50, y: 18 }, tone: 'opponent' },
+  { id: 'opponent-seven', label: '7', role: 'Holds position', start: { x: 65, y: 49 }, tone: 'opponent' },
+  { id: 'opponent-nine', label: '9', role: 'Holds position', start: { x: 57, y: 62 }, tone: 'opponent' },
+  { id: 'opponent-ten', label: '10', role: 'Holds position', start: { x: 43, y: 62 }, tone: 'opponent' },
 ]
 
 export const WING_BACK_PREVIEW_BALL_START: WingBackPreviewPoint = { x: 16, y: 45 }

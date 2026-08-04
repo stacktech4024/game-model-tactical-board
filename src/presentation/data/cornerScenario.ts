@@ -38,7 +38,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   { id: 'rest-defender', label: '4', role: 'Rest-defence balance', start: { x: 62, y: 48 }, facingAngle: -65.0 },
   {
     id: 'opponent-keeper',
-    label: '',
+    label: '1',
     role: 'Goalkeeper',
     start: { x: 50, y: 3 },
     tone: 'keeper',
@@ -46,7 +46,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   },
   {
     id: 'opponent-near-post',
-    label: '',
+    label: '4',
     role: 'Near-post cover',
     start: { x: 40, y: 8 },
     tone: 'opponent',
@@ -54,7 +54,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   },
   {
     id: 'opponent-marker',
-    label: '',
+    label: '10',
     role: 'Marker on #9',
     start: { x: 48, y: 24 },
     tone: 'opponent',
@@ -62,7 +62,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   },
   {
     id: 'opponent-blocker',
-    label: '',
+    label: '11',
     role: 'Central blocker',
     start: { x: 32, y: 16 },
     tone: 'opponent',
@@ -70,7 +70,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   },
   {
     id: 'opponent-far-post',
-    label: '',
+    label: '5',
     role: 'Far-post cover',
     start: { x: 60, y: 8 },
     tone: 'opponent',
@@ -78,12 +78,22 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
   },
   {
     id: 'opponent-outlet',
-    label: '',
+    label: '9',
     role: 'Outlet if cleared',
     start: { x: 75, y: 44 },
     tone: 'opponent',
     facingAngle: -115.0,
   },
+  { id: 'keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 93 }, tone: 'keeper' },
+  { id: 'right-back', label: '2', role: 'Holds position', start: { x: 85, y: 73 } },
+  { id: 'right-centre-back', label: '5', role: 'Holds position', start: { x: 62, y: 76 } },
+  { id: 'six', label: '6', role: 'Holds position', start: { x: 38, y: 50 } },
+  { id: 'left-wing', label: '11', role: 'Holds position', start: { x: 15, y: 41 } },
+  { id: 'opponent-two', label: '2', role: 'Holds position', start: { x: 79, y: 14 }, tone: 'opponent' },
+  { id: 'opponent-three', label: '3', role: 'Holds position', start: { x: 21, y: 14 }, tone: 'opponent' },
+  { id: 'opponent-six', label: '6', role: 'Holds position', start: { x: 50, y: 12 }, tone: 'opponent' },
+  { id: 'opponent-seven', label: '7', role: 'Holds position', start: { x: 74, y: 24 }, tone: 'opponent' },
+  { id: 'opponent-eight', label: '8', role: 'Holds position', start: { x: 65, y: 20 }, tone: 'opponent' },
 ]
 
 export const CORNER_PREVIEW_BALL_START: CornerPreviewPoint = { x: 2, y: 6 }

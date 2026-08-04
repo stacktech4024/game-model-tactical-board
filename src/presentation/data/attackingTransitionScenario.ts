@@ -8,7 +8,7 @@ export type AttackingTransitionPlayer = {
   label: string
   role: string
   start: AttackingTransitionPoint
-  tone?: 'primary' | 'support' | 'opponent'
+  tone?: 'primary' | 'support' | 'opponent' | 'keeper'
 }
 
 export type AttackingTransitionMovement = {
@@ -27,11 +27,21 @@ export const ATTACKING_TRANSITION_PLAYERS: AttackingTransitionPlayer[] = [
   { id: 'right-wing', label: '7', role: 'Right transition runner', start: { x: 73, y: 38 } },
   { id: 'eight', label: '8', role: 'Support underneath', start: { x: 38, y: 68 } },
   { id: 'rest-defender', label: '4', role: 'Rest-defence cover', start: { x: 50, y: 80 }, tone: 'support' },
-  { id: 'opponent-lost-ball', label: '', role: 'Player dispossessed', start: { x: 54, y: 66 }, tone: 'opponent' },
-  { id: 'opponent-counterpress', label: '', role: 'Nearest counter-press', start: { x: 45, y: 60 }, tone: 'opponent' },
-  { id: 'opponent-left', label: '', role: 'Recovering opponent', start: { x: 36, y: 34 }, tone: 'opponent' },
-  { id: 'opponent-right', label: '', role: 'Recovering opponent', start: { x: 64, y: 35 }, tone: 'opponent' },
-  { id: 'opponent-cover', label: '', role: 'Covering centre-back', start: { x: 50, y: 19 }, tone: 'opponent' },
+  { id: 'opponent-lost-ball', label: '8', role: 'Player dispossessed', start: { x: 54, y: 66 }, tone: 'opponent' },
+  { id: 'opponent-counterpress', label: '6', role: 'Nearest counter-press', start: { x: 45, y: 60 }, tone: 'opponent' },
+  { id: 'opponent-left', label: '3', role: 'Recovering opponent', start: { x: 36, y: 34 }, tone: 'opponent' },
+  { id: 'opponent-right', label: '2', role: 'Recovering opponent', start: { x: 64, y: 35 }, tone: 'opponent' },
+  { id: 'opponent-cover', label: '5', role: 'Covering centre-back', start: { x: 50, y: 19 }, tone: 'opponent' },
+  { id: 'keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 93 }, tone: 'keeper' },
+  { id: 'right-back', label: '2', role: 'Holds position', start: { x: 85, y: 71 } },
+  { id: 'left-back', label: '3', role: 'Holds position', start: { x: 15, y: 71 } },
+  { id: 'right-centre-back', label: '5', role: 'Holds position', start: { x: 62, y: 76 } },
+  { id: 'opponent-keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 6 }, tone: 'keeper' },
+  { id: 'opponent-four', label: '4', role: 'Holds position', start: { x: 38, y: 20 }, tone: 'opponent' },
+  { id: 'opponent-seven', label: '7', role: 'Holds position', start: { x: 81, y: 59 }, tone: 'opponent' },
+  { id: 'opponent-nine', label: '9', role: 'Holds position', start: { x: 50, y: 66 }, tone: 'opponent' },
+  { id: 'opponent-ten', label: '10', role: 'Holds position', start: { x: 63, y: 45 }, tone: 'opponent' },
+  { id: 'opponent-eleven', label: '11', role: 'Holds position', start: { x: 19, y: 59 }, tone: 'opponent' },
 ]
 
 export const ATTACKING_TRANSITION_BALL_START: AttackingTransitionPoint = { x: 50, y: 67 }

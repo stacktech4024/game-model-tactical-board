@@ -8,7 +8,7 @@ export type BuildThroughWideChannelsPlayer = {
   label: string
   role: string
   start: BuildThroughWideChannelsPoint
-  tone?: 'primary' | 'support' | 'opponent'
+  tone?: 'primary' | 'support' | 'opponent' | 'keeper'
 }
 
 export type BuildThroughWideChannelsMovement = {
@@ -27,11 +27,21 @@ export const BUILD_THROUGH_WIDE_CHANNELS_PLAYERS: BuildThroughWideChannelsPlayer
   { id: 'centre-back', label: '4', role: 'Central release point', start: { x: 38, y: 74 } },
   { id: 'ten', label: '10', role: 'Final pass option', start: { x: 42, y: 24 } },
   { id: 'nine', label: '9', role: 'Near-post finisher', start: { x: 58, y: 20 } },
-  { id: 'opponent-nine', label: '', role: 'First pressing forward', start: { x: 27, y: 67 }, tone: 'opponent' },
-  { id: 'opponent-eight', label: '', role: 'Central midfield screen', start: { x: 38, y: 54 }, tone: 'opponent' },
-  { id: 'opponent-three', label: '', role: 'Wide-channel defender', start: { x: 20, y: 37 }, tone: 'opponent' },
-  { id: 'opponent-five', label: '', role: 'Tracking centre-back', start: { x: 60, y: 20 }, tone: 'opponent' },
-  { id: 'opponent-two', label: '', role: 'Weak-side fullback', start: { x: 84, y: 22 }, tone: 'opponent' },
+  { id: 'opponent-nine', label: '9', role: 'First pressing forward', start: { x: 27, y: 67 }, tone: 'opponent' },
+  { id: 'opponent-eight', label: '8', role: 'Central midfield screen', start: { x: 38, y: 54 }, tone: 'opponent' },
+  { id: 'opponent-three', label: '3', role: 'Wide-channel defender', start: { x: 20, y: 37 }, tone: 'opponent' },
+  { id: 'opponent-five', label: '5', role: 'Tracking centre-back', start: { x: 60, y: 20 }, tone: 'opponent' },
+  { id: 'opponent-two', label: '2', role: 'Weak-side fullback', start: { x: 84, y: 22 }, tone: 'opponent' },
+  { id: 'keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 93 }, tone: 'keeper' },
+  { id: 'right-centre-back', label: '5', role: 'Holds position', start: { x: 62, y: 76 } },
+  { id: 'right-wing', label: '7', role: 'Holds position', start: { x: 85, y: 41 } },
+  { id: 'eight', label: '8', role: 'Holds position', start: { x: 62, y: 50 } },
+  { id: 'opponent-keeper', label: '1', role: 'Goalkeeper', start: { x: 50, y: 6 }, tone: 'keeper' },
+  { id: 'opponent-four', label: '4', role: 'Holds position', start: { x: 40, y: 17 }, tone: 'opponent' },
+  { id: 'opponent-six', label: '6', role: 'Holds position', start: { x: 50, y: 12 }, tone: 'opponent' },
+  { id: 'opponent-seven', label: '7', role: 'Holds position', start: { x: 74, y: 24 }, tone: 'opponent' },
+  { id: 'opponent-ten', label: '10', role: 'Holds position', start: { x: 50, y: 24 }, tone: 'opponent' },
+  { id: 'opponent-eleven', label: '11', role: 'Holds position', start: { x: 26, y: 20 }, tone: 'opponent' },
 ]
 
 export const BUILD_THROUGH_WIDE_CHANNELS_BALL_START: BuildThroughWideChannelsPoint = { x: 16, y: 73 }
