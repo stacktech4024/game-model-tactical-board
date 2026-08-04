@@ -21,6 +21,7 @@ type PixiPitchPreviewPlayer = {
   x: number
   y: number
   tone?: 'primary' | 'keeper' | 'opponent'
+  side?: 'home' | 'away'
   // Static facing override in degrees, same convention as SquadPlayer.facingAngle:
   // 0 = facing up the pitch (increasing pitch y), 90 = facing increasing pitch x.
   // Only applies before a player's first scripted movement begins - once a step
@@ -104,7 +105,7 @@ function buildPlayerAdapter(players: PixiPitchPreviewPlayer[]) {
   players.forEach((player, index) => {
     const number = index + 1
     const isGoalkeeper = player.tone === 'keeper'
-    const isOpponent = player.tone === 'opponent'
+    const isOpponent = player.side === 'away' || player.tone === 'opponent'
 
     squad.push({
       id: player.id,

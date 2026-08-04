@@ -4,57 +4,20 @@ import { SCENARIOS } from '../../data/scenarios'
 import { PresentationLayout } from '../PresentationLayout'
 import { BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO } from '../data/buildThroughWideChannelsPixiAdapter'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
+import {
+  ATTACKING_ORGANIZATION_PAGE_BODY,
+  ATTACKING_ORGANIZATION_TAB_COPY,
+  ATTACKING_ORGANIZATION_TABS,
+  type AttackingOrganizationTab,
+} from '../data/attackingOrganizationPageData'
 
 const ANALYSIS_SCENARIO_ID = 'build-through-wide-channels'
-const ANALYSIS_TABS = ['System', 'Strategy', 'Tactics', 'Skill Set'] as const
-
-type AnalysisTab = (typeof ANALYSIS_TABS)[number]
-
-function formatZones(zones: number[]): string[] {
-  return zones.map((zone) => `Zone ${zone}`)
-}
-
-function formatChannels(channels: number[]): string[] {
-  return channels.map((channel) => `Channel ${channel}`)
-}
-
-function getTabCopy(tab: AnalysisTab, scenario: (typeof SCENARIOS)[number]) {
-  if (tab === 'System') {
-    return {
-      headline: scenario.system.shape,
-      note: scenario.system.description,
-      chips: formatZones(scenario.fieldGeography.zones),
-    }
-  }
-
-  if (tab === 'Strategy') {
-    return {
-      headline: 'Shared strategy',
-      note: scenario.strategy,
-      chips: formatChannels(scenario.fieldGeography.channels),
-    }
-  }
-
-  if (tab === 'Tactics') {
-    return {
-      headline: 'Key tactical behaviours',
-      note: scenario.description,
-      chips: scenario.tactics,
-    }
-  }
-
-  return {
-    headline: 'Skill Set under pressure',
-    note: 'The technical detail that makes the wide-channel progression repeatable.',
-    chips: scenario.skillSet,
-  }
-}
 
 export function GameAnalysisPage() {
   const scenario = SCENARIOS.find((item) => item.id === ANALYSIS_SCENARIO_ID) ?? SCENARIOS[0]
-  const [activeTab, setActiveTab] = useState<AnalysisTab>('System')
-  const [cue, setCue] = useState('Secure build-up')
-  const activeCopy = getTabCopy(activeTab, scenario)
+  const [activeTab, setActiveTab] = useState<AttackingOrganizationTab>('System')
+  const [cue, setCue] = useState('#3 starts the Zone 2 build')
+  const activeCopy = ATTACKING_ORGANIZATION_TAB_COPY[activeTab]
   const firstStepId = scenario.phaseSteps[0]?.id
   const boardUrl = firstStepId
     ? `/presentation/live-board?scenario=${scenario.id}&step=${firstStepId}`
@@ -65,8 +28,7 @@ export function GameAnalysisPage() {
       <p className="presentation-eyebrow">Section 2 — the what</p>
       <h1 className="presentation-title">{scenario.momentOfGame}</h1>
       <p className="presentation-body">
-        One game moment drives everything. Select a tab to explore the System, Strategy, Tactics,
-        and Skill Set behind our wide-channel build-up.
+        {ATTACKING_ORGANIZATION_PAGE_BODY}
       </p>
 
       <section className="analysis-lab">
@@ -78,7 +40,7 @@ export function GameAnalysisPage() {
             ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
             steps={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.steps}
             routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
-            tokenScale={0.88}
+            tokenScale={0.76}
             repeatDelay={1.2}
             onCueChange={setCue}
           />
@@ -102,7 +64,7 @@ export function GameAnalysisPage() {
 
         <aside className="analysis-tabs">
           <div className="analysis-tab-list" role="tablist" aria-label="Attacking organization focus">
-            {ANALYSIS_TABS.map((tab) => (
+            {ATTACKING_ORGANIZATION_TABS.map((tab) => (
               <button
                 key={tab}
                 type="button"
