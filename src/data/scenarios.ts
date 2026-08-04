@@ -7,7 +7,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     moment: 'Attacking Organization',
     momentOfGame: 'Attacking Organization',
     formationMode: 'attacking-442',
-    zoneFocus: 'Zone 1 to Zone 3',
+    zoneFocus: 'Zone 2 to Zone 3 into 4',
     fieldGeography: {
       zones: [1, 2, 3, 4],
       channels: [1, 2],

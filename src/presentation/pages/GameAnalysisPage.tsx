@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SCENARIOS } from '../../data/scenarios'
 import { PresentationLayout } from '../PresentationLayout'
-import diagram1 from '../../assets/diagram1_attacking_org.png'
+import { BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO } from '../data/buildThroughWideChannelsPixiAdapter'
+import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 
 const ANALYSIS_SCENARIO_ID = 'build-through-wide-channels'
 const ANALYSIS_TABS = ['System', 'Strategy', 'Tactics', 'Skill Set'] as const
@@ -52,6 +53,7 @@ function getTabCopy(tab: AnalysisTab, scenario: (typeof SCENARIOS)[number]) {
 export function GameAnalysisPage() {
   const scenario = SCENARIOS.find((item) => item.id === ANALYSIS_SCENARIO_ID) ?? SCENARIOS[0]
   const [activeTab, setActiveTab] = useState<AnalysisTab>('System')
+  const [cue, setCue] = useState('Secure build-up')
   const activeCopy = getTabCopy(activeTab, scenario)
   const firstStepId = scenario.phaseSteps[0]?.id
   const boardUrl = firstStepId
@@ -69,8 +71,33 @@ export function GameAnalysisPage() {
 
       <section className="analysis-lab">
         <div className="analysis-pitch-card">
-          <img src={diagram1} alt={`${scenario.title} diagram`} />
-          <div className={`analysis-hotspot analysis-hotspot--${activeTab.toLowerCase().replace(' ', '-')}`} aria-hidden="true" />
+          <PixiPitchPreview
+            width={480}
+            height={741}
+            players={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.players}
+            ballPosition={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.ballPosition}
+            steps={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.steps}
+            routes={BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.routes}
+            tokenScale={0.88}
+            repeatDelay={1.2}
+            onCueChange={setCue}
+          />
+          <div className="mini-pitch__cue" aria-live="polite">
+            {cue}
+          </div>
+          <div className="mini-pitch__caption">
+            {BUILD_THROUGH_WIDE_CHANNELS_PIXI_SCENARIO.caption}
+          </div>
+          <div className="mini-pitch__legend" aria-label="Diagram key">
+            <span>
+              <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+              Pass
+            </span>
+            <span>
+              <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+              Player run
+            </span>
+          </div>
         </div>
 
         <aside className="analysis-tabs">
