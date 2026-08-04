@@ -9,20 +9,20 @@ export const SCENARIOS: ScenarioDefinition[] = [
     formationMode: 'attacking-442',
     zoneFocus: 'Zone 2 to Zone 3 into 4',
     fieldGeography: {
-      zones: [1, 2, 3, 4],
+      zones: [2, 3, 4],
       channels: [1, 2],
-      description: 'Zone 1 build-up into Zone 3 progression, then Zone 4 attack through Channel 1 width.',
+      description: 'Zone 2 to Zone 3 into Zone 4, using Channel 1 width to release the fullback.',
     },
     system: {
       shape: '1-4-4-2',
       description: '1-4-4-2 in possession with fullbacks providing width and #6 underneath support.',
     },
-    strategy: 'Build patiently, draw pressure, and progress through wide channels before attacking Zone 4.',
+    strategy: 'Progress from Zone 2 through Zone 3 into Zone 4 by using the fullback support angle, overlap timing, and wide-channel release.',
     tactics: [
       'Centre-backs split to start the build',
       '#6 supports underneath the ball',
-      'Fullbacks provide width and overlap timing',
-      '#9 stays central for the final action',
+      'Fullback supports wide, then overlaps on the winger’s release',
+      '#10 links Zone 3 to #9’s central Zone 4 finish',
     ],
     skillSet: ['Scanning', 'First touch forward', 'Support angle', 'Overlap timing', 'Pass selection'],
     phaseSteps: [
