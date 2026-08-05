@@ -72,6 +72,7 @@ function buildPlayers(homePositions: FormationPositionMap, awayPositions: Format
       x: start.x,
       y: start.y,
       tone: number === 1 ? 'keeper' : 'opponent',
+      side: 'away',
     })
   }
 

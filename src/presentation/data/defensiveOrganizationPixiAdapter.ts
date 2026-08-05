@@ -19,6 +19,7 @@ export const DEFENSIVE_ORGANIZATION_PIXI_SCENARIO: DefensiveOrganizationPixiScen
     x: player.start.x,
     y: player.start.y,
     tone: player.tone ?? 'primary',
+    side: player.side,
   })),
   ballPosition: DEFENSIVE_ORGANIZATION_PAGE_CASE.ballPosition,
   steps: DEFENSIVE_ORGANIZATION_PAGE_CASE.steps,

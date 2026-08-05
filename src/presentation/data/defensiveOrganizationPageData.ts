@@ -8,6 +8,7 @@ export type DefensiveOrganizationPreviewPlayer = {
   role: string
   start: DefensiveOrganizationPoint
   tone?: 'primary' | 'opponent' | 'keeper'
+  side?: 'home' | 'away'
 }
 
 export type DefensiveOrganizationPageCase = {
@@ -39,7 +40,7 @@ const players: DefensiveOrganizationPreviewPlayer[] = [
   { id: 'home-10', label: '10', role: 'Central connection', start: { x: 50, y: 43 } },
   { id: 'home-7', label: '7', role: 'Wide delay and press trigger', start: { x: 77, y: 45 } },
   { id: 'home-9', label: '9', role: 'Counter outlet', start: { x: 50, y: 30 } },
-  { id: 'away-1', label: '1', role: 'Goalkeeper', start: { x: 50, y: 7 }, tone: 'keeper' },
+  { id: 'away-1', label: '1', role: 'Goalkeeper', start: { x: 50, y: 7 }, tone: 'keeper', side: 'away' },
   { id: 'away-2', label: '2', role: 'Wide possession outlet in Channel 1', start: { x: 84, y: 27 }, tone: 'opponent' },
   { id: 'away-3', label: '3', role: 'Weak-side fullback', start: { x: 16, y: 27 }, tone: 'opponent' },
   { id: 'away-4', label: '4', role: 'Backline support', start: { x: 39, y: 22 }, tone: 'opponent' },

@@ -260,6 +260,19 @@
   background: rgba(15, 23, 42, 0.55);
 }
 
+.analysis-pitch-card > .pixi-pitch-preview {
+  width: min(100%, 480px);
+  aspect-ratio: 480 / 741;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
+.analysis-pitch-card > .pixi-pitch-preview canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .analysis-pitch-card img {
   display: block;
   width: 100%;

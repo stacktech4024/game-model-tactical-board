@@ -11,17 +11,18 @@ export const SCENARIOS: ScenarioDefinition[] = [
     fieldGeography: {
       zones: [1, 2, 3, 4],
       channels: [1, 2],
-      description: 'Zone 1 build-up into Zone 3 progression, then Zone 4 attack through Channel 1 width.',
+      description: 'Zone 2 build through Zone 3, then attack Zone 4 through Channel 1 width.',
     },
     system: {
       shape: '1-4-4-2',
       description: '1-4-4-2 in possession with fullbacks providing width and #6 underneath support.',
     },
-    strategy: 'Build patiently, draw pressure, and progress through wide channels before attacking Zone 4.',
+    strategy: 'Build from Zone 2, progress through wide channels into Zone 3, then use the #10 link to find #9 centrally in Zone 4.',
     tactics: [
       'Centre-backs split to start the build',
       '#6 supports underneath the ball',
       'Fullbacks provide width and overlap timing',
+      '#10 links the wide progression to the central target',
       '#9 stays central for the final action',
     ],
     skillSet: ['Scanning', 'First touch forward', 'Support angle', 'Overlap timing', 'Pass selection'],

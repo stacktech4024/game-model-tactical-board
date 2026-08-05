@@ -17,11 +17,16 @@
 
 .app-shell--embedded .app-grid {
   grid-template-columns: minmax(250px, 30%) minmax(0, 70%);
+  grid-template-areas:
+    "scenarios controls"
+    "scenarios pitch";
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: min(78svh, 760px);
   align-items: stretch;
 }
 
 .app-shell--embedded .pitch-panel {
+  grid-area: pitch;
   height: min(78svh, 760px);
   min-height: 640px;
 }
@@ -31,6 +36,7 @@
 }
 
 .app-shell--embedded .scenario-panel {
+  grid-area: scenarios;
   max-height: min(78svh, 760px);
 }
 
@@ -50,7 +56,7 @@
 }
 
 .embedded-board-controls {
-  margin-bottom: 12px;
+  grid-area: controls;
 }
 
 .app-header {
@@ -449,6 +455,16 @@ h2 {
 
   .app-shell--embedded .app-grid {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "controls"
+      "pitch"
+      "scenarios";
+    grid-template-rows: auto auto auto;
+  }
+
+  .app-shell--embedded .scenario-panel {
+    max-height: none;
+    overflow-y: visible;
   }
 
   .app-shell:not(.app-shell--embedded) .pitch-panel {

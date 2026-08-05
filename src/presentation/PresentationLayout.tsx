@@ -21,6 +21,15 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target
+      const isInteractiveTarget = target instanceof Element && Boolean(target.closest(
+        'input, textarea, select, button, [role="slider"], [role="group"], [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]',
+      ))
+
+      if (isInteractiveTarget) {
+        return
+      }
+
       if (event.key === 'ArrowRight' && nextPage) {
         navigate(`/presentation/${nextPage}`)
       }

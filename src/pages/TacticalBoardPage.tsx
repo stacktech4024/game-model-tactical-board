@@ -280,33 +280,33 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
       )}
 
       <section className="app-grid">
-        <aside className="scenario-panel">
-          {embedded && (
-            <div className="embedded-board-controls">
-              <div className="playback-controls" role="group" aria-label="Playback controls">
-                <span className="playback-controls__label">Playback: {playState}</span>
-                <button
-                  type="button"
-                  className="control-button"
-                  disabled={playState === 'playing'}
-                  onClick={handlePlay}
-                >
-                  Play
-                </button>
-                <button
-                  type="button"
-                  className="control-button"
-                  disabled={playState === 'idle' || playState === 'complete'}
-                  onClick={handlePause}
-                >
-                  Pause
-                </button>
-                <button type="button" className="control-button" onClick={handleReset}>
-                  Reset
-                </button>
-              </div>
+        {embedded && (
+          <div className="embedded-board-controls">
+            <div className="playback-controls" role="group" aria-label="Playback controls">
+              <span className="playback-controls__label">Playback: {playState}</span>
+              <button
+                type="button"
+                className="control-button"
+                disabled={playState === 'playing'}
+                onClick={handlePlay}
+              >
+                Play
+              </button>
+              <button
+                type="button"
+                className="control-button"
+                disabled={playState === 'idle' || playState === 'complete'}
+                onClick={handlePause}
+              >
+                Pause
+              </button>
+              <button type="button" className="control-button" onClick={handleReset}>
+                Reset
+              </button>
             </div>
-          )}
+          </div>
+        )}
+        <aside className="scenario-panel">
           <h2>Scenarios</h2>
           <div className="scenario-list">
             {SCENARIOS.map((scenario) => (
