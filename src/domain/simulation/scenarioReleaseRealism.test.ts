@@ -182,6 +182,31 @@ test('build-through-wide-channels keeps #4 at the forward-pass release space and
     side: 'home',
     playerNumber: 9,
   })
+
+  const finalPass = getIntent(plan, 'wide-build-finish-nine')
+  const releaseSnapshot = getWorldSnapshotAtProgress(plan, finalPass.timing.startProgress)
+  const numberNine = releaseSnapshot.players.find(
+    (player) => player.side === 'home' && player.number === 9,
+  )
+  const trackingCentreBack = releaseSnapshot.players.find(
+    (player) => player.side === 'away' && player.number === 5,
+  )
+  const secondLastOpponentY = releaseSnapshot.players
+    .filter((player) => player.side === 'away')
+    .map((player) => player.position.y)
+    .sort((a, b) => b - a)[1]
+
+  assert.ok(numberNine, 'Expected home #9 at the AO final-pass release')
+  assert.ok(trackingCentreBack, 'Expected away #5 tracking the AO final-pass run')
+  assert.ok(
+    numberNine.position.y <= secondLastOpponentY,
+    `AO final pass: #9 at y=${numberNine.position.y} must be onside of the second-last opponent at y=${secondLastOpponentY}`,
+  )
+  assert.ok(
+    numberNine.position.y < trackingCentreBack.position.y,
+    `AO final pass: #9 at y=${numberNine.position.y} needs a visible margin behind tracking #5 at y=${trackingCentreBack.position.y}`,
+  )
+
   assertMarkerAtIntentTarget(scenario, plan, 'wide-build-goal-marker', 'wide-build-shot-goal')
   assertFinalBallAtIntentTarget(plan, 'wide-build-shot-goal')
 })

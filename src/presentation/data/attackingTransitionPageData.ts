@@ -1,9 +1,14 @@
 import type { PixiPitchPreviewProps, PixiPitchPreviewRoute, PixiPitchPreviewStep } from '../../renderers/pixi/PixiPitchPreview'
-import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
+import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations.ts'
+import {
+  formationMetresToPitchPercentPositions,
+  pitchPercentToPreviewPoint,
+  type TransitionPositionMap,
+} from './transitionPreviewCoordinates.ts'
 
 type PreviewPlayer = PixiPitchPreviewProps['players'][number]
 type PitchPoint = { x: number; y: number }
-type FormationPositionMap = Record<number, PitchPoint>
+type FormationPositionMap = TransitionPositionMap
 
 export type AttackingTransitionPageCase = {
   id: 'zone-1' | 'zone-2' | 'zone-3' | 'zone-4'
@@ -28,11 +33,11 @@ export type AttackingTransitionPageCase = {
   liveBoardScenarioId?: string
 }
 
-const HOME_ATTACKING_433 = FORMATION_POSITIONS['attacking-433']
-const AWAY_ATTACKING_433 = OPPOSITION_POSITIONS['attacking-433']
-const HOME_DEFENSIVE_4231 = FORMATION_POSITIONS['defensive-4231']
-const AWAY_DEFENSIVE_4231 = OPPOSITION_POSITIONS['defensive-4231']
-const AWAY_ATTACKING_442 = OPPOSITION_POSITIONS['attacking-442']
+const HOME_ATTACKING_433 = formationMetresToPitchPercentPositions(FORMATION_POSITIONS['attacking-433'])
+const AWAY_ATTACKING_433 = formationMetresToPitchPercentPositions(OPPOSITION_POSITIONS['attacking-433'])
+const HOME_DEFENSIVE_4231 = formationMetresToPitchPercentPositions(FORMATION_POSITIONS['defensive-4231'])
+const AWAY_DEFENSIVE_4231 = formationMetresToPitchPercentPositions(OPPOSITION_POSITIONS['defensive-4231'])
+const AWAY_ATTACKING_442 = formationMetresToPitchPercentPositions(OPPOSITION_POSITIONS['attacking-442'])
 
 function applyOverrides(
   base: FormationPositionMap,
@@ -52,34 +57,55 @@ function buildPlayers(homePositions: FormationPositionMap, awayPositions: Format
 
   for (let number = 1; number <= 11; number += 1) {
     const start = homePositions[number]
+    const previewStart = pitchPercentToPreviewPoint(start)
 
     players.push({
       id: `home-${number}`,
       label: String(number),
-      x: start.x,
-      y: start.y,
+      x: previewStart.x,
+      y: previewStart.y,
       tone: number === 1 ? 'keeper' : undefined,
+      facingAngle: number === 1 ? 0 : undefined,
     })
   }
 
   for (let number = 1; number <= 11; number += 1) {
     const start = awayPositions[number]
+    const previewStart = pitchPercentToPreviewPoint(start)
 
     players.push({
       id: `away-${number}`,
       label: String(number),
-      x: start.x,
-      y: start.y,
+      x: previewStart.x,
+      y: previewStart.y,
       tone: number === 1 ? 'keeper' : 'opponent',
       side: 'away',
+      facingAngle: number === 1 ? 180 : undefined,
     })
   }
 
   return players
 }
 
-function makeRoutes(routes: PixiPitchPreviewRoute[]) {
-  return routes
+function toPreviewStep(step: PixiPitchPreviewStep): PixiPitchPreviewStep {
+  return {
+    ...step,
+    playerTo: step.playerTo ? pitchPercentToPreviewPoint(step.playerTo) : undefined,
+    playerMoves: step.playerMoves?.map((move) => ({
+      ...move,
+      to: pitchPercentToPreviewPoint(move.to),
+    })),
+    ballFrom: step.ballFrom ? pitchPercentToPreviewPoint(step.ballFrom) : undefined,
+    ballTo: step.ballTo ? pitchPercentToPreviewPoint(step.ballTo) : undefined,
+  }
+}
+
+function toPreviewRoute(route: PixiPitchPreviewRoute): PixiPitchPreviewRoute {
+  return {
+    ...route,
+    from: pitchPercentToPreviewPoint(route.from),
+    to: pitchPercentToPreviewPoint(route.to),
+  }
 }
 
 const zone1Home = applyOverrides(HOME_DEFENSIVE_4231, {
@@ -105,47 +131,47 @@ const zone1Away = applyOverrides(AWAY_DEFENSIVE_4231, {
 })
 
 const zone2Home = applyOverrides(HOME_ATTACKING_433, {
-  6: { x: 50, y: 67 },
-  8: { x: 43, y: 74 },
-  10: { x: 51, y: 58 },
-  11: { x: 25, y: 42 },
-  7: { x: 75, y: 42 },
-  9: { x: 50, y: 27 },
+  6: { x: 50, y: 47 },
+  8: { x: 43, y: 52 },
+  10: { x: 51, y: 57 },
+  11: { x: 25, y: 61 },
+  7: { x: 75, y: 61 },
+  9: { x: 50, y: 68 },
 })
 
 const zone2Away = applyOverrides(AWAY_ATTACKING_433, {
-  2: { x: 61, y: 62 },
-  3: { x: 39, y: 62 },
-  4: { x: 35, y: 70 },
-  5: { x: 65, y: 70 },
-  6: { x: 45, y: 62 },
-  7: { x: 74, y: 44 },
-  8: { x: 42, y: 49 },
-  9: { x: 50, y: 42 },
-  10: { x: 57, y: 47 },
-  11: { x: 26, y: 44 },
+  2: { x: 61, y: 68 },
+  3: { x: 39, y: 68 },
+  4: { x: 35, y: 72 },
+  5: { x: 65, y: 72 },
+  6: { x: 45, y: 61 },
+  7: { x: 74, y: 55 },
+  8: { x: 42, y: 58 },
+  9: { x: 50, y: 48 },
+  10: { x: 57, y: 56 },
+  11: { x: 26, y: 55 },
 })
 
 const zone3Home = applyOverrides(HOME_ATTACKING_433, {
   6: { x: 52, y: 56 },
   8: { x: 44, y: 60 },
-  10: { x: 56, y: 52 },
-  11: { x: 22, y: 34 },
-  7: { x: 78, y: 34 },
-  9: { x: 52, y: 40 },
+  10: { x: 56, y: 62 },
+  11: { x: 22, y: 66 },
+  7: { x: 78, y: 68 },
+  9: { x: 52, y: 69 },
 })
 
 const zone3Away = applyOverrides(AWAY_ATTACKING_433, {
-  2: { x: 62, y: 58 },
-  3: { x: 38, y: 58 },
-  4: { x: 35, y: 70 },
-  5: { x: 65, y: 70 },
-  6: { x: 50, y: 64 },
-  7: { x: 74, y: 48 },
-  8: { x: 42, y: 52 },
-  9: { x: 50, y: 40 },
-  10: { x: 58, y: 50 },
-  11: { x: 26, y: 48 },
+  2: { x: 62, y: 72 },
+  3: { x: 38, y: 72 },
+  4: { x: 35, y: 74 },
+  5: { x: 65, y: 74 },
+  6: { x: 50, y: 66 },
+  7: { x: 74, y: 58 },
+  8: { x: 42, y: 62 },
+  9: { x: 50, y: 52 },
+  10: { x: 58, y: 60 },
+  11: { x: 26, y: 58 },
 })
 
 const zone4Home = applyOverrides(HOME_ATTACKING_433, {
@@ -211,7 +237,7 @@ const zone1Steps: PixiPitchPreviewStep[] = [
   },
 ]
 
-const zone1Routes = makeRoutes([
+const zone1Routes: PixiPitchPreviewRoute[] = [
   {
     id: 'zone-1-outlet',
     from: { x: 50, y: 22 },
@@ -240,7 +266,7 @@ const zone1Routes = makeRoutes([
     type: 'recovery',
     revealOnStepId: 'zone-1-escape',
   },
-])
+]
 
 const zone2Steps: PixiPitchPreviewStep[] = [
   {
@@ -252,32 +278,31 @@ const zone2Steps: PixiPitchPreviewStep[] = [
   {
     id: 'zone-2-link',
     cue: '#10 links the first pass',
-    ballFrom: { x: 50, y: 67 },
-    ballTo: { x: 51, y: 58 },
+    ballFrom: { x: 50, y: 47 },
+    ballTo: { x: 51, y: 57 },
     playerId: 'home-10',
     playerTo: { x: 51, y: 58 },
     playerMoves: [
-      { playerId: 'home-7', to: { x: 79, y: 40 } },
-      { playerId: 'home-11', to: { x: 21, y: 40 } },
-      { playerId: 'home-9', to: { x: 50, y: 44 } },
-      { playerId: 'home-8', to: { x: 44, y: 63 } },
-      { playerId: 'away-10', to: { x: 49, y: 62 } },
-      { playerId: 'away-2', to: { x: 64, y: 54 } },
-      { playerId: 'away-3', to: { x: 36, y: 54 } },
+      { playerId: 'home-7', to: { x: 79, y: 67 } },
+      { playerId: 'home-11', to: { x: 21, y: 67 } },
+      { playerId: 'home-8', to: { x: 44, y: 55 } },
+      { playerId: 'away-10', to: { x: 49, y: 59 } },
+      { playerId: 'away-2', to: { x: 64, y: 70 } },
+      { playerId: 'away-3', to: { x: 36, y: 70 } },
     ],
     duration: 0.66,
   },
   {
     id: 'zone-2-target',
     cue: '#9 checks onside as recovering defenders track the central target',
-    ballFrom: { x: 51, y: 58 },
-    ballTo: { x: 50, y: 40 },
+    ballFrom: { x: 51, y: 57 },
+    ballTo: { x: 50, y: 66 },
     playerId: 'home-9',
-    playerTo: { x: 50, y: 40 },
+    playerTo: { x: 50, y: 66 },
     playerMoves: [
-      { playerId: 'away-5', to: { x: 55, y: 48 } },
-      { playerId: 'away-4', to: { x: 43, y: 50 } },
-      { playerId: 'away-1', to: { x: 50, y: 96 } },
+      { playerId: 'away-5', to: { x: 55, y: 74 } },
+      { playerId: 'away-4', to: { x: 43, y: 74 } },
+      { playerId: 'away-1', to: { x: 50, y: 94 } },
     ],
     duration: 0.58,
   },
@@ -289,57 +314,57 @@ const zone2Steps: PixiPitchPreviewStep[] = [
   },
 ]
 
-const zone2Routes = makeRoutes([
+const zone2Routes: PixiPitchPreviewRoute[] = [
   {
     id: 'zone-2-regain-pass',
-    from: { x: 50, y: 67 },
-    to: { x: 51, y: 58 },
+    from: { x: 50, y: 47 },
+    to: { x: 51, y: 57 },
     type: 'pass',
     revealOnStepId: 'zone-2-link',
   },
   {
     id: 'zone-2-left-run',
-    from: { x: 25, y: 42 },
-    to: { x: 21, y: 40 },
+    from: { x: 25, y: 61 },
+    to: { x: 21, y: 67 },
     type: 'run',
     revealOnStepId: 'zone-2-link',
   },
   {
     id: 'zone-2-right-run',
-    from: { x: 75, y: 42 },
-    to: { x: 79, y: 40 },
+    from: { x: 75, y: 61 },
+    to: { x: 79, y: 67 },
     type: 'run',
     revealOnStepId: 'zone-2-link',
   },
   {
     id: 'zone-2-finish-pass',
-    from: { x: 51, y: 58 },
-    to: { x: 50, y: 27 },
+    from: { x: 51, y: 57 },
+    to: { x: 50, y: 66 },
     type: 'pass',
     revealOnStepId: 'zone-2-target',
   },
   {
     id: 'zone-2-support-run',
-    from: { x: 44, y: 63 },
-    to: { x: 44, y: 63 },
+    from: { x: 44, y: 55 },
+    to: { x: 44, y: 55 },
     type: 'recovery',
     revealOnStepId: 'zone-2-shape',
   },
   {
     id: 'zone-2-counterpress',
-    from: { x: 57, y: 47 },
-    to: { x: 49, y: 62 },
+    from: { x: 57, y: 56 },
+    to: { x: 49, y: 59 },
     type: 'press',
     revealOnStepId: 'zone-2-link',
   },
   {
     id: 'zone-2-track-nine',
-    from: { x: 65, y: 70 },
-    to: { x: 55, y: 48 },
+    from: { x: 65, y: 72 },
+    to: { x: 55, y: 74 },
     type: 'recovery',
     revealOnStepId: 'zone-2-target',
   },
-])
+]
 
 const zone3Steps: PixiPitchPreviewStep[] = [
   {
@@ -352,80 +377,79 @@ const zone3Steps: PixiPitchPreviewStep[] = [
     id: 'zone-3-channel',
     cue: 'Wide runner attacks Channel 1 or 2',
     ballFrom: { x: 52, y: 58 },
-    ballTo: { x: 78, y: 34 },
+    ballTo: { x: 78, y: 70 },
     playerId: 'home-7',
-    playerTo: { x: 78, y: 34 },
+    playerTo: { x: 78, y: 70 },
     playerMoves: [
-      { playerId: 'home-11', to: { x: 22, y: 34 } },
-      { playerId: 'home-9', to: { x: 52, y: 36 } },
-      { playerId: 'home-10', to: { x: 56, y: 50 } },
-      { playerId: 'away-2', to: { x: 70, y: 42 } },
-      { playerId: 'away-6', to: { x: 52, y: 56 } },
+      { playerId: 'home-11', to: { x: 22, y: 69 } },
+      { playerId: 'home-10', to: { x: 56, y: 64 } },
+      { playerId: 'away-2', to: { x: 70, y: 75 } },
+      { playerId: 'away-6', to: { x: 52, y: 68 } },
     ],
     duration: 0.62,
   },
   {
     id: 'zone-3-link',
     cue: '#10 supports underneath the next action',
-    ballFrom: { x: 78, y: 34 },
-    ballTo: { x: 56, y: 50 },
+    ballFrom: { x: 78, y: 70 },
+    ballTo: { x: 56, y: 64 },
     playerId: 'home-10',
-    playerTo: { x: 56, y: 50 },
+    playerTo: { x: 56, y: 64 },
     duration: 0.52,
   },
   {
     id: 'zone-3-finish',
     cue: '#9 pins centrally for the finish',
-    ballFrom: { x: 56, y: 50 },
-    ballTo: { x: 52, y: 32 },
+    ballFrom: { x: 56, y: 64 },
+    ballTo: { x: 52, y: 73 },
     playerId: 'home-9',
-    playerTo: { x: 52, y: 32 },
+    playerTo: { x: 52, y: 73 },
     playerMoves: [
-      { playerId: 'away-4', to: { x: 40, y: 58 } },
-      { playerId: 'away-5', to: { x: 60, y: 58 } },
-      { playerId: 'away-1', to: { x: 50, y: 96 } },
+      { playerId: 'away-4', to: { x: 40, y: 76 } },
+      { playerId: 'away-5', to: { x: 60, y: 76 } },
+      { playerId: 'away-1', to: { x: 50, y: 94 } },
     ],
     duration: 0.5,
   },
 ]
 
-const zone3Routes = makeRoutes([
+const zone3Routes: PixiPitchPreviewRoute[] = [
   {
     id: 'zone-3-channel-run',
-    from: { x: 75, y: 42 },
-    to: { x: 78, y: 34 },
+    from: { x: 78, y: 68 },
+    to: { x: 78, y: 70 },
     type: 'run',
     revealOnStepId: 'zone-3-channel',
   },
   {
     id: 'zone-3-support-run',
-    from: { x: 56, y: 58 },
-    to: { x: 56, y: 50 },
+    from: { x: 56, y: 62 },
+    to: { x: 56, y: 64 },
     type: 'recovery',
     revealOnStepId: 'zone-3-link',
   },
   {
     id: 'zone-3-finish-pass',
-    from: { x: 56, y: 50 },
-    to: { x: 52, y: 22 },
+    from: { x: 56, y: 64 },
+    to: { x: 52, y: 73 },
     type: 'pass',
     revealOnStepId: 'zone-3-finish',
   },
   {
     id: 'zone-3-wide-pressure',
-    from: { x: 62, y: 58 },
-    to: { x: 70, y: 42 },
+    from: { x: 62, y: 72 },
+    to: { x: 70, y: 75 },
     type: 'press',
     revealOnStepId: 'zone-3-channel',
   },
   {
     id: 'zone-3-track-nine',
-    from: { x: 65, y: 70 },
-    to: { x: 60, y: 58 },
+    from: { x: 65, y: 74 },
+    to: { x: 60, y: 76 },
     type: 'recovery',
     revealOnStepId: 'zone-3-finish',
   },
-])
+]
 
 const zone4Steps: PixiPitchPreviewStep[] = [
   {
@@ -467,7 +491,7 @@ const zone4Steps: PixiPitchPreviewStep[] = [
   },
 ]
 
-const zone4Routes = makeRoutes([
+const zone4Routes: PixiPitchPreviewRoute[] = [
   {
     id: 'zone-4-cutback-pass',
     from: { x: 52, y: 90 },
@@ -503,7 +527,7 @@ const zone4Routes = makeRoutes([
     type: 'recovery',
     revealOnStepId: 'zone-4-cutback',
   },
-])
+]
 
 export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
   {
@@ -530,9 +554,9 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     skillSet: ['Shielding', 'Scanning', 'First pass under pressure', 'Support angle', 'Ball security'],
     principles: ['DENY', 'SUPPORT', 'DISPERSAL'],
     players: buildPlayers(zone1Home, zone1Away),
-    ballPosition: { x: 50, y: 22 },
-    steps: zone1Steps,
-    routes: zone1Routes,
+    ballPosition: pitchPercentToPreviewPoint({ x: 50, y: 22 }),
+    steps: zone1Steps.map(toPreviewStep),
+    routes: zone1Routes.map(toPreviewRoute),
     repeatDelay: 1.25,
     tokenScale: 0.76,
   },
@@ -560,9 +584,9 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     skillSet: ['First action after regain', 'Forward passing', 'Run timing', 'Body shape', 'Support underneath'],
     principles: ['DENY', 'SUPPORT', 'MOBILITY', 'PENETRATION'],
     players: buildPlayers(zone2Home, zone2Away),
-    ballPosition: { x: 50, y: 67 },
-    steps: zone2Steps,
-    routes: zone2Routes,
+    ballPosition: pitchPercentToPreviewPoint({ x: 50, y: 47 }),
+    steps: zone2Steps.map(toPreviewStep),
+    routes: zone2Routes.map(toPreviewRoute),
     repeatDelay: 1.2,
     tokenScale: 0.8,
     liveBoardScenarioId: 'counter-quickly-on-turnover',
@@ -590,9 +614,9 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     skillSet: ['Transition scanning', 'Run timing', 'Channel recognition', 'First-time support', 'Final pass'],
     principles: ['SUPPORT', 'MOBILITY', 'PENETRATION'],
     players: buildPlayers(zone3Home, zone3Away),
-    ballPosition: { x: 52, y: 58 },
-    steps: zone3Steps,
-    routes: zone3Routes,
+    ballPosition: pitchPercentToPreviewPoint({ x: 52, y: 58 }),
+    steps: zone3Steps.map(toPreviewStep),
+    routes: zone3Routes.map(toPreviewRoute),
     repeatDelay: 1.15,
     tokenScale: 0.8,
   },
@@ -619,9 +643,9 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     skillSet: ['Composure', 'Decision speed', 'Combination play', 'Cutback timing', 'Finishing'],
     principles: ['SUPPORT', 'PENETRATION', 'IMPROVISATION'],
     players: buildPlayers(zone4Home, zone4Away),
-    ballPosition: { x: 52, y: 90 },
-    steps: zone4Steps,
-    routes: zone4Routes,
+    ballPosition: pitchPercentToPreviewPoint({ x: 52, y: 90 }),
+    steps: zone4Steps.map(toPreviewStep),
+    routes: zone4Routes.map(toPreviewRoute),
     repeatDelay: 1.1,
     tokenScale: 0.74,
   },
