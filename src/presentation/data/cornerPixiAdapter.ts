@@ -23,6 +23,7 @@ export const CORNER_PIXI_SCENARIO: CornerPixiScenario = {
     x: player.start.x,
     y: player.start.y,
     tone: player.tone === 'opponent' || player.tone === 'keeper' ? player.tone : 'primary',
+    side: player.side,
     facingAngle: player.facingAngle,
   })),
   ballPosition: CORNER_PREVIEW_BALL_START,

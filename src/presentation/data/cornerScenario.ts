@@ -9,6 +9,7 @@ export type CornerPreviewPlayer = {
   role: string
   start: CornerPreviewPoint
   tone?: 'primary' | 'support' | 'opponent' | 'keeper'
+  side?: 'home' | 'away'
   // Static facing in degrees (0 = up the pitch, 90 = toward +x), matching the
   // SquadPlayer.facingAngle convention. Computed as the bearing from each
   // player's start position toward the corner-flag/ball start position, so
@@ -47,6 +48,7 @@ export const CORNER_PREVIEW_PLAYERS: CornerPreviewPlayer[] = [
     role: 'Goalkeeper',
     start: { x: 50, y: 3 },
     tone: 'keeper',
+    side: 'away',
     facingAngle: -95.5,
   },
   {
@@ -153,14 +155,14 @@ export const CORNER_PREVIEW_STEPS: PixiPitchPreviewStep[] = [
   { id: 'short-touch', cue: 'Short touch decoy', ballFrom: shortTouch.from, ballTo: shortTouch.to, duration: 0.35 },
   {
     id: 'cross-in',
-    cue: 'Cross into the corridor',
+    cue: 'Cross into the delivery corridor',
     ballFrom: crossIn.from,
     ballTo: crossIn.to,
     playerId: secondBallSupport.playerId,
     playerTo: secondBallSupport.to,
     duration: 0.7,
   },
-  { id: 'nine-arrives', cue: '#9 attacks the corridor', playerId: nineAttacks.playerId, playerTo: nineAttacks.to, duration: 0.55 },
+  { id: 'nine-arrives', cue: '#9 attacks the delivery corridor', playerId: nineAttacks.playerId, playerTo: nineAttacks.to, duration: 0.55 },
   {
     id: 'header',
     cue: 'Header on goal',
@@ -190,5 +192,5 @@ export const CORNER_PREVIEW_ROUTES: PixiPitchPreviewRoute[] = CORNER_PREVIEW_MOV
 }))
 
 export const CORNER_PREVIEW_CAPTION =
-  'Short touch to change the angle, loop a cross into the corridor, then attack it for a header.'
+  'Short touch to change the angle, loop a cross into the delivery corridor, then attack it for a header.'
 import type { PixiPitchPreviewRoute, PixiPitchPreviewStep } from '../../renderers/pixi/PixiPitchPreview'

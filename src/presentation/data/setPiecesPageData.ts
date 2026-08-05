@@ -12,6 +12,7 @@ export const SET_PIECES_PAGE_CASE = {
     '#9 attacks the central delivery corridor in Zone 4',
     '#8 and #10 arrive for the second ball',
     '#2, #4, #5, and #6 protect rest-defence behind the routine',
+    'Defending goalkeeper organizes the six-yard area and protects the delivery corridor',
   ],
   skillSet: ['Delivery quality', 'Disguise', 'Timing of run', 'Header finishing', 'Second-ball reaction'],
   principles: ['SUPPORT', 'MOBILITY', 'PENETRATION'],
