@@ -2,6 +2,9 @@ import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import { getPitchScale, pitchToScreen } from '../../../domain/pitch/coordTransforms'
 import { getZoneNumberForY } from '../../../domain/pitch/pitchConstants'
 import type { SquadPlayer } from '../../../domain/players/playerTypes'
+import {
+  facingAngleToSpriteRotation,
+} from '../animation/playerFacing.ts'
 
 import shaperMaroonUrl from '../../../assets/shapers/player_maroon.svg'
 import shaperYellowUrl from '../../../assets/shapers/player_yellow.svg'
@@ -29,8 +32,6 @@ const SHADOW_RADIUS_X_RATIO = 0.85
 const SHADOW_RADIUS_Y_RATIO = 0.3
 const FOCUS_RING_COLOR = 0xfbbf24
 const FOCUS_RING_ALPHA = 0.88
-const SHAPER_FORWARD_ROTATION_OFFSET_DEGREES = -90
-
 // The Shapers artwork is a "head" circle plus a curved orientation arm,
 // drawn on a 223x500 canvas where the head circle is ~171px in diameter
 // (measured from the source asset). This constant lets us scale any
@@ -164,8 +165,7 @@ function addToken(
   // Shapers artwork naturally faces right. Rotate that axis onto the pitch so
   // home players default toward the top goal and away players toward the bottom.
   const facingAngle = player.facingAngle ?? (player.side === 'away' ? 180 : 0)
-  tokenSprite.rotation =
-    ((facingAngle + SHAPER_FORWARD_ROTATION_OFFSET_DEGREES) * Math.PI) / 180
+  tokenSprite.rotation = facingAngleToSpriteRotation(facingAngle)
 
   numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
   numberText.anchor.set(0.5)

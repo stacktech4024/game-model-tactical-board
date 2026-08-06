@@ -369,6 +369,65 @@
   margin: 0;
 }
 
+.analysis-skill-controls {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.analysis-skill-controls > strong {
+  color: #f8fafc;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+}
+
+.analysis-skill-list {
+  display: grid;
+  gap: 8px;
+}
+
+.analysis-skill-button,
+.analysis-service-button {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #dbeafe;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  padding: 9px 10px;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.analysis-skill-button:hover,
+.analysis-skill-button.is-active,
+.analysis-service-button:hover,
+.analysis-service-button.is-active {
+  border-color: rgba(251, 191, 36, 0.76);
+  background: rgba(251, 191, 36, 0.12);
+  color: #fef3c7;
+}
+
+.analysis-service-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.analysis-service-button {
+  text-align: center;
+}
+
+.analysis-detail .analysis-replay-note {
+  margin-top: 18px;
+  color: #93a4bd;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .skill-lab {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);

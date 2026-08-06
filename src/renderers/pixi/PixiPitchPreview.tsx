@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Text } from 'pixi.js'
+import { Application, Container, Graphics, Sprite, Text } from 'pixi.js'
 import { gsap } from 'gsap'
 import { useEffect, useRef } from 'react'
 import type { SquadPlayer } from '../../domain/players/playerTypes'
@@ -6,6 +6,10 @@ import { pitchToScreen } from '../../domain/pitch/coordTransforms'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import type { ScenarioArrow } from '../../domain/scenarios/scenarioTypes'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
+import {
+  facingAngleToSpriteRotation,
+  getNearestEquivalentFacingAngle,
+} from './animation/playerFacing.ts'
 import { drawScenarioArrows } from './layers/ArrowLayer'
 import { drawBall } from './layers/BallLayer'
 import { drawChannels } from './layers/ChannelLayer'
@@ -33,6 +37,10 @@ export type PixiPitchPreviewStep = {
   id: string
   playerId?: string
   playerTo?: { x: number; y: number }
+  // Rotates only the player artwork, so the arms/body visibly change direction
+  // while the number label remains upright. Uses the same pitch convention as
+  // PixiPitchPreviewPlayer.facingAngle.
+  facingAngle?: number
   playerMoves?: { playerId: string; to: { x: number; y: number } }[]
   ballFrom?: { x: number; y: number }
   ballTo?: { x: number; y: number }
@@ -205,6 +213,7 @@ export function PixiPitchPreview({
       const playerLayer = new Container()
       const playerTokenRefs = new Map<number, Container>()
       const idleAnchorRefs = new Map<number, Container>()
+      const playerSpriteRefs = new Map<number, Sprite>()
       const routeGraphicsByRevealStepId = new Map<string, Graphics[]>()
       const { squad, positions, labels, numbersById } = buildPlayerAdapter(players)
 
@@ -264,7 +273,7 @@ export function PixiPitchPreview({
         playerTokenRefs,
         undefined,
         idleAnchorRefs,
-        undefined,
+        playerSpriteRefs,
         tokenScale,
       )
 
@@ -284,11 +293,20 @@ export function PixiPitchPreview({
       if (steps?.length && ballToken) {
         const playerTokensById = new Map<string, Container>()
         const idleTokensById = new Map<string, Container>()
+        const playerSpritesById = new Map<string, Sprite>()
         const initialPlayerPositions = new Map<string, { x: number; y: number }>()
+        const initialPlayerRotations = new Map<string, number>()
+        const plannedFacingAngles = new Map(
+          players.map((player) => [
+            player.id,
+            player.facingAngle ?? (player.side === 'away' || player.tone === 'opponent' ? 180 : 0),
+          ]),
+        )
 
         numbersById.forEach((number, id) => {
           const token = playerTokenRefs.get(number)
           const idleAnchor = idleAnchorRefs.get(number)
+          const sprite = playerSpriteRefs.get(number)
 
           if (token) {
             playerTokensById.set(id, token)
@@ -297,6 +315,11 @@ export function PixiPitchPreview({
 
           if (idleAnchor) {
             idleTokensById.set(id, idleAnchor)
+          }
+
+          if (sprite) {
+            playerSpritesById.set(id, sprite)
+            initialPlayerRotations.set(id, sprite.rotation)
           }
         })
 
@@ -370,6 +393,13 @@ export function PixiPitchPreview({
               if (token) {
                 token.position.set(position.x, position.y)
                 token.scale.set(1)
+              }
+            })
+            initialPlayerRotations.forEach((rotation, id) => {
+              const sprite = playerSpritesById.get(id)
+
+              if (sprite) {
+                sprite.rotation = rotation
               }
             })
             ballToken.position.set(initialBallPosition.x, initialBallPosition.y)
@@ -458,6 +488,32 @@ export function PixiPitchPreview({
               })
             }
 
+            const playerSprite = step.playerId
+              ? playerSpritesById.get(step.playerId)
+              : undefined
+
+            if (playerSprite && step.facingAngle !== undefined && step.playerId) {
+              const currentFacingAngle = plannedFacingAngles.get(step.playerId) ?? 0
+              const targetFacingAngle = getNearestEquivalentFacingAngle(
+                currentFacingAngle,
+                step.facingAngle,
+              )
+
+              plannedFacingAngles.set(step.playerId, targetFacingAngle)
+              timeline.call(() => {
+                stopIdleWiggle(step.playerId as string)
+              }, undefined, stepLabel)
+              timeline.to(
+                playerSprite,
+                {
+                  rotation: facingAngleToSpriteRotation(targetFacingAngle),
+                  duration: step.duration,
+                  ease: 'power2.inOut',
+                },
+                stepLabel,
+              )
+            }
+
             if (step.ballTo) {
               timeline.to(
                 ballToken.position,
@@ -471,7 +527,11 @@ export function PixiPitchPreview({
                   duration: step.duration,
                   ease: 'power1.inOut',
                 },
-                playerToken ? '<35%' : undefined,
+                playerToken
+                  ? step.facingAngle !== undefined
+                    ? stepLabel
+                    : '<35%'
+                  : undefined,
               )
             }
 
