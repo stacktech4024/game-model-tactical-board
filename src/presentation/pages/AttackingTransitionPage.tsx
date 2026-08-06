@@ -1,39 +1,25 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import { PresentationLayout } from '../PresentationLayout'
 import {
   ATTACKING_TRANSITION_PAGE_CASES,
   ATTACKING_TRANSITION_PAGE_DEFAULT_CASE_ID,
   type AttackingTransitionPageCase,
 } from '../data/attackingTransitionPageData'
-import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
-
-function getCaseDetails(activeCase: AttackingTransitionPageCase) {
-  return {
-    principleChips: activeCase.principles,
-    tacticChips: activeCase.tactics,
-    skillChips: activeCase.skillSet,
-  }
-}
 
 export function AttackingTransitionPage() {
   const [activeCaseId, setActiveCaseId] = useState(ATTACKING_TRANSITION_PAGE_DEFAULT_CASE_ID)
   const activeCase = useMemo(
     () =>
       ATTACKING_TRANSITION_PAGE_CASES.find((item) => item.id === activeCaseId) ??
-      ATTACKING_TRANSITION_PAGE_CASES.find((item) => item.id === ATTACKING_TRANSITION_PAGE_DEFAULT_CASE_ID) ??
       ATTACKING_TRANSITION_PAGE_CASES[0],
     [activeCaseId],
   )
-  const [cue, setCue] = useState(activeCase.steps[0]?.cue ?? activeCase.cue)
-  const boardUrl = activeCase.liveBoardScenarioId
-    ? `/presentation/live-board?scenario=${activeCase.liveBoardScenarioId}`
-    : null
-  const activeDetails = getCaseDetails(activeCase)
+  const [cue, setCue] = useState(activeCase.steps[0]?.cue ?? '')
 
   const handleCaseSelect = (nextCase: AttackingTransitionPageCase) => {
     setActiveCaseId(nextCase.id)
-    setCue(nextCase.steps[0]?.cue ?? nextCase.cue)
+    setCue(nextCase.steps[0]?.cue ?? '')
   }
 
   return (
@@ -41,8 +27,9 @@ export function AttackingTransitionPage() {
       <p className="presentation-eyebrow">Moment page - attacking transition</p>
       <h1 className="presentation-title">Attacking Transition</h1>
       <p className="presentation-body">
-        When we win the ball, we look to counter quickly with wide-forward triggers, #10 support and
-        link play, #9 as the central target, and rest-defence behind the attack.
+        Every case begins with the opponent goalkeeper in possession. Canada presses in connected
+        lines with the back four protecting halfway against the long ball; the selected tab shows
+        the zone where we recover possession and begin the Attacking Transition.
       </p>
 
       <section className="analysis-lab">
@@ -65,17 +52,25 @@ export function AttackingTransitionPage() {
           <div className="mini-pitch__legend" aria-label="Diagram key">
             <span>
               <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
-              Pass
+              Ball movement
             </span>
             <span>
               <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
               Player run
             </span>
+            <span>
+              <i className="mini-pitch__legend-mark" style={{ background: '#fb923c' }} />
+              Cross
+            </span>
+            <span>
+              <i className="mini-pitch__legend-mark" style={{ background: '#a855f7' }} />
+              Shot
+            </span>
           </div>
         </div>
 
         <aside className="analysis-tabs">
-          <div className="analysis-tab-list" role="tablist" aria-label="Attacking transition focus">
+          <div className="analysis-tab-list" role="tablist" aria-label="Attacking transition turnover zone">
             {ATTACKING_TRANSITION_PAGE_CASES.map((item) => (
               <button
                 key={item.id}
@@ -93,20 +88,24 @@ export function AttackingTransitionPage() {
           <section className="analysis-detail" aria-live="polite">
             <span>Moment of the Game: Attacking Transition</span>
             <h2>{activeCase.zoneFocus}</h2>
-            <p>{activeCase.system.description}</p>
+            <p>{activeCase.subtitle}</p>
 
-            <div className="presentation-chip-row" aria-label="System">
-              <span className="presentation-chip presentation-chip--small">{activeCase.system.shape}</span>
-            </div>
-
-            <div className="presentation-chip-row" aria-label="Strategy">
-              <span className="presentation-chip presentation-chip--small">{activeCase.strategy}</span>
+            <div>
+              <strong>System</strong>
+              <p>{activeCase.system.description}</p>
             </div>
 
             <div>
-              <strong>Tactics</strong>
+              <strong>Strategy</strong>
               <div className="presentation-chip-row">
-                {activeDetails.tacticChips.map((tactic) => (
+                <span className="presentation-chip presentation-chip--small">{activeCase.strategy}</span>
+              </div>
+            </div>
+
+            <div>
+              <strong>Movement sequence</strong>
+              <div className="presentation-chip-row">
+                {activeCase.tactics.map((tactic) => (
                   <span key={tactic} className="presentation-chip presentation-chip--small">
                     {tactic}
                   </span>
@@ -115,9 +114,27 @@ export function AttackingTransitionPage() {
             </div>
 
             <div>
+              <strong>Body-position emphasis</strong>
+              <p>
+                The player releasing the ball faces the next action, receivers open forward,
+                runners align with their run, and defenders recover goal-side with their shoulders
+                open to the ball carrier.
+              </p>
+            </div>
+
+            <div>
+              <strong>Unit progression</strong>
+              <p>
+                Before the regain, the front and midfield units press while the back four protect
+                halfway. After the regain, the front unit stretches, midfield supports underneath,
+                and the back line squeezes forward with #4 and #5 slightly deeper.
+              </p>
+            </div>
+
+            <div>
               <strong>Skill Set</strong>
               <div className="presentation-chip-row">
-                {activeDetails.skillChips.map((skill) => (
+                {activeCase.skillSet.map((skill) => (
                   <span key={skill} className="presentation-chip presentation-chip--small">
                     {skill}
                   </span>
@@ -126,23 +143,15 @@ export function AttackingTransitionPage() {
             </div>
 
             <div>
-              <strong>Canada Soccer principles</strong>
+              <strong>Canada Soccer attacking principles</strong>
               <div className="presentation-chip-row">
-                {activeDetails.principleChips.map((principle) => (
+                {activeCase.principles.map((principle) => (
                   <span key={principle} className="presentation-chip presentation-chip--small">
                     {principle}
                   </span>
                 ))}
               </div>
             </div>
-
-            {boardUrl ? (
-              <Link className="presentation-link-button" to={boardUrl}>
-                Open in live board
-              </Link>
-            ) : (
-              <span className="presentation-chip presentation-chip--small">Preview only</span>
-            )}
           </section>
         </aside>
       </section>
