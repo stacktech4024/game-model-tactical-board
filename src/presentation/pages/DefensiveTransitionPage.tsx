@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import { PresentationLayout } from '../PresentationLayout'
 import {
@@ -7,14 +6,6 @@ import {
   DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID,
   type DefensiveTransitionPageCase,
 } from '../data/defensiveTransitionPageData'
-
-function getCaseDetails(activeCase: DefensiveTransitionPageCase) {
-  return {
-    principleChips: activeCase.principles,
-    tacticChips: activeCase.tactics,
-    skillChips: activeCase.skillSet,
-  }
-}
 
 export function DefensiveTransitionPage() {
   const [activeCaseId, setActiveCaseId] = useState(DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID)
@@ -26,10 +17,6 @@ export function DefensiveTransitionPage() {
     [activeCaseId],
   )
   const [cue, setCue] = useState(activeCase.steps[0]?.cue ?? activeCase.cue)
-  const activeDetails = getCaseDetails(activeCase)
-  const boardUrl = activeCase.liveBoardScenarioId
-    ? `/presentation/live-board?scenario=${activeCase.liveBoardScenarioId}`
-    : null
 
   const handleCaseSelect = (nextCase: DefensiveTransitionPageCase) => {
     setActiveCaseId(nextCase.id)
@@ -46,8 +33,8 @@ export function DefensiveTransitionPage() {
         routes, and the back line protects Zone 1.
       </p>
 
-      <section className="analysis-lab">
-        <div className="analysis-pitch-card">
+      <section className="analysis-lab defensive-transition-lab">
+        <div className="analysis-pitch-card defensive-transition-animation-card">
           <PixiPitchPreview
             width={480}
             height={741}
@@ -55,23 +42,30 @@ export function DefensiveTransitionPage() {
             ballPosition={activeCase.ballPosition}
             steps={activeCase.steps}
             routes={activeCase.routes}
+            fadeRouteHistory
             tokenScale={activeCase.tokenScale}
             repeatDelay={activeCase.repeatDelay}
             onCueChange={setCue}
           />
-          <div className="mini-pitch__cue" aria-live="polite">
-            {cue}
-          </div>
-          <div className="mini-pitch__caption">{activeCase.caption}</div>
-          <div className="mini-pitch__legend" aria-label="Diagram key">
-            <span>
-              <i className="mini-pitch__legend-mark" style={{ background: '#ef4444' }} />
-              Pressure
-            </span>
-            <span>
-              <i className="mini-pitch__legend-mark" style={{ background: '#22c55e' }} />
-              Recovery
-            </span>
+          <div className="defensive-transition-animation-meta">
+            <div className="mini-pitch__cue" aria-live="polite">
+              {cue}
+            </div>
+            <div className="mini-pitch__caption">{activeCase.caption}</div>
+            <div className="mini-pitch__legend" aria-label="Diagram key">
+              <span>
+                <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                Ball movement
+              </span>
+              <span>
+                <i className="mini-pitch__legend-mark" style={{ background: '#ef4444' }} />
+                Pressure
+              </span>
+              <span>
+                <i className="mini-pitch__legend-mark" style={{ background: '#22c55e' }} />
+                Recovery
+              </span>
+            </div>
           </div>
         </div>
 
@@ -91,59 +85,67 @@ export function DefensiveTransitionPage() {
             ))}
           </div>
 
-          <section className="analysis-detail" aria-live="polite">
+          <section
+            className="analysis-detail attacking-transition-detail defensive-transition-detail"
+            aria-live="polite"
+          >
             <span>Moment of the Game: Defensive Transition</span>
             <h2>{activeCase.zoneFocus}</h2>
-            <p>{activeCase.system.description}</p>
+            <p className="attacking-transition-detail__summary">{activeCase.subtitle}</p>
 
-            <div className="presentation-chip-row" aria-label="System">
-              <span className="presentation-chip presentation-chip--small">{activeCase.system.shape}</span>
-            </div>
-
-            <div className="presentation-chip-row" aria-label="Strategy">
-              <span className="presentation-chip presentation-chip--small">{activeCase.strategy}</span>
-            </div>
-
-            <div>
-              <strong>Tactics</strong>
-              <div className="presentation-chip-row">
-                {activeDetails.tacticChips.map((tactic) => (
-                  <span key={tactic} className="presentation-chip presentation-chip--small">
-                    {tactic}
-                  </span>
-                ))}
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Game plan</strong>
+                <span>System + Strategy</span>
               </div>
+              <p>
+                <b>{activeCase.system.shape}.</b> {activeCase.system.description}
+              </p>
+              <p className="attacking-transition-detail__objective">
+                <b>Objective:</b> {activeCase.strategy}
+              </p>
             </div>
 
-            <div>
-              <strong>Skill Set</strong>
-              <div className="presentation-chip-row">
-                {activeDetails.skillChips.map((skill) => (
-                  <span key={skill} className="presentation-chip presentation-chip--small">
-                    {skill}
-                  </span>
-                ))}
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Movement sequence</strong>
+                <span>Tactics</span>
               </div>
+              <ol className="attacking-transition-steps">
+                {activeCase.tactics.map((tactic, index) => (
+                  <li key={tactic}>
+                    <b>{index + 1}</b>
+                    <p>{tactic}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
 
-            <div>
-              <strong>Canada Soccer defending principles</strong>
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Coaching points</strong>
+                <span>Player + Unit actions</span>
+              </div>
+              <ul className="attacking-transition-coaching-points">
+                {activeCase.coachingPoints.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Key tags</strong>
+                <span>Skill Set + Principles</span>
+              </div>
               <div className="presentation-chip-row">
-                {activeDetails.principleChips.map((principle) => (
+                {activeCase.principles.map((principle) => (
                   <span key={principle} className="presentation-chip presentation-chip--small">
                     {principle}
                   </span>
                 ))}
               </div>
             </div>
-
-            {boardUrl ? (
-              <Link className="presentation-link-button" to={boardUrl}>
-                Open in live board
-              </Link>
-            ) : (
-              <span className="presentation-chip presentation-chip--small">Preview only</span>
-            )}
           </section>
         </aside>
       </section>

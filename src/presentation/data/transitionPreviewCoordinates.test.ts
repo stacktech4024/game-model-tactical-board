@@ -11,7 +11,10 @@ import {
   getTransitionFacingAngle,
   type AttackingTransitionPageCase,
 } from './attackingTransitionPageData.ts'
-import { DEFENSIVE_TRANSITION_PAGE_CASES } from './defensiveTransitionPageData.ts'
+import {
+  DEFENSIVE_TRANSITION_PAGE_CASES,
+  DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID,
+} from './defensiveTransitionPageData.ts'
 import {
   formationMetresToPitchPercentPositions,
   previewPointToPitchPercent,
@@ -86,13 +89,124 @@ test('every DT tab starts with the ball in its labelled canonical zone', () => {
   })
 })
 
-test('every DT tab visibly transfers possession before pressure begins', () => {
+test('every DT tab begins with Canada in possession before the visible loss', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
-    const firstStep = testCase.steps[0]
+    const initialPossessor = getPlayer(testCase, testCase.initialPossessorId)
+    const possession = testCase.steps[0]
+    const loss = testCase.steps[1]
 
-    assert.match(firstStep.id, /-loss$/)
-    assertVisibleDefensiveTurnover(firstStep, testCase.ballPosition, testCase.id)
-    assert.ok(testCase.routes.some((route) => route.revealOnStepId === firstStep.id))
+    assert.equal(possession.id, testCase.possessionStepId)
+    assert.equal(possession.emphasizePlayerId, testCase.initialPossessorId)
+    assert.equal(possession.ballFrom, undefined)
+    assert.equal(possession.ballTo, undefined)
+    assert.deepEqual(testCase.ballPosition, { x: initialPossessor.x, y: initialPossessor.y })
+
+    assert.equal(loss.id, testCase.lossStepId)
+    assert.equal(loss.ballFromPlayerId, testCase.initialPossessorId)
+    assert.equal(loss.ballToPlayerId, loss.playerId)
+    assertVisibleDefensiveTurnover(loss, testCase.ballPosition, testCase.id)
+    assert.ok(testCase.routes.some((route) => route.revealOnStepId === loss.id))
+  })
+})
+
+test('every DT tab gives the opponent a counter action before Canada reacts', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+    const loss = testCase.steps[lossIndex]
+    const counter = testCase.steps[lossIndex + 1]
+    const firstDefensiveReaction = testCase.steps[lossIndex + 2]
+
+    assert.equal(counter.id, testCase.counterStepId)
+    assert.equal(counter.ballFromPlayerId, loss.ballToPlayerId)
+    assert.ok(counter.ballFromPlayerId?.startsWith('away-'))
+    assert.ok(counter.ballToPlayerId?.startsWith('away-'))
+    assert.deepEqual(counter.ballFrom, loss.ballTo)
+    assert.notDeepEqual(counter.ballFrom, counter.ballTo)
+    assert.ok(counter.playerMoves?.some((move) => move.playerId.startsWith('away-')))
+    assert.match(counter.cue, /Opponent counter/i)
+    assert.match(firstDefensiveReaction.id, /-(press|delay)$/)
+    assert.ok(testCase.routes.some((route) => route.revealOnStepId === counter.id))
+  })
+})
+
+test('Defensive Transition makes the loss readable without slowing the reaction sequence', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
+    const timeBeforeReaction = testCase.steps
+      .slice(0, counterIndex + 1)
+      .reduce((total, step) => total + step.duration, 0)
+    const totalDuration = testCase.steps.reduce((total, step) => total + step.duration, 0)
+
+    assert.ok(timeBeforeReaction >= 1.2 && timeBeforeReaction <= 1.5, `${testCase.id}: readable loss and counter`)
+    assert.ok(totalDuration <= 3.2, `${testCase.id}: defensive transition stays fast`)
+  })
+})
+
+test('every DT tab preserves pressure, cover, central protection, back-line balance, and GK adjustment', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
+    const reactions = testCase.steps.slice(counterIndex + 1)
+    const movedPlayers = new Set(
+      reactions.flatMap((step) => [
+        ...(step.playerId ? [step.playerId] : []),
+        ...(step.playerMoves?.map((move) => move.playerId) ?? []),
+      ]),
+    )
+    const backLineMoves = ['home-2', 'home-3', 'home-4', 'home-5'].filter((playerId) =>
+      movedPlayers.has(playerId),
+    )
+
+    assert.match(reactions[0]?.id ?? '', /-(press|delay)$/)
+    assert.ok(reactions.some((step) => step.id.includes('cover')), `${testCase.id}: second defender cover`)
+    assert.ok(movedPlayers.has('home-6'), `${testCase.id}: #6 central protection`)
+    assert.ok(movedPlayers.has('home-8'), `${testCase.id}: #8 central protection`)
+    assert.ok(backLineMoves.length >= 3, `${testCase.id}: connected back-line balance`)
+    assert.ok(movedPlayers.has('home-1'), `${testCase.id}: goalkeeper set adjustment`)
+  })
+})
+
+test('Defensive Transition keeps four loss tabs with Zone 3 as the default', () => {
+  assert.deepEqual(
+    DEFENSIVE_TRANSITION_PAGE_CASES.map((testCase) => testCase.id),
+    ['zone-1', 'zone-2', 'zone-3', 'zone-4'],
+  )
+  assert.equal(DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID, 'zone-3')
+})
+
+test('every DT ball movement stays attached to its named owner and receiver', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const playerPositions = new Map(
+      testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+    let currentBall = testCase.ballPosition
+
+    testCase.steps.forEach((step) => {
+      if (step.ballFrom) {
+        assert.ok(step.ballTo, `${testCase.id} ${step.id}: ball movement needs an endpoint`)
+        assert.ok(step.ballFromPlayerId, `${testCase.id} ${step.id}: ball owner must be named`)
+        assert.ok(step.ballToPlayerId, `${testCase.id} ${step.id}: receiver must be named`)
+        assert.deepEqual(step.ballFrom, currentBall, `${testCase.id} ${step.id}: continuous ball chain`)
+        assert.deepEqual(
+          step.ballFrom,
+          playerPositions.get(step.ballFromPlayerId),
+          `${testCase.id} ${step.id}: ball begins attached to ${step.ballFromPlayerId}`,
+        )
+      }
+
+      if (step.playerId && step.playerTo) {
+        playerPositions.set(step.playerId, step.playerTo)
+      }
+      step.playerMoves?.forEach((move) => playerPositions.set(move.playerId, move.to))
+
+      if (step.ballTo && step.ballToPlayerId) {
+        assert.deepEqual(
+          step.ballTo,
+          playerPositions.get(step.ballToPlayerId),
+          `${testCase.id} ${step.id}: ball finishes attached to ${step.ballToPlayerId}`,
+        )
+        currentBall = step.ballTo
+      }
+    })
   })
 })
 
@@ -651,5 +765,52 @@ test('Page 13 exposes a compact System, Strategy, Tactics, and Skill Set panel',
     assert.equal(scenario.tactics.length, 4, `${scenario.id}: exactly four numbered movement steps`)
     assert.ok(scenario.coachingPoints.length >= 1 && scenario.coachingPoints.length <= 3)
     assert.ok(scenario.principles.length <= 4, `${scenario.id}: no more than four visible key tags`)
+  })
+})
+
+test('Defensive Transition exposes the compact panel and required Canada Soccer language', () => {
+  const pageSource = readFileSync(
+    new URL('../pages/DefensiveTransitionPage.tsx', import.meta.url),
+    'utf8',
+  )
+  const evaluatorCopy = [
+    pageSource,
+    ...DEFENSIVE_TRANSITION_PAGE_CASES.flatMap((testCase) => [
+      testCase.tabLabel,
+      testCase.zoneFocus,
+      testCase.caption,
+      testCase.strategy,
+      ...testCase.tactics,
+      ...testCase.coachingPoints,
+      ...testCase.principles,
+      ...testCase.steps.map((step) => step.cue),
+    ]),
+  ].join(' ')
+
+  ;[
+    'Defensive Transition',
+    'Zone 1',
+    'Zone 2',
+    'Zone 3',
+    'Zone 4',
+    'Channel 1',
+    'Channel 2',
+    'Channel 3',
+    'DENY',
+    'DELAY',
+    'DIRECT',
+    'BALANCE',
+    'CONTROL & RESTRAINT',
+    'Game plan',
+    'Movement sequence',
+    'Coaching points',
+    'Key tags',
+  ].forEach((term) => assert.match(evaluatorCopy, new RegExp(term.replace('&', '\\&'))))
+
+  assert.doesNotMatch(pageSource, /Preview only/)
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    assert.equal(testCase.tactics.length, 4, `${testCase.id}: four numbered movement steps`)
+    assert.ok(testCase.coachingPoints.length >= 2 && testCase.coachingPoints.length <= 3)
+    assert.ok(testCase.principles.length > 0 && testCase.principles.length <= 4)
   })
 })
