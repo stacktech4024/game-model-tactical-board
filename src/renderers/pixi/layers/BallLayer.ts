@@ -51,10 +51,14 @@ export function drawBall(
   )
   const ballToken = new Container()
   const shadow = new Graphics()
+  const contrastRing = new Graphics()
   const ballSprite = new Sprite(getBallTexture())
 
   shadow.circle(ballRadius * 0.19, ballRadius * 0.25, ballRadius)
   shadow.fill({ color: 0x000000, alpha: 0.22 })
+
+  contrastRing.circle(0, 0, ballRadius * 1.12)
+  contrastRing.fill({ color: 0x0f172a, alpha: 0.86 })
 
   ballSprite.anchor.set(0.5)
   ballSprite.width = ballRadius * 2
@@ -62,6 +66,7 @@ export function drawBall(
 
   ballToken.position.set(point.sx + BALL_FOOT_OFFSET_X, point.sy + BALL_FOOT_OFFSET_Y)
   ballToken.addChild(shadow)
+  ballToken.addChild(contrastRing)
   ballToken.addChild(ballSprite)
   container.addChild(ballToken)
 
@@ -83,9 +88,14 @@ export function getAerialLiftAtProgress(progress: number): number {
 // token built by drawBall. Safe to call every frame from a GSAP onUpdate.
 export function applyBallAerialLift(ballToken: Container, liftRatio: number): void {
   const shadow = ballToken.children[0]
-  const ballSprite = ballToken.children[1]
+  const contrastRing = ballToken.children[1]
+  const ballSprite = ballToken.children[2]
 
-  if (!(shadow instanceof Graphics) || !(ballSprite instanceof Sprite)) {
+  if (
+    !(shadow instanceof Graphics) ||
+    !(contrastRing instanceof Graphics) ||
+    !(ballSprite instanceof Sprite)
+  ) {
     return
   }
 
@@ -100,6 +110,8 @@ export function applyBallAerialLift(ballToken: Container, liftRatio: number): vo
 
   ballSprite.scale.set(baseScale.x * scaleBoost, baseScale.y * scaleBoost)
   ballSprite.position.set(0, -lift * AERIAL_RISE_OFFSET)
+  contrastRing.scale.set(scaleBoost)
+  contrastRing.position.set(0, -lift * AERIAL_RISE_OFFSET)
   shadow.position.set(lift * AERIAL_SHADOW_DRIFT, lift * AERIAL_SHADOW_DRIFT * 0.6)
   shadow.alpha = 1 - lift * AERIAL_SHADOW_MIN_ALPHA_FACTOR
 }

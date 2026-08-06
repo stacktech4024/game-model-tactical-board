@@ -32,8 +32,8 @@ export function AttackingTransitionPage() {
         the zone where we recover possession and begin the Attacking Transition.
       </p>
 
-      <section className="analysis-lab">
-        <div className="analysis-pitch-card">
+      <section className="analysis-lab attacking-transition-lab">
+        <div className="analysis-pitch-card attacking-transition-animation-card">
           <PixiPitchPreview
             width={480}
             height={741}
@@ -41,31 +41,34 @@ export function AttackingTransitionPage() {
             ballPosition={activeCase.ballPosition}
             steps={activeCase.steps}
             routes={activeCase.routes}
+            fadeRouteHistory
             tokenScale={activeCase.tokenScale}
             repeatDelay={activeCase.repeatDelay}
             onCueChange={setCue}
           />
-          <div className="mini-pitch__cue" aria-live="polite">
-            {cue}
-          </div>
-          <div className="mini-pitch__caption">{activeCase.caption}</div>
-          <div className="mini-pitch__legend" aria-label="Diagram key">
-            <span>
-              <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
-              Ball movement
-            </span>
-            <span>
-              <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
-              Player run
-            </span>
-            <span>
-              <i className="mini-pitch__legend-mark" style={{ background: '#fb923c' }} />
-              Cross
-            </span>
-            <span>
-              <i className="mini-pitch__legend-mark" style={{ background: '#a855f7' }} />
-              Shot
-            </span>
+          <div className="attacking-transition-animation-meta">
+            <div className="mini-pitch__cue" aria-live="polite">
+              {cue}
+            </div>
+            <div className="mini-pitch__caption">{activeCase.caption}</div>
+            <div className="mini-pitch__legend" aria-label="Diagram key">
+              <span>
+                <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
+                Ball movement
+              </span>
+              <span>
+                <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
+                Player run
+              </span>
+              <span>
+                <i className="mini-pitch__legend-mark" style={{ background: '#fb923c' }} />
+                Cross
+              </span>
+              <span>
+                <i className="mini-pitch__legend-mark" style={{ background: '#a855f7' }} />
+                Shot
+              </span>
+            </div>
           </div>
         </div>
 

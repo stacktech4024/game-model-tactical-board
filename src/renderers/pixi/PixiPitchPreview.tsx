@@ -44,6 +44,9 @@ export type PixiPitchPreviewStep = {
   playerMoves?: {
     playerId: string
     to: { x: number; y: number }
+    // Delays this player's reaction inside the current action while keeping
+    // the unit's endpoint and the overall step duration unchanged.
+    startDelay?: number
     // Body orientation at the end of the movement. This allows a recovering
     // defender to retreat while staying open to the ball instead of turning
     // their back and simply facing the direction of travel.
@@ -78,6 +81,7 @@ export type PixiPitchPreviewProps = {
   repeatDelay?: number
   onCueChange?: (cue: string) => void
   routes?: PixiPitchPreviewRoute[]
+  fadeRouteHistory?: boolean
   tokenScale?: number
 }
 
@@ -152,6 +156,7 @@ export function PixiPitchPreview({
   repeatDelay = 1.5,
   onCueChange,
   routes,
+  fadeRouteHistory = false,
   tokenScale = 1,
 }: PixiPitchPreviewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -435,6 +440,8 @@ export function PixiPitchPreview({
 
           timeline.call(resetVisuals)
 
+          const revealedRouteGraphics = new Set<Graphics>()
+
           steps.forEach((step, stepIndex) => {
             if (step.emphasizePlayerId) {
               const emphasisToken = playerTokensById.get(step.emphasizePlayerId)
@@ -548,11 +555,15 @@ export function PixiPitchPreview({
 
             step.playerMoves?.forEach((move) => {
               const moveToken = playerTokensById.get(move.playerId)
+              const moveStart = move.startDelay
+                ? `${stepLabel}+=${move.startDelay}`
+                : stepLabel
+              const moveDuration = Math.max(0.16, step.duration - (move.startDelay ?? 0))
 
               if (moveToken) {
                 timeline.call(() => {
                   stopIdleWiggle(move.playerId)
-                }, undefined, stepLabel)
+                }, undefined, moveStart)
 
                 timeline.to(
                   moveToken.position,
@@ -563,10 +574,10 @@ export function PixiPitchPreview({
                       width,
                       height,
                     ),
-                    duration: step.duration,
+                    duration: moveDuration,
                     ease: 'power2.inOut',
                   },
-                  stepLabel,
+                  moveStart,
                 )
               }
 
@@ -585,10 +596,10 @@ export function PixiPitchPreview({
                     moveSprite,
                     {
                       rotation: facingAngleToSpriteRotation(targetFacingAngle),
-                      duration: step.duration,
+                      duration: moveDuration,
                       ease: 'power2.inOut',
                     },
-                    stepLabel,
+                    moveStart,
                   )
                 }
               }
@@ -617,7 +628,25 @@ export function PixiPitchPreview({
               }
             })
 
-            routeGraphicsByRevealStepId.get(step.id)?.forEach((routeGraphics) => {
+            const stepRoutes = routeGraphicsByRevealStepId.get(step.id) ?? []
+
+            if (fadeRouteHistory && stepRoutes.length > 0) {
+              revealedRouteGraphics.forEach((routeGraphics) => {
+                if (!stepRoutes.includes(routeGraphics)) {
+                  timeline.to(
+                    routeGraphics,
+                    {
+                      alpha: 0.14,
+                      duration: 0.16,
+                      ease: 'power1.out',
+                    },
+                    stepLabel,
+                  )
+                }
+              })
+            }
+
+            stepRoutes.forEach((routeGraphics) => {
               timeline.to(
                 routeGraphics,
                 {
@@ -627,6 +656,7 @@ export function PixiPitchPreview({
                 },
                 stepLabel,
               )
+              revealedRouteGraphics.add(routeGraphics)
             })
           })
         }, container)
@@ -654,7 +684,7 @@ export function PixiPitchPreview({
 
       destroyApp()
     }
-  }, [ballPosition, height, players, repeatDelay, routes, steps, tokenScale, width])
+  }, [ballPosition, fadeRouteHistory, height, players, repeatDelay, routes, steps, tokenScale, width])
 
   return <div ref={containerRef} className="pixi-pitch-preview" />
 }

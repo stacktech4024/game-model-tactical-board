@@ -12,6 +12,7 @@ type PositionMap = Record<number, PitchPoint>
 export type AttackingTransitionPageStep = PixiPitchPreviewStep & {
   ballFromPlayerId?: string
   ballToPlayerId?: string
+  focusPoint?: PitchPoint
 }
 
 export type AttackingTransitionPageCase = {
@@ -33,6 +34,7 @@ export type AttackingTransitionPageCase = {
   initialPossessorId: 'away-1'
   distributionStepId: string
   turnoverStepId: string
+  regainPauseStepId: string
   steps: AttackingTransitionPageStep[]
   routes: PixiPitchPreviewRoute[]
   repeatDelay: number
@@ -116,8 +118,12 @@ function addBodyPositioning(
     positions.set(`away-${number}`, awayPositions[number])
   }
 
+  const turnoverIndex = steps.findIndex((step) => step.id.endsWith('-turnover'))
+  const frontUnit = new Set(['home-7', 'home-9', 'home-11'])
+  const midfieldUnit = new Set(['home-6', 'home-8', 'home-10'])
+
   return steps.map((step, stepIndex) => {
-    const ballFocus = step.ballTo ?? step.ballFrom
+    const ballFocus = step.ballTo ?? step.ballFrom ?? step.focusPoint
     const movedPlayerIds = new Set(step.playerMoves?.map((move) => move.playerId) ?? [])
     const nextAction = step.ballToPlayerId
       ? steps.slice(stepIndex + 1).find((candidate) => candidate.ballFromPlayerId === step.ballToPlayerId)
@@ -141,6 +147,21 @@ function addBodyPositioning(
 
       return {
         ...move,
+        startDelay:
+          move.startDelay ??
+          (move.playerId.startsWith('away-')
+            ? 0.06
+            : stepIndex <= turnoverIndex
+              ? frontUnit.has(move.playerId)
+                ? 0
+                : midfieldUnit.has(move.playerId)
+                  ? 0.1
+                  : 0.2
+              : midfieldUnit.has(move.playerId)
+                ? 0.08
+                : frontUnit.has(move.playerId)
+                  ? 0.16
+                  : 0.26),
         facingAngle:
           move.facingAngle ??
           (start && facingTarget
@@ -281,7 +302,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 60 } },
       { playerId: 'home-11', to: { x: 22, y: 62 } },
     ],
-    duration: 0.78,
+    duration: 0.9,
   },
   {
     id: 'zone-1-turnover',
@@ -292,8 +313,16 @@ const zone1Steps: AttackingTransitionPageStep[] = [
     ballToPlayerId: 'home-1',
     playerId: 'home-1',
     playerTo: { x: 50, y: 8 },
+    focusPoint: { x: 50, y: 8 },
     emphasizePlayerId: 'home-1',
-    duration: 0.46,
+    duration: 0.58,
+  },
+  {
+    id: 'zone-1-regain-scan',
+    cue: 'Regain pause — GK #1 secures the ball, sets, and scans for #2 before releasing.',
+    playerId: 'home-1',
+    playerTo: { x: 50, y: 8 },
+    duration: 0.34,
   },
   {
     id: 'zone-1-gk-release',
@@ -325,7 +354,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-4', to: { x: 40, y: 90 } },
       { playerId: 'away-5', to: { x: 60, y: 90 } },
     ],
-    duration: 0.66,
+    duration: 0.72,
   },
   {
     id: 'zone-1-ten-connects',
@@ -347,7 +376,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 70 } },
       { playerId: 'home-11', to: { x: 14, y: 70 } },
     ],
-    duration: 0.58,
+    duration: 0.66,
   },
   {
     id: 'zone-1-seven-released',
@@ -369,7 +398,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 76 } },
       { playerId: 'home-11', to: { x: 12, y: 75 } },
     ],
-    duration: 0.58,
+    duration: 0.66,
   },
   {
     id: 'zone-1-seven-enters',
@@ -387,7 +416,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-8', to: { x: 45, y: 68 } },
       { playerId: 'home-10', to: { x: 58, y: 72 } },
     ],
-    duration: 0.46,
+    duration: 0.54,
   },
   {
     id: 'zone-1-cross',
@@ -399,7 +428,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-9',
     playerTo: { x: 50, y: 88 },
     playerMoves: [{ playerId: 'away-1', to: { x: 50, y: 93 } }],
-    duration: 0.5,
+    duration: 0.58,
   },
   {
     id: 'zone-1-finish',
@@ -408,7 +437,7 @@ const zone1Steps: AttackingTransitionPageStep[] = [
     ballTo: { x: 50, y: 100 },
     ballFromPlayerId: 'home-9',
     playerMoves: [{ playerId: 'away-1', to: { x: 46, y: 96 } }],
-    duration: 0.42,
+    duration: 0.5,
   },
 ]
 
@@ -437,7 +466,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 68 } },
       { playerId: 'home-11', to: { x: 20, y: 70 } },
     ],
-    duration: 0.7,
+    duration: 0.84,
   },
   {
     id: 'zone-2-turnover',
@@ -448,7 +477,15 @@ const zone2Steps: AttackingTransitionPageStep[] = [
     ballToPlayerId: 'home-6',
     playerId: 'home-6',
     playerTo: { x: 48, y: 43 },
-    duration: 0.36,
+    focusPoint: { x: 48, y: 43 },
+    duration: 0.5,
+  },
+  {
+    id: 'zone-2-regain-scan',
+    cue: 'Regain pause — #6 settles the second ball, opens forward, and scans for #10.',
+    playerId: 'home-6',
+    playerTo: { x: 48, y: 43 },
+    duration: 0.32,
   },
   {
     id: 'zone-2-ten-connects',
@@ -480,7 +517,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-4', to: { x: 40, y: 90 } },
       { playerId: 'away-5', to: { x: 60, y: 90 } },
     ],
-    duration: 0.58,
+    duration: 0.7,
   },
   {
     id: 'zone-2-seven-released',
@@ -502,7 +539,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 76 } },
       { playerId: 'home-11', to: { x: 13, y: 75 } },
     ],
-    duration: 0.56,
+    duration: 0.66,
   },
   {
     id: 'zone-2-seven-enters',
@@ -520,7 +557,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-8', to: { x: 44, y: 68 } },
       { playerId: 'home-10', to: { x: 58, y: 72 } },
     ],
-    duration: 0.45,
+    duration: 0.54,
   },
   {
     id: 'zone-2-cross',
@@ -532,7 +569,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-9',
     playerTo: { x: 50, y: 88 },
     playerMoves: [{ playerId: 'away-1', to: { x: 50, y: 93 } }],
-    duration: 0.48,
+    duration: 0.56,
   },
   {
     id: 'zone-2-finish',
@@ -541,7 +578,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
     ballTo: { x: 50, y: 100 },
     ballFromPlayerId: 'home-9',
     playerMoves: [{ playerId: 'away-1', to: { x: 46, y: 96 } }],
-    duration: 0.42,
+    duration: 0.5,
   },
 ]
 
@@ -567,7 +604,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-4', to: { x: 41, y: 50 } },
       { playerId: 'home-5', to: { x: 59, y: 50 } },
     ],
-    duration: 0.62,
+    duration: 0.76,
   },
   {
     id: 'zone-3-turnover',
@@ -578,7 +615,15 @@ const zone3Steps: AttackingTransitionPageStep[] = [
     ballToPlayerId: 'home-8',
     playerId: 'home-8',
     playerTo: { x: 46, y: 64 },
-    duration: 0.34,
+    focusPoint: { x: 46, y: 64 },
+    duration: 0.5,
+  },
+  {
+    id: 'zone-3-regain-scan',
+    cue: 'Regain pause — #8 secures the interception, opens forward, and scans before releasing.',
+    playerId: 'home-8',
+    playerTo: { x: 46, y: 64 },
+    duration: 0.32,
   },
   {
     id: 'zone-3-ten-connects',
@@ -610,7 +655,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-4', to: { x: 40, y: 90 } },
       { playerId: 'away-5', to: { x: 60, y: 90 } },
     ],
-    duration: 0.54,
+    duration: 0.66,
   },
   {
     id: 'zone-3-seven-released',
@@ -632,7 +677,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 77 } },
       { playerId: 'home-11', to: { x: 13, y: 76 } },
     ],
-    duration: 0.5,
+    duration: 0.62,
   },
   {
     id: 'zone-3-seven-enters',
@@ -650,7 +695,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-8', to: { x: 46, y: 74 } },
       { playerId: 'home-10', to: { x: 58, y: 78 } },
     ],
-    duration: 0.44,
+    duration: 0.52,
   },
   {
     id: 'zone-3-cross',
@@ -662,7 +707,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-9',
     playerTo: { x: 50, y: 88 },
     playerMoves: [{ playerId: 'away-1', to: { x: 50, y: 93 } }],
-    duration: 0.48,
+    duration: 0.56,
   },
   {
     id: 'zone-3-finish',
@@ -671,7 +716,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
     ballTo: { x: 50, y: 100 },
     ballFromPlayerId: 'home-9',
     playerMoves: [{ playerId: 'away-1', to: { x: 46, y: 96 } }],
-    duration: 0.4,
+    duration: 0.5,
   },
 ]
 
@@ -685,19 +730,41 @@ const zone4Steps: AttackingTransitionPageStep[] = [
     ballToPlayerId: 'away-5',
     playerId: 'away-5',
     playerTo: { x: 62, y: 87 },
+    duration: 0.75,
+  },
+  {
+    id: 'zone-4-front-press',
+    cue: 'Pressing trap — #5 takes a touch as #9 curves the press and the wingers close outside exits.',
+    focusPoint: { x: 62, y: 87 },
     playerMoves: [
       { playerId: 'home-9', to: { x: 55, y: 85 } },
       { playerId: 'home-7', to: { x: 78, y: 83 } },
       { playerId: 'home-11', to: { x: 22, y: 80 } },
+    ],
+    duration: 0.55,
+  },
+  {
+    id: 'zone-4-midfield-lock',
+    cue: 'Support squeeze — #10 locks the inside receiver; #6 and #8 remove the next pass.',
+    focusPoint: { x: 62, y: 87 },
+    playerMoves: [
       { playerId: 'home-10', to: { x: 58, y: 79 } },
       { playerId: 'home-8', to: { x: 42, y: 72 } },
       { playerId: 'home-6', to: { x: 50, y: 66 } },
+    ],
+    duration: 0.45,
+  },
+  {
+    id: 'zone-4-back-line-hold',
+    cue: 'Rest-defence — the back four adjust together around halfway while staying ready for the long release.',
+    focusPoint: { x: 62, y: 87 },
+    playerMoves: [
       { playerId: 'home-2', to: { x: 75, y: 55 } },
       { playerId: 'home-3', to: { x: 25, y: 53 } },
       { playerId: 'home-4', to: { x: 41, y: 52 } },
       { playerId: 'home-5', to: { x: 59, y: 52 } },
     ],
-    duration: 0.48,
+    duration: 0.35,
   },
   {
     id: 'zone-4-turnover',
@@ -708,16 +775,8 @@ const zone4Steps: AttackingTransitionPageStep[] = [
     ballToPlayerId: 'home-10',
     playerId: 'home-10',
     playerTo: { x: 58, y: 84 },
+    focusPoint: { x: 58, y: 84 },
     playerMoves: [
-      { playerId: 'home-9', to: { x: 52, y: 87 } },
-      { playerId: 'home-7', to: { x: 86, y: 84 } },
-      { playerId: 'home-11', to: { x: 18, y: 84 } },
-      { playerId: 'home-8', to: { x: 43, y: 76 } },
-      { playerId: 'home-6', to: { x: 50, y: 70 } },
-      { playerId: 'home-2', to: { x: 74, y: 59 } },
-      { playerId: 'home-3', to: { x: 26, y: 57 } },
-      { playerId: 'home-4', to: { x: 41, y: 55 } },
-      { playerId: 'home-5', to: { x: 59, y: 55 } },
       { playerId: 'away-5', to: { x: 61, y: 91 } },
       { playerId: 'away-9', to: { x: 50, y: 58 } },
       { playerId: 'away-7', to: { x: 21, y: 62 } },
@@ -729,7 +788,14 @@ const zone4Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-3', to: { x: 19, y: 90 } },
       { playerId: 'away-4', to: { x: 40, y: 91 } },
     ],
-    duration: 0.4,
+    duration: 0.55,
+  },
+  {
+    id: 'zone-4-regain-scan',
+    cue: 'Regain pause — #10 protects the turnover, opens forward, and scans before the release.',
+    playerId: 'home-10',
+    playerTo: { x: 58, y: 84 },
+    duration: 0.36,
   },
   {
     id: 'zone-4-seven-released',
@@ -751,7 +817,7 @@ const zone4Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-8', to: { x: 44, y: 80 } },
       { playerId: 'home-10', to: { x: 58, y: 87 } },
     ],
-    duration: 0.44,
+    duration: 0.75,
   },
   {
     id: 'zone-4-cross',
@@ -763,7 +829,7 @@ const zone4Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-9',
     playerTo: { x: 50, y: 89 },
     playerMoves: [{ playerId: 'away-1', to: { x: 50, y: 93 } }],
-    duration: 0.46,
+    duration: 0.65,
   },
   {
     id: 'zone-4-finish',
@@ -772,13 +838,13 @@ const zone4Steps: AttackingTransitionPageStep[] = [
     ballTo: { x: 50, y: 100 },
     ballFromPlayerId: 'home-9',
     playerMoves: [{ playerId: 'away-1', to: { x: 46, y: 96 } }],
-    duration: 0.38,
+    duration: 0.45,
   },
 ]
 
 const commonExtraRoutes: PixiPitchPreviewRoute[] = [
-  { id: 'press-nine', from: { x: 50, y: 82 }, to: { x: 55, y: 85 }, type: 'press', revealOnStepId: 'zone-4-gk-distribution' },
-  { id: 'back-line-protection', from: { x: 24, y: 50 }, to: { x: 76, y: 52 }, type: 'recovery' },
+  { id: 'press-nine', from: { x: 50, y: 82 }, to: { x: 55, y: 85 }, type: 'press', revealOnStepId: 'zone-4-front-press' },
+  { id: 'back-line-protection', from: { x: 24, y: 50 }, to: { x: 76, y: 52 }, type: 'recovery', revealOnStepId: 'zone-4-back-line-hold' },
 ]
 
 export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
@@ -798,6 +864,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     initialPossessorId: 'away-1',
     distributionStepId: 'zone-1-gk-distribution',
     turnoverStepId: 'zone-1-turnover',
+    regainPauseStepId: 'zone-1-regain-scan',
     steps: zone1Steps,
     routeTypes: { 'zone-1-gk-distribution': 'pass', 'zone-1-turnover': 'shot', 'zone-1-gk-release': 'pass', 'zone-1-ten-connects': 'pass', 'zone-1-seven-released': 'pass', 'zone-1-seven-enters': 'dribble', 'zone-1-cross': 'cross', 'zone-1-finish': 'shot' },
     extraRoutes: [
@@ -824,6 +891,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     initialPossessorId: 'away-1',
     distributionStepId: 'zone-2-gk-distribution',
     turnoverStepId: 'zone-2-turnover',
+    regainPauseStepId: 'zone-2-regain-scan',
     steps: zone2Steps,
     routeTypes: { 'zone-2-gk-distribution': 'pass', 'zone-2-turnover': 'pass', 'zone-2-ten-connects': 'pass', 'zone-2-seven-released': 'pass', 'zone-2-seven-enters': 'dribble', 'zone-2-cross': 'cross', 'zone-2-finish': 'shot' },
     extraRoutes: [
@@ -850,6 +918,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     initialPossessorId: 'away-1',
     distributionStepId: 'zone-3-gk-distribution',
     turnoverStepId: 'zone-3-turnover',
+    regainPauseStepId: 'zone-3-regain-scan',
     steps: zone3Steps,
     routeTypes: { 'zone-3-gk-distribution': 'pass', 'zone-3-turnover': 'pass', 'zone-3-ten-connects': 'pass', 'zone-3-seven-released': 'pass', 'zone-3-seven-enters': 'dribble', 'zone-3-cross': 'cross', 'zone-3-finish': 'shot' },
     extraRoutes: [
@@ -876,6 +945,7 @@ export const ATTACKING_TRANSITION_PAGE_CASES: AttackingTransitionPageCase[] = [
     initialPossessorId: 'away-1',
     distributionStepId: 'zone-4-gk-distribution',
     turnoverStepId: 'zone-4-turnover',
+    regainPauseStepId: 'zone-4-regain-scan',
     steps: zone4Steps,
     routeTypes: { 'zone-4-gk-distribution': 'pass', 'zone-4-turnover': 'pass', 'zone-4-seven-released': 'pass', 'zone-4-cross': 'cross', 'zone-4-finish': 'shot' },
     extraRoutes: commonExtraRoutes,

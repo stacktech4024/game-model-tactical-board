@@ -273,6 +273,44 @@
   height: 100% !important;
 }
 
+.attacking-transition-lab {
+  align-items: start;
+}
+
+.attacking-transition-animation-card {
+  display: grid;
+  align-self: start;
+}
+
+.attacking-transition-animation-meta {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(2, 6, 23, 0.38);
+}
+
+.attacking-transition-animation-meta .mini-pitch__cue,
+.attacking-transition-animation-meta .mini-pitch__caption,
+.attacking-transition-animation-meta .mini-pitch__legend {
+  position: static;
+  inset: auto;
+  max-width: none;
+}
+
+.attacking-transition-animation-meta .mini-pitch__cue {
+  justify-self: stretch;
+  text-align: left;
+}
+
+.attacking-transition-animation-meta .mini-pitch__caption {
+  font-size: 0.68rem;
+}
+
+.attacking-transition-animation-meta .mini-pitch__legend {
+  justify-self: start;
+}
+
 .analysis-pitch-card img {
   display: block;
   width: 100%;

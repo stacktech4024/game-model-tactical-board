@@ -102,6 +102,89 @@ test('Page 13 retains one attacking-transition case for each of the four zones',
   )
 })
 
+test('Page 13 gives every regain a readable scan before Canada attacks', () => {
+  ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
+    const turnoverIndex = scenario.steps.findIndex((step) => step.id === scenario.turnoverStepId)
+    const pause = scenario.steps[turnoverIndex + 1]
+    const firstCanadaAction = scenario.steps
+      .slice(turnoverIndex + 2)
+      .find((step) => step.ballFromPlayerId?.startsWith('home-'))
+
+    assert.equal(pause?.id, scenario.regainPauseStepId, `${scenario.id}: pause follows regain`)
+    assert.match(pause.cue, /Regain pause.*scan/i)
+    assert.ok(pause.duration >= 0.25 && pause.duration <= 0.4, `${scenario.id}: readable pause`)
+    assert.equal(pause.ballFrom, undefined, `${scenario.id}: scan keeps the ball with the regaining player`)
+    assert.equal(pause.ballTo, undefined, `${scenario.id}: scan precedes the first attacking action`)
+    assert.ok(firstCanadaAction, `${scenario.id}: Canada attacks after the scan`)
+  })
+})
+
+test('Page 13 active timing makes each regain readable and gives Zone 4 nearly five seconds', () => {
+  const activeDurations = Object.fromEntries(
+    ATTACKING_TRANSITION_PAGE_CASES.map((scenario) => [
+      scenario.id,
+      Number(scenario.steps.reduce((total, step) => total + step.duration, 0).toFixed(2)),
+    ]),
+  )
+
+  assert.deepEqual(activeDurations, {
+    'zone-1': 5.48,
+    'zone-2': 4.62,
+    'zone-3': 4.44,
+    'zone-4': 4.86,
+  })
+
+  ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
+    const turnoverIndex = scenario.steps.findIndex((step) => step.id === scenario.turnoverStepId)
+    const timeThroughRegain = scenario.steps
+      .slice(0, turnoverIndex + 1)
+      .reduce((total, step) => total + step.duration, 0)
+
+    assert.ok(timeThroughRegain >= 1.2, `${scenario.id}: regain must not follow the GK action immediately`)
+  })
+})
+
+test('Page 13 staggers pressing, support, forward release, and back-line adjustment', () => {
+  ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
+    const turnoverIndex = scenario.steps.findIndex((step) => step.id === scenario.turnoverStepId)
+    const preRegainSteps = scenario.steps.slice(0, turnoverIndex + 1)
+    const firstMovement = (playerId: string) => {
+      const stepIndex = preRegainSteps.findIndex((step) =>
+        step.playerMoves?.some((move) => move.playerId === playerId),
+      )
+      const move = preRegainSteps[stepIndex]?.playerMoves?.find((item) => item.playerId === playerId)
+
+      return { stepIndex, startDelay: move?.startDelay ?? 0 }
+    }
+    const pressReaction = firstMovement('home-9')
+    const midfieldReaction = firstMovement('home-6')
+    const backLineReaction = firstMovement('home-4')
+    const firstUnitProgression = scenario.steps
+      .slice(turnoverIndex + 2)
+      .find((step) => {
+        const ids = new Set(step.playerMoves?.map((move) => move.playerId))
+
+        return ids.has('home-6') && ids.has('home-9') && ids.has('home-4')
+      })
+
+    assert.ok(pressReaction.stepIndex >= 0, `${scenario.id}: front press reaction`)
+    assert.ok(midfieldReaction.stepIndex >= 0, `${scenario.id}: midfield squeeze reaction`)
+    assert.ok(backLineReaction.stepIndex >= 0, `${scenario.id}: back-line reaction`)
+    assert.ok(pressReaction.stepIndex <= midfieldReaction.stepIndex, `${scenario.id}: front press reacts first`)
+    assert.ok(midfieldReaction.stepIndex <= backLineReaction.stepIndex, `${scenario.id}: midfield reacts before the back line`)
+    if (pressReaction.stepIndex === midfieldReaction.stepIndex) {
+      assert.ok(pressReaction.startDelay < midfieldReaction.startDelay, `${scenario.id}: front delay precedes midfield`)
+    }
+    if (midfieldReaction.stepIndex === backLineReaction.stepIndex) {
+      assert.ok(midfieldReaction.startDelay < backLineReaction.startDelay, `${scenario.id}: midfield delay precedes back line`)
+    }
+    assert.ok(firstUnitProgression, `${scenario.id}: connected unit progression step`)
+    assert.equal(firstUnitProgression.playerMoves?.find((move) => move.playerId === 'home-6')?.startDelay, 0.08)
+    assert.equal(firstUnitProgression.playerMoves?.find((move) => move.playerId === 'home-9')?.startDelay, 0.16)
+    assert.equal(firstUnitProgression.playerMoves?.find((move) => move.playerId === 'home-4')?.startDelay, 0.26)
+  })
+})
+
 test('every AT case starts with the ball attached to the away goalkeeper', () => {
   ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
     const initialPossessor = getPlayer(scenario, scenario.initialPossessorId)
@@ -348,7 +431,7 @@ test('the opponent forwards, midfield, and back line recover after every turnove
     })
 
     const recoveryMoves = scenario.steps
-      .slice(turnoverIndex, turnoverIndex + 2)
+      .slice(turnoverIndex, turnoverIndex + 3)
       .flatMap((step) => step.playerMoves ?? [])
 
     recoveryUnits.flat().forEach((playerId) => {
