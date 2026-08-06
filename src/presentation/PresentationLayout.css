@@ -407,6 +407,127 @@
   margin: 0;
 }
 
+.attacking-transition-detail {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.attacking-transition-detail > span {
+  margin-bottom: -8px;
+}
+
+.attacking-transition-detail h2 {
+  margin-bottom: -6px;
+}
+
+.attacking-transition-detail .attacking-transition-detail__summary {
+  color: #e5eef9;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.attacking-transition-detail__section {
+  display: grid;
+  gap: 9px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.attacking-transition-detail__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attacking-transition-detail__heading > strong {
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+.attacking-transition-detail__heading > span {
+  margin: 0;
+  color: #f87171;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-align: right;
+}
+
+.attacking-transition-detail__section > p,
+.attacking-transition-detail__section li {
+  color: #cdd8ea;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.attacking-transition-detail__section > p b {
+  color: #f8fafc;
+}
+
+.attacking-transition-detail .attacking-transition-detail__objective {
+  padding: 9px 10px;
+  border-left: 2px solid rgba(204, 0, 0, 0.72);
+  background: rgba(204, 0, 0, 0.08);
+}
+
+.attacking-transition-steps,
+.attacking-transition-coaching-points {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attacking-transition-steps li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.attacking-transition-steps li > b {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(204, 0, 0, 0.2);
+  color: #fecaca;
+  font-size: 0.72rem;
+}
+
+.attacking-transition-detail .attacking-transition-steps p {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.attacking-transition-coaching-points li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.attacking-transition-coaching-points li::before {
+  position: absolute;
+  top: 0.54em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #fb923c;
+  content: '';
+}
+
+.attacking-transition-detail .presentation-chip-row {
+  gap: 6px;
+}
+
+.attacking-transition-detail .presentation-chip--small {
+  padding: 6px 8px;
+  font-size: 0.64rem;
+}
+
 .analysis-skill-controls {
   display: grid;
   gap: 10px;

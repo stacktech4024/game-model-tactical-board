@@ -88,65 +88,54 @@ export function AttackingTransitionPage() {
             ))}
           </div>
 
-          <section className="analysis-detail" aria-live="polite">
+          <section className="analysis-detail attacking-transition-detail" aria-live="polite">
             <span>Moment of the Game: Attacking Transition</span>
             <h2>{activeCase.zoneFocus}</h2>
-            <p>{activeCase.subtitle}</p>
+            <p className="attacking-transition-detail__summary">{activeCase.subtitle}</p>
 
-            <div>
-              <strong>System</strong>
-              <p>{activeCase.system.description}</p>
-            </div>
-
-            <div>
-              <strong>Strategy</strong>
-              <div className="presentation-chip-row">
-                <span className="presentation-chip presentation-chip--small">{activeCase.strategy}</span>
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Game plan</strong>
+                <span>System + Strategy</span>
               </div>
-            </div>
-
-            <div>
-              <strong>Movement sequence</strong>
-              <div className="presentation-chip-row">
-                {activeCase.tactics.map((tactic) => (
-                  <span key={tactic} className="presentation-chip presentation-chip--small">
-                    {tactic}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <strong>Body-position emphasis</strong>
-              <p>
-                The player releasing the ball faces the next action, receivers open forward,
-                runners align with their run, and defenders recover goal-side with their shoulders
-                open to the ball carrier.
+              <p><b>{activeCase.system.shape}.</b> {activeCase.system.description}</p>
+              <p className="attacking-transition-detail__objective">
+                <b>Objective:</b> {activeCase.strategy}
               </p>
             </div>
 
-            <div>
-              <strong>Unit progression</strong>
-              <p>
-                Before the regain, the front and midfield units press while the back four protect
-                halfway. After the regain, the front unit stretches, midfield supports underneath,
-                and the back line squeezes forward with #4 and #5 slightly deeper.
-              </p>
-            </div>
-
-            <div>
-              <strong>Skill Set</strong>
-              <div className="presentation-chip-row">
-                {activeCase.skillSet.map((skill) => (
-                  <span key={skill} className="presentation-chip presentation-chip--small">
-                    {skill}
-                  </span>
-                ))}
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Movement sequence</strong>
+                <span>Tactics</span>
               </div>
+              <ol className="attacking-transition-steps">
+                {activeCase.tactics.map((tactic, index) => (
+                  <li key={tactic}>
+                    <b>{index + 1}</b>
+                    <p>{tactic}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
 
-            <div>
-              <strong>Canada Soccer attacking principles</strong>
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Coaching points</strong>
+                <span>Body position + Unit progression</span>
+              </div>
+              <ul className="attacking-transition-coaching-points">
+                {activeCase.coachingPoints.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="attacking-transition-detail__section">
+              <div className="attacking-transition-detail__heading">
+                <strong>Key tags</strong>
+                <span>Skill Set + Principles</span>
+              </div>
               <div className="presentation-chip-row">
                 {activeCase.principles.map((principle) => (
                   <span key={principle} className="presentation-chip presentation-chip--small">

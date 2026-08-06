@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import { PITCH, getZoneNumberForY } from '../../domain/pitch/pitchConstants.ts'
@@ -102,6 +103,56 @@ test('Page 13 retains one attacking-transition case for each of the four zones',
   )
 })
 
+test('Zones 1–3 circulate through multiple opponents before Canada regains', () => {
+  ATTACKING_TRANSITION_PAGE_CASES.slice(0, 3).forEach((scenario) => {
+    const turnoverIndex = scenario.steps.findIndex((step) => step.id === scenario.turnoverStepId)
+    const opponentActions = scenario.steps.slice(0, turnoverIndex).filter((step) =>
+      step.ballFromPlayerId?.startsWith('away-') && step.ballToPlayerId?.startsWith('away-'),
+    )
+    const turnover = scenario.steps[turnoverIndex]
+
+    assert.ok(opponentActions.length >= 3, `${scenario.id}: needs a staged opponent build-up`)
+    assert.equal(opponentActions[0]?.ballFromPlayerId, 'away-1')
+    assert.notEqual(opponentActions[1]?.ballFromPlayerId, 'away-1', `${scenario.id}: circulation continues beyond the GK`)
+    assert.notEqual(turnover.ballFromPlayerId, 'away-1', `${scenario.id}: regain cannot come directly from the GK`)
+    assert.equal(opponentActions.at(-1)?.ballToPlayerId, turnover.ballFromPlayerId)
+  })
+})
+
+test('Page 13 preserves the established Canadian post-regain actions', () => {
+  const expectedPostRegainSteps = {
+    'zone-1': ['zone-1-regain-scan', 'zone-1-gk-release', 'zone-1-ten-connects', 'zone-1-seven-released', 'zone-1-seven-enters', 'zone-1-cross', 'zone-1-finish'],
+    'zone-2': ['zone-2-regain-scan', 'zone-2-ten-connects', 'zone-2-seven-released', 'zone-2-seven-enters', 'zone-2-cross', 'zone-2-finish'],
+    'zone-3': ['zone-3-regain-scan', 'zone-3-ten-connects', 'zone-3-seven-released', 'zone-3-seven-enters', 'zone-3-cross', 'zone-3-finish'],
+    'zone-4': ['zone-4-regain-scan', 'zone-4-seven-released', 'zone-4-cross', 'zone-4-finish'],
+  }
+
+  ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
+    const pauseIndex = scenario.steps.findIndex((step) => step.id === scenario.regainPauseStepId)
+
+    assert.deepEqual(
+      scenario.steps.slice(pauseIndex).map((step) => step.id),
+      expectedPostRegainSteps[scenario.id],
+    )
+  })
+})
+
+test('Zone 4 keeps its established short-build, press, regain, release, cross, and finish sequence', () => {
+  const zone4 = ATTACKING_TRANSITION_PAGE_CASES.find((scenario) => scenario.id === 'zone-4')
+
+  assert.deepEqual(zone4?.steps.map((step) => step.id), [
+    'zone-4-gk-distribution',
+    'zone-4-front-press',
+    'zone-4-midfield-lock',
+    'zone-4-back-line-hold',
+    'zone-4-turnover',
+    'zone-4-regain-scan',
+    'zone-4-seven-released',
+    'zone-4-cross',
+    'zone-4-finish',
+  ])
+})
+
 test('Page 13 gives every regain a readable scan before Canada attacks', () => {
   ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
     const turnoverIndex = scenario.steps.findIndex((step) => step.id === scenario.turnoverStepId)
@@ -128,9 +179,9 @@ test('Page 13 active timing makes each regain readable and gives Zone 4 nearly f
   )
 
   assert.deepEqual(activeDurations, {
-    'zone-1': 5.48,
-    'zone-2': 5.22,
-    'zone-3': 5.04,
+    'zone-1': 6.42,
+    'zone-2': 5.99,
+    'zone-3': 5.59,
     'zone-4': 4.86,
   })
 
@@ -583,5 +634,22 @@ test('Page 13 uses the required Canada Soccer terms and principles', () => {
 
   ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
     assert.deepEqual(scenario.principles, ['DISPERSAL', 'SUPPORT', 'MOBILITY', 'PENETRATION'])
+  })
+})
+
+test('Page 13 exposes a compact System, Strategy, Tactics, and Skill Set panel', () => {
+  const pageSource = readFileSync(
+    new URL('../pages/AttackingTransitionPage.tsx', import.meta.url),
+    'utf8',
+  )
+
+  ;['Game plan', 'System + Strategy', 'Movement sequence', 'Tactics', 'Coaching points', 'Key tags', 'Skill Set + Principles'].forEach((term) => {
+    assert.match(pageSource, new RegExp(term.replace('+', '\\+')))
+  })
+
+  ATTACKING_TRANSITION_PAGE_CASES.forEach((scenario) => {
+    assert.equal(scenario.tactics.length, 4, `${scenario.id}: exactly four numbered movement steps`)
+    assert.ok(scenario.coachingPoints.length >= 1 && scenario.coachingPoints.length <= 3)
+    assert.ok(scenario.principles.length <= 4, `${scenario.id}: no more than four visible key tags`)
   })
 })
