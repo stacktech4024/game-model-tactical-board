@@ -129,8 +129,8 @@ test('Page 13 active timing makes each regain readable and gives Zone 4 nearly f
 
   assert.deepEqual(activeDurations, {
     'zone-1': 5.48,
-    'zone-2': 4.62,
-    'zone-3': 4.44,
+    'zone-2': 5.22,
+    'zone-3': 5.04,
     'zone-4': 4.86,
   })
 

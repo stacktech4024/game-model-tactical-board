@@ -466,7 +466,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-9', to: { x: 50, y: 68 } },
       { playerId: 'home-11', to: { x: 20, y: 70 } },
     ],
-    duration: 0.84,
+    duration: 0.99,
   },
   {
     id: 'zone-2-turnover',
@@ -478,14 +478,14 @@ const zone2Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-6',
     playerTo: { x: 48, y: 43 },
     focusPoint: { x: 48, y: 43 },
-    duration: 0.5,
+    duration: 0.7,
   },
   {
     id: 'zone-2-regain-scan',
     cue: 'Regain pause — #6 settles the second ball, opens forward, and scans for #10.',
     playerId: 'home-6',
     playerTo: { x: 48, y: 43 },
-    duration: 0.32,
+    duration: 0.4,
   },
   {
     id: 'zone-2-ten-connects',
@@ -517,7 +517,7 @@ const zone2Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-4', to: { x: 40, y: 90 } },
       { playerId: 'away-5', to: { x: 60, y: 90 } },
     ],
-    duration: 0.7,
+    duration: 0.87,
   },
   {
     id: 'zone-2-seven-released',
@@ -604,7 +604,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'home-4', to: { x: 41, y: 50 } },
       { playerId: 'home-5', to: { x: 59, y: 50 } },
     ],
-    duration: 0.76,
+    duration: 0.91,
   },
   {
     id: 'zone-3-turnover',
@@ -616,14 +616,14 @@ const zone3Steps: AttackingTransitionPageStep[] = [
     playerId: 'home-8',
     playerTo: { x: 46, y: 64 },
     focusPoint: { x: 46, y: 64 },
-    duration: 0.5,
+    duration: 0.7,
   },
   {
     id: 'zone-3-regain-scan',
     cue: 'Regain pause — #8 secures the interception, opens forward, and scans before releasing.',
     playerId: 'home-8',
     playerTo: { x: 46, y: 64 },
-    duration: 0.32,
+    duration: 0.4,
   },
   {
     id: 'zone-3-ten-connects',
@@ -655,7 +655,7 @@ const zone3Steps: AttackingTransitionPageStep[] = [
       { playerId: 'away-4', to: { x: 40, y: 90 } },
       { playerId: 'away-5', to: { x: 60, y: 90 } },
     ],
-    duration: 0.66,
+    duration: 0.83,
   },
   {
     id: 'zone-3-seven-released',
