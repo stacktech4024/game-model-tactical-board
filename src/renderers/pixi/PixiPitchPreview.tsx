@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { SquadPlayer } from '../../domain/players/playerTypes'
 import { pitchToScreen } from '../../domain/pitch/coordTransforms'
 import { PITCH } from '../../domain/pitch/pitchConstants'
-import type { ScenarioArrow } from '../../domain/scenarios/scenarioTypes'
+import type { ScenarioArrow, ScenarioArrowType } from '../../domain/scenarios/scenarioTypes'
 import { preloadTokenAssets } from './assets/preloadTokenAssets'
 import {
   facingAngleToSpriteRotation,
@@ -41,7 +41,18 @@ export type PixiPitchPreviewStep = {
   // while the number label remains upright. Uses the same pitch convention as
   // PixiPitchPreviewPlayer.facingAngle.
   facingAngle?: number
-  playerMoves?: { playerId: string; to: { x: number; y: number } }[]
+  playerMoves?: {
+    playerId: string
+    to: { x: number; y: number }
+    // Body orientation at the end of the movement. This allows a recovering
+    // defender to retreat while staying open to the ball instead of turning
+    // their back and simply facing the direction of travel.
+    facingAngle?: number
+  }[]
+  // Rotation-only adjustments for players holding their position while the
+  // ball moves. Used to keep supporting attackers and defenders visually
+  // connected to the current ball carrier.
+  playerFacings?: { playerId: string; facingAngle: number }[]
   ballFrom?: { x: number; y: number }
   ballTo?: { x: number; y: number }
   duration: number
@@ -54,7 +65,7 @@ export type PixiPitchPreviewRoute = {
   id: string
   from: { x: number; y: number }
   to: { x: number; y: number }
-  type: 'pass' | 'run' | 'dribble' | 'press' | 'recovery'
+  type: ScenarioArrowType
   revealOnStepId?: string
 }
 
@@ -553,6 +564,52 @@ export function PixiPitchPreview({
                       height,
                     ),
                     duration: step.duration,
+                    ease: 'power2.inOut',
+                  },
+                  stepLabel,
+                )
+              }
+
+              if (move.facingAngle !== undefined) {
+                const moveSprite = playerSpritesById.get(move.playerId)
+                const currentFacingAngle = plannedFacingAngles.get(move.playerId) ?? 0
+                const targetFacingAngle = getNearestEquivalentFacingAngle(
+                  currentFacingAngle,
+                  move.facingAngle,
+                )
+
+                plannedFacingAngles.set(move.playerId, targetFacingAngle)
+
+                if (moveSprite) {
+                  timeline.to(
+                    moveSprite,
+                    {
+                      rotation: facingAngleToSpriteRotation(targetFacingAngle),
+                      duration: step.duration,
+                      ease: 'power2.inOut',
+                    },
+                    stepLabel,
+                  )
+                }
+              }
+            })
+
+            step.playerFacings?.forEach((facing) => {
+              const facingSprite = playerSpritesById.get(facing.playerId)
+              const currentFacingAngle = plannedFacingAngles.get(facing.playerId) ?? 0
+              const targetFacingAngle = getNearestEquivalentFacingAngle(
+                currentFacingAngle,
+                facing.facingAngle,
+              )
+
+              plannedFacingAngles.set(facing.playerId, targetFacingAngle)
+
+              if (facingSprite) {
+                timeline.to(
+                  facingSprite,
+                  {
+                    rotation: facingAngleToSpriteRotation(targetFacingAngle),
+                    duration: Math.min(step.duration, 0.36),
                     ease: 'power2.inOut',
                   },
                   stepLabel,
