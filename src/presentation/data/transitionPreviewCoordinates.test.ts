@@ -162,11 +162,17 @@ test('all DT zones include 2–3 connected Canada actions and opponent unit reac
         `${testCase.id} ${step.id}: opponent reacts to the buildup`,
       )
     })
-    assert.ok(
-      CanadaActions.some((step) => step.playerMoves?.some((move) =>
-        /^away-[2-5]$/.test(move.playerId),
-      )),
-      `${testCase.id}: grey back line adjusts during Canada buildup`,
+    const shiftingDefenders = new Set(
+      CanadaActions.flatMap((step) =>
+        step.playerMoves?.filter((move) => /^away-[2-5]$/.test(move.playerId))
+          .map((move) => move.playerId) ?? [],
+      ),
+    )
+
+    assert.deepEqual(
+      [...shiftingDefenders].sort(),
+      ['away-2', 'away-3', 'away-4', 'away-5'],
+      `${testCase.id}: the entire grey back line shifts during Canada buildup`,
     )
   })
 })
@@ -195,12 +201,19 @@ test('every DT counter includes grey runners, midfield support, a stepping back 
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
     const counter = testCase.steps[counterIndex]
-    const supportIds = new Set(counter.playerMoves?.map((move) => move.playerId) ?? [])
+    const supportIds = new Set([
+      ...(counter.playerId ? [counter.playerId] : []),
+      ...(counter.playerMoves?.map((move) => move.playerId) ?? []),
+    ])
     const reset = testCase.steps.slice(counterIndex + 1).find((step) => step.id.endsWith('grey-reset'))
 
     assert.ok([...supportIds].some((id) => /^away-(7|9|11)$/.test(id)), `${testCase.id}: forward runner`)
     assert.ok([...supportIds].some((id) => /^away-(6|8|10)$/.test(id)), `${testCase.id}: midfield support`)
-    assert.ok([...supportIds].some((id) => /^away-[2-5]$/.test(id)), `${testCase.id}: stepping back line`)
+    assert.deepEqual(
+      [...supportIds].filter((id) => /^away-[2-5]$/.test(id)).sort(),
+      ['away-2', 'away-3', 'away-4', 'away-5'],
+      `${testCase.id}: entire back line steps behind the counter`,
+    )
     assert.ok(reset, `${testCase.id}: grey reset before loop restart`)
     assert.ok(
       (reset.playerMoves?.filter((move) => move.playerId.startsWith('away-')).length ?? 0) >= 4,
@@ -270,6 +283,85 @@ test('Zones 1–3 visibly recover #9 toward the team after the turnover', () => 
       ),
       `${testCase.id}: visible #9 recovery route`,
     )
+  })
+})
+
+test('Zone 1 recovers #10 into a central screen after the loss', () => {
+  const testCase = DEFENSIVE_TRANSITION_PAGE_CASES.find((item) => item.id === 'zone-1')
+
+  assert.ok(testCase)
+
+  const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+  const recoveryStep = testCase.steps.slice(lossIndex + 1).find((step) =>
+    step.playerMoves?.some((move) => move.playerId === 'home-10'),
+  )
+  const recoveryMove = recoveryStep?.playerMoves?.find((move) => move.playerId === 'home-10')
+  const initialTen = previewPointToPitchPercent(getPlayer(testCase, 'home-10'))
+
+  assert.ok(recoveryStep && recoveryMove)
+
+  const recoveryTarget = previewPointToPitchPercent(recoveryMove.to)
+
+  assert.ok(recoveryTarget.y < initialTen.y - 8, 'zone-1: #10 makes a visible recovery run')
+  assert.ok(
+    testCase.routes.some((route) =>
+      route.id.includes('ten-recovery') && route.revealOnStepId === recoveryStep.id,
+    ),
+    'zone-1: visible #10 recovery route',
+  )
+})
+
+test('grey back lines stay ordered and compact when shifting to the loss', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const positions = new Map(
+      testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+
+    testCase.steps.slice(0, lossIndex + 1).forEach((step) => {
+      if (step.playerId && step.playerTo) positions.set(step.playerId, step.playerTo)
+      step.playerMoves?.forEach((move) => positions.set(move.playerId, move.to))
+    })
+
+    const line = ['away-3', 'away-4', 'away-5', 'away-2'].map((id) => positions.get(id))
+
+    assert.ok(line.every(Boolean), `${testCase.id}: complete grey back line`)
+
+    const backLine = line as PreviewPoint[]
+    const verticalSpread = Math.max(...backLine.map((point) => point.y))
+      - Math.min(...backLine.map((point) => point.y))
+
+    assert.ok(
+      backLine.every((point, index) => index === 0 || backLine[index - 1].x < point.x),
+      `${testCase.id}: grey back line remains laterally ordered`,
+    )
+    assert.ok(verticalSpread <= 6, `${testCase.id}: grey back line shifts compactly`)
+  })
+})
+
+test('DT player movements avoid unrealistic cross-pitch jumps', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const positions = new Map(
+      testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+
+    testCase.steps.forEach((step) => {
+      const movements = [
+        ...(step.playerId && step.playerTo ? [{ playerId: step.playerId, to: step.playerTo }] : []),
+        ...(step.playerMoves ?? []),
+      ]
+
+      movements.forEach((move) => {
+        const from = positions.get(move.playerId)
+
+        assert.ok(from, `${testCase.id} ${step.id}: ${move.playerId} starting position`)
+        assert.ok(
+          pointDistance(from, move.to) <= 30,
+          `${testCase.id} ${step.id}: ${move.playerId} cannot jump across the pitch`,
+        )
+        positions.set(move.playerId, move.to)
+      })
+    })
   })
 })
 
