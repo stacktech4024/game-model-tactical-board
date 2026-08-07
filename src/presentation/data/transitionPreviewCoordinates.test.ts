@@ -42,17 +42,31 @@ function assertAngleClose(actual: number | undefined, expected: number, message:
   assert.ok(difference < 0.001, `${message}: expected ${expected}, received ${actual}`)
 }
 
+function pointDistance(first: PreviewPoint, second: PreviewPoint): number {
+  return Math.hypot(first.x - second.x, first.y - second.y)
+}
+
+function assertVisuallyAttached(
+  ball: PreviewPoint | undefined,
+  player: PreviewPoint | undefined,
+  message: string,
+): void {
+  assert.ok(ball && player, `${message}: ball and player positions are required`)
+
+  const distance = pointDistance(ball, player)
+
+  assert.ok(distance >= 1 && distance <= 2, `${message}: expected a readable 1–2 unit offset, received ${distance}`)
+}
+
 function assertVisibleDefensiveTurnover(
   step: PixiPitchPreviewStep,
-  initialBall: PreviewPoint,
   caseId: string,
 ): void {
   assert.ok(step.ballFrom, `${caseId}: turnover step needs ballFrom`)
   assert.ok(step.ballTo, `${caseId}: turnover step needs ballTo`)
-  assert.deepEqual(step.ballFrom, initialBall, `${caseId}: turnover must begin at the visible initial ball`)
   assert.notDeepEqual(step.ballFrom, step.ballTo, `${caseId}: turnover must visibly move the ball`)
   assert.ok(step.playerId?.startsWith('away-'), `${caseId}: an opponent must collect the turnover`)
-  assert.deepEqual(step.playerTo, step.ballTo, `${caseId}: opponent collection must finish at the loose ball`)
+  assertVisuallyAttached(step.ballTo, step.playerTo, `${caseId}: opponent collection`)
 }
 
 test('formation metres normalize to canonical pitch percentages before preview conversion', () => {
@@ -79,13 +93,17 @@ test('AT and DT previews keep home and away goalkeepers at the correct goal ends
   })
 })
 
-test('every DT tab starts with the ball in its labelled canonical zone', () => {
+test('every DT tab loses the ball in its labelled canonical zone', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const expectedZone = Number(testCase.id.at(-1))
-    const pitchPercent = previewPointToPitchPercent(testCase.ballPosition)
+    const loss = testCase.steps.find((step) => step.id === testCase.lossStepId)
+
+    assert.ok(loss?.ballTo, `${testCase.id}: loss endpoint`)
+
+    const pitchPercent = previewPointToPitchPercent(loss.ballTo)
     const pitchY = (pitchPercent.y / 100) * PITCH.LENGTH
 
-    assert.equal(getZoneNumberForY(pitchY), expectedZone, `${testCase.tabLabel}: visible initial ball zone`)
+    assert.equal(getZoneNumberForY(pitchY), expectedZone, `${testCase.tabLabel}: visible loss zone`)
   })
 })
 
@@ -93,19 +111,42 @@ test('every DT tab begins with Canada in possession before the visible loss', ()
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const initialPossessor = getPlayer(testCase, testCase.initialPossessorId)
     const possession = testCase.steps[0]
-    const loss = testCase.steps[1]
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+    const loss = testCase.steps[lossIndex]
 
     assert.equal(possession.id, testCase.possessionStepId)
     assert.equal(possession.emphasizePlayerId, testCase.initialPossessorId)
     assert.equal(possession.ballFrom, undefined)
     assert.equal(possession.ballTo, undefined)
-    assert.deepEqual(testCase.ballPosition, { x: initialPossessor.x, y: initialPossessor.y })
+    assertVisuallyAttached(
+      testCase.ballPosition,
+      { x: initialPossessor.x, y: initialPossessor.y },
+      `${testCase.id}: initial Canada possession`,
+    )
 
     assert.equal(loss.id, testCase.lossStepId)
-    assert.equal(loss.ballFromPlayerId, testCase.initialPossessorId)
+    assert.ok(lossIndex > 0)
+    assert.ok(loss.ballFromPlayerId?.startsWith('home-'))
     assert.equal(loss.ballToPlayerId, loss.playerId)
-    assertVisibleDefensiveTurnover(loss, testCase.ballPosition, testCase.id)
+    assertVisibleDefensiveTurnover(loss, testCase.id)
     assert.ok(testCase.routes.some((route) => route.revealOnStepId === loss.id))
+  })
+})
+
+test('Zones 1–3 include connected Canada buildup and opponent reactions before the loss', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.slice(0, 3).forEach((testCase) => {
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+    const CanadaActions = testCase.steps.slice(0, lossIndex).filter((step) =>
+      step.ballFromPlayerId?.startsWith('home-') && step.ballToPlayerId?.startsWith('home-'),
+    )
+
+    assert.ok(CanadaActions.length >= 2 && CanadaActions.length <= 3, `${testCase.id}: 2–3 Canada buildup actions`)
+    CanadaActions.forEach((step) => {
+      assert.ok(
+        step.playerMoves?.some((move) => move.playerId.startsWith('away-')),
+        `${testCase.id} ${step.id}: opponent reacts to the buildup`,
+      )
+    })
   })
 })
 
@@ -131,14 +172,23 @@ test('every DT tab gives the opponent a counter action before Canada reacts', ()
 
 test('Defensive Transition makes the loss readable without slowing the reaction sequence', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
     const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
-    const timeBeforeReaction = testCase.steps
-      .slice(0, counterIndex + 1)
+    const buildupDuration = testCase.steps
+      .slice(0, lossIndex)
+      .reduce((total, step) => total + step.duration, 0)
+    const lossAndCounterDuration = testCase.steps
+      .slice(lossIndex, counterIndex + 1)
       .reduce((total, step) => total + step.duration, 0)
     const totalDuration = testCase.steps.reduce((total, step) => total + step.duration, 0)
 
-    assert.ok(timeBeforeReaction >= 1.2 && timeBeforeReaction <= 1.5, `${testCase.id}: readable loss and counter`)
-    assert.ok(totalDuration <= 3.2, `${testCase.id}: defensive transition stays fast`)
+    if (testCase.id === 'zone-4') {
+      assert.ok(buildupDuration >= 0.25, `${testCase.id}: readable final-third possession`)
+    } else {
+      assert.ok(buildupDuration >= 1 && buildupDuration <= 1.5, `${testCase.id}: readable buildup`)
+    }
+    assert.ok(lossAndCounterDuration >= 0.85 && lossAndCounterDuration <= 1.05)
+    assert.ok(totalDuration <= 4.2, `${testCase.id}: defensive transition stays fast`)
   })
 })
 
@@ -165,6 +215,71 @@ test('every DT tab preserves pressure, cover, central protection, back-line bala
   })
 })
 
+test('Zones 1–3 visibly recover #9 toward the team after the turnover', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.slice(0, 3).forEach((testCase) => {
+    const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
+    const recoveryStep = testCase.steps.slice(lossIndex + 1).find((step) =>
+      step.playerMoves?.some((move) => move.playerId === 'home-9'),
+    )
+    const recoveryMove = recoveryStep?.playerMoves?.find((move) => move.playerId === 'home-9')
+    const initialNine = previewPointToPitchPercent(getPlayer(testCase, 'home-9'))
+
+    assert.ok(recoveryStep && recoveryMove, `${testCase.id}: #9 recovery movement`)
+
+    const recoveryTarget = previewPointToPitchPercent(recoveryMove.to)
+
+    assert.ok(recoveryTarget.y < initialNine.y - 10, `${testCase.id}: #9 drops toward halfway`)
+    assert.ok(
+      testCase.routes.some((route) =>
+        route.id.includes('nine-recovery') && route.revealOnStepId === recoveryStep.id,
+      ),
+      `${testCase.id}: visible #9 recovery route`,
+    )
+  })
+})
+
+test('key players remain separated around each DT turnover and first pressure', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const positions = new Map(
+      testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+    const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
+    const counter = testCase.steps[counterIndex]
+    const firstDefender = testCase.steps[counterIndex + 1]
+    const secondDefender = testCase.steps[counterIndex + 2]
+
+    testCase.steps.forEach((step) => {
+      if (step.playerId && step.playerTo) {
+        positions.set(step.playerId, step.playerTo)
+      }
+      step.playerMoves?.forEach((move) => positions.set(move.playerId, move.to))
+    })
+
+    const supportPlayerId = counter.playerMoves?.find((move) => move.playerId.startsWith('away-'))?.playerId
+    const keyPlayerIds = [...new Set([
+      counter.ballToPlayerId,
+      firstDefender.playerId,
+      secondDefender.playerId,
+      'home-6',
+      'home-8',
+      supportPlayerId,
+    ].filter((playerId): playerId is string => Boolean(playerId)))]
+
+    keyPlayerIds.forEach((playerId, index) => {
+      keyPlayerIds.slice(index + 1).forEach((otherPlayerId) => {
+        const first = positions.get(playerId)
+        const second = positions.get(otherPlayerId)
+
+        assert.ok(first && second)
+        assert.ok(
+          pointDistance(first, second) >= 3,
+          `${testCase.id}: ${playerId} and ${otherPlayerId} need distinct turnover lanes`,
+        )
+      })
+    })
+  })
+})
+
 test('Defensive Transition keeps four loss tabs with Zone 3 as the default', () => {
   assert.deepEqual(
     DEFENSIVE_TRANSITION_PAGE_CASES.map((testCase) => testCase.id),
@@ -186,7 +301,7 @@ test('every DT ball movement stays attached to its named owner and receiver', ()
         assert.ok(step.ballFromPlayerId, `${testCase.id} ${step.id}: ball owner must be named`)
         assert.ok(step.ballToPlayerId, `${testCase.id} ${step.id}: receiver must be named`)
         assert.deepEqual(step.ballFrom, currentBall, `${testCase.id} ${step.id}: continuous ball chain`)
-        assert.deepEqual(
+        assertVisuallyAttached(
           step.ballFrom,
           playerPositions.get(step.ballFromPlayerId),
           `${testCase.id} ${step.id}: ball begins attached to ${step.ballFromPlayerId}`,
@@ -199,7 +314,7 @@ test('every DT ball movement stays attached to its named owner and receiver', ()
       step.playerMoves?.forEach((move) => playerPositions.set(move.playerId, move.to))
 
       if (step.ballTo && step.ballToPlayerId) {
-        assert.deepEqual(
+        assertVisuallyAttached(
           step.ballTo,
           playerPositions.get(step.ballToPlayerId),
           `${testCase.id} ${step.id}: ball finishes attached to ${step.ballToPlayerId}`,
