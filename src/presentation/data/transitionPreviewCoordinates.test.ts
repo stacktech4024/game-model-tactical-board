@@ -46,6 +46,21 @@ function pointDistance(first: PreviewPoint, second: PreviewPoint): number {
   return Math.hypot(first.x - second.x, first.y - second.y)
 }
 
+function getFinalPlayerPositions(testCase: (typeof DEFENSIVE_TRANSITION_PAGE_CASES)[number]) {
+  const positions = new Map(
+    testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+  )
+
+  testCase.steps.forEach((step) => {
+    if (step.playerId && step.playerTo) {
+      positions.set(step.playerId, step.playerTo)
+    }
+    step.playerMoves?.forEach((move) => positions.set(move.playerId, move.to))
+  })
+
+  return positions
+}
+
 function assertVisuallyAttached(
   ball: PreviewPoint | undefined,
   player: PreviewPoint | undefined,
@@ -133,8 +148,8 @@ test('every DT tab begins with Canada in possession before the visible loss', ()
   })
 })
 
-test('Zones 1–3 include connected Canada buildup and opponent reactions before the loss', () => {
-  DEFENSIVE_TRANSITION_PAGE_CASES.slice(0, 3).forEach((testCase) => {
+test('all DT zones include 2–3 connected Canada actions and opponent unit reactions before the loss', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
     const CanadaActions = testCase.steps.slice(0, lossIndex).filter((step) =>
       step.ballFromPlayerId?.startsWith('home-') && step.ballToPlayerId?.startsWith('home-'),
@@ -147,6 +162,12 @@ test('Zones 1–3 include connected Canada buildup and opponent reactions before
         `${testCase.id} ${step.id}: opponent reacts to the buildup`,
       )
     })
+    assert.ok(
+      CanadaActions.some((step) => step.playerMoves?.some((move) =>
+        /^away-[2-5]$/.test(move.playerId),
+      )),
+      `${testCase.id}: grey back line adjusts during Canada buildup`,
+    )
   })
 })
 
@@ -170,6 +191,24 @@ test('every DT tab gives the opponent a counter action before Canada reacts', ()
   })
 })
 
+test('every DT counter includes grey runners, midfield support, a stepping back line, and a reset', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
+    const counter = testCase.steps[counterIndex]
+    const supportIds = new Set(counter.playerMoves?.map((move) => move.playerId) ?? [])
+    const reset = testCase.steps.slice(counterIndex + 1).find((step) => step.id.endsWith('grey-reset'))
+
+    assert.ok([...supportIds].some((id) => /^away-(7|9|11)$/.test(id)), `${testCase.id}: forward runner`)
+    assert.ok([...supportIds].some((id) => /^away-(6|8|10)$/.test(id)), `${testCase.id}: midfield support`)
+    assert.ok([...supportIds].some((id) => /^away-[2-5]$/.test(id)), `${testCase.id}: stepping back line`)
+    assert.ok(reset, `${testCase.id}: grey reset before loop restart`)
+    assert.ok(
+      (reset.playerMoves?.filter((move) => move.playerId.startsWith('away-')).length ?? 0) >= 4,
+      `${testCase.id}: connected grey reset`,
+    )
+  })
+})
+
 test('Defensive Transition makes the loss readable without slowing the reaction sequence', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
@@ -182,13 +221,9 @@ test('Defensive Transition makes the loss readable without slowing the reaction 
       .reduce((total, step) => total + step.duration, 0)
     const totalDuration = testCase.steps.reduce((total, step) => total + step.duration, 0)
 
-    if (testCase.id === 'zone-4') {
-      assert.ok(buildupDuration >= 0.25, `${testCase.id}: readable final-third possession`)
-    } else {
-      assert.ok(buildupDuration >= 1 && buildupDuration <= 1.5, `${testCase.id}: readable buildup`)
-    }
+    assert.ok(buildupDuration >= 1 && buildupDuration <= 1.5, `${testCase.id}: readable buildup`)
     assert.ok(lossAndCounterDuration >= 0.85 && lossAndCounterDuration <= 1.05)
-    assert.ok(totalDuration <= 4.2, `${testCase.id}: defensive transition stays fast`)
+    assert.ok(totalDuration <= 4.4, `${testCase.id}: defensive transition stays fast`)
   })
 })
 
@@ -238,22 +273,40 @@ test('Zones 1–3 visibly recover #9 toward the team after the turnover', () => 
   })
 })
 
+test('Zone 1 and Zone 3 recover #9 into a distinct screening lane', () => {
+  const separationGroups = {
+    'zone-1': ['home-10'],
+    'zone-3': ['home-10', 'home-6', 'home-8'],
+  } as const
+
+  Object.entries(separationGroups).forEach(([caseId, centralPlayerIds]) => {
+    const testCase = DEFENSIVE_TRANSITION_PAGE_CASES.find((item) => item.id === caseId)
+
+    assert.ok(testCase)
+
+    const finalPositions = getFinalPlayerPositions(testCase)
+    const nine = finalPositions.get('home-9')
+
+    assert.ok(nine)
+    centralPlayerIds.forEach((playerId) => {
+      const centralPlayer = finalPositions.get(playerId)
+
+      assert.ok(centralPlayer)
+      assert.ok(
+        pointDistance(nine, centralPlayer) >= 5,
+        `${caseId}: #9 needs a separate screening lane from ${playerId}`,
+      )
+    })
+  })
+})
+
 test('key players remain separated around each DT turnover and first pressure', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
-    const positions = new Map(
-      testCase.players.map((player) => [player.id, { x: player.x, y: player.y }]),
-    )
+    const positions = getFinalPlayerPositions(testCase)
     const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
     const counter = testCase.steps[counterIndex]
     const firstDefender = testCase.steps[counterIndex + 1]
     const secondDefender = testCase.steps[counterIndex + 2]
-
-    testCase.steps.forEach((step) => {
-      if (step.playerId && step.playerTo) {
-        positions.set(step.playerId, step.playerTo)
-      }
-      step.playerMoves?.forEach((move) => positions.set(move.playerId, move.to))
-    })
 
     const supportPlayerId = counter.playerMoves?.find((move) => move.playerId.startsWith('away-'))?.playerId
     const keyPlayerIds = [...new Set([
