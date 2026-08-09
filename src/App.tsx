@@ -3,6 +3,7 @@ import TacticalBoardPage from './pages/TacticalBoardPage'
 import { CoverPage } from './presentation/pages/CoverPage'
 import { IntroPage } from './presentation/pages/IntroPage'
 import { PhilosophyPage } from './presentation/pages/PhilosophyPage'
+import { PitchGeographyPage } from './presentation/pages/PitchGeographyPage'
 import { GameAnalysisPage } from './presentation/pages/GameAnalysisPage'
 import { AttackingTransitionPage } from './presentation/pages/AttackingTransitionPage'
 import { DefensiveTransitionPage } from './presentation/pages/DefensiveTransitionPage'
@@ -22,6 +23,7 @@ function App() {
       <Route path="/presentation/cover" element={<CoverPage />} />
       <Route path="/presentation/intro" element={<IntroPage />} />
       <Route path="/presentation/philosophy" element={<PhilosophyPage />} />
+      <Route path="/presentation/pitch-geography" element={<PitchGeographyPage />} />
       <Route path="/presentation/game-analysis" element={<GameAnalysisPage />} />
       <Route path="/presentation/attacking-transition" element={<AttackingTransitionPage />} />
       <Route path="/presentation/defensive-transition" element={<DefensiveTransitionPage />} />
