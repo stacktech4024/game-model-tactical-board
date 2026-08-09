@@ -148,19 +148,44 @@ test('every DT tab begins with Canada in possession before the visible loss', ()
   })
 })
 
-test('all DT zones include 2–3 connected Canada actions and opponent unit reactions before the loss', () => {
+test('all DT zones include connected Canada actions and layered opponent reactions before the loss', () => {
+  const expectedCanadaActionCounts = {
+    'zone-1': 2,
+    'zone-2': 2,
+    'zone-3': 3,
+    'zone-4': 8,
+  } as const
+
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const lossIndex = testCase.steps.findIndex((step) => step.id === testCase.lossStepId)
     const CanadaActions = testCase.steps.slice(0, lossIndex).filter((step) =>
       step.ballFromPlayerId?.startsWith('home-') && step.ballToPlayerId?.startsWith('home-'),
     )
 
-    assert.ok(CanadaActions.length >= 2 && CanadaActions.length <= 3, `${testCase.id}: 2–3 Canada buildup actions`)
+    assert.equal(
+      CanadaActions.length,
+      expectedCanadaActionCounts[testCase.id],
+      `${testCase.id}: authored Canada buildup actions`,
+    )
     CanadaActions.forEach((step) => {
       assert.ok(
         step.playerMoves?.some((move) => move.playerId.startsWith('away-')),
         `${testCase.id} ${step.id}: opponent reacts to the buildup`,
       )
+
+      const backLineMoves = step.playerMoves?.filter((move) => /^away-[2-5]$/.test(move.playerId)) ?? []
+
+      assert.ok(
+        backLineMoves.length <= 3,
+        `${testCase.id} ${step.id}: at least one grey defender holds rather than moving as a wall`,
+      )
+      if (backLineMoves.length > 1) {
+        assert.equal(
+          new Set(backLineMoves.map((move) => move.startDelay ?? 0)).size,
+          backLineMoves.length,
+          `${testCase.id} ${step.id}: grey back-line reactions are staggered`,
+        )
+      }
     })
     const shiftingDefenders = new Set(
       CanadaActions.flatMap((step) =>
@@ -172,7 +197,7 @@ test('all DT zones include 2–3 connected Canada actions and opponent unit reac
     assert.deepEqual(
       [...shiftingDefenders].sort(),
       ['away-2', 'away-3', 'away-4', 'away-5'],
-      `${testCase.id}: the entire grey back line shifts during Canada buildup`,
+      `${testCase.id}: ball-side cover responds while the far side can hold`,
     )
   })
 })
@@ -197,7 +222,7 @@ test('every DT tab gives the opponent a counter action before Canada reacts', ()
   })
 })
 
-test('every DT counter includes grey runners, midfield support, a stepping back line, and a reset', () => {
+test('every DT counter includes grey runners, midfield support, layered back-line cover, and a reset', () => {
   DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
     const counterIndex = testCase.steps.findIndex((step) => step.id === testCase.counterStepId)
     const counter = testCase.steps[counterIndex]
@@ -209,10 +234,15 @@ test('every DT counter includes grey runners, midfield support, a stepping back 
 
     assert.ok([...supportIds].some((id) => /^away-(7|9|11)$/.test(id)), `${testCase.id}: forward runner`)
     assert.ok([...supportIds].some((id) => /^away-(6|8|10)$/.test(id)), `${testCase.id}: midfield support`)
-    assert.deepEqual(
-      [...supportIds].filter((id) => /^away-[2-5]$/.test(id)).sort(),
-      ['away-2', 'away-3', 'away-4', 'away-5'],
-      `${testCase.id}: entire back line steps behind the counter`,
+    const steppingBackLine = counter.playerMoves?.filter((move) => /^away-[2-5]$/.test(move.playerId)) ?? []
+
+    assert.ok(
+      steppingBackLine.length >= 1 && steppingBackLine.length <= 2,
+      `${testCase.id}: one or two defenders support while the far side holds`,
+    )
+    assert.ok(
+      steppingBackLine.every((move) => (move.startDelay ?? 0) > 0),
+      `${testCase.id}: back-line support arrives after the runners and midfield`,
     )
     assert.ok(reset, `${testCase.id}: grey reset before loop restart`)
     assert.ok(
@@ -234,9 +264,15 @@ test('Defensive Transition makes the loss readable without slowing the reaction 
       .reduce((total, step) => total + step.duration, 0)
     const totalDuration = testCase.steps.reduce((total, step) => total + step.duration, 0)
 
-    assert.ok(buildupDuration >= 1 && buildupDuration <= 1.5, `${testCase.id}: readable buildup`)
+    const maximumBuildupDuration = testCase.id === 'zone-4' ? 2.55 : 1.5
+    const maximumTotalDuration = testCase.id === 'zone-4' ? 5.4 : 4.4
+
+    assert.ok(
+      buildupDuration >= 1 && buildupDuration <= maximumBuildupDuration,
+      `${testCase.id}: readable buildup`,
+    )
     assert.ok(lossAndCounterDuration >= 0.85 && lossAndCounterDuration <= 1.05)
-    assert.ok(totalDuration <= 4.4, `${testCase.id}: defensive transition stays fast`)
+    assert.ok(totalDuration <= maximumTotalDuration, `${testCase.id}: defensive transition stays fast`)
   })
 })
 
@@ -431,6 +467,122 @@ test('Defensive Transition keeps four loss tabs with Zone 3 as the default', () 
     ['zone-1', 'zone-2', 'zone-3', 'zone-4'],
   )
   assert.equal(DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID, 'zone-3')
+})
+
+test('Zone 4 builds from the goalkeeper through #4, #6, and #8 before the final-third entry', () => {
+  const zone4 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-4')
+
+  assert.ok(zone4)
+
+  const lossIndex = zone4.steps.findIndex((step) => step.id === zone4.lossStepId)
+  const preLossSteps = zone4.steps.slice(0, lossIndex)
+  const buildupPairs = preLossSteps
+    .filter((step) => step.ballFromPlayerId && step.ballToPlayerId)
+    .map((step) => [step.ballFromPlayerId, step.ballToPlayerId])
+  const carry = preLossSteps.find((step) => step.id === 'zone-4-eight-carry')
+  const release = preLossSteps.find((step) => step.id === 'zone-4-eight-releases-seven')
+  const overlap = release?.playerMoves?.find((move) => move.playerId === 'home-2')
+
+  assert.equal(zone4.initialPossessorId, 'home-1')
+  assert.deepEqual(buildupPairs.slice(0, 5), [
+    ['home-1', 'home-4'],
+    ['home-4', 'home-6'],
+    ['home-6', 'home-8'],
+    ['home-8', 'home-8'],
+    ['home-8', 'home-7'],
+  ])
+  assert.equal(carry?.ballFromPlayerId, 'home-8')
+  assert.equal(carry?.ballToPlayerId, 'home-8')
+  assert.equal(release?.ballFromPlayerId, 'home-8')
+  assert.equal(release?.ballToPlayerId, 'home-7')
+  assert.ok(overlap, '#2 continues beyond #7')
+  assert.ok(
+    zone4.routes.some((route) => route.id === 'zone-4-two-overlap' && route.type === 'run'),
+    '#2 overlap is visible',
+  )
+  assert.ok(
+    zone4.routes.some((route) => route.id === 'zone-4-eight-carry' && route.type === 'dribble'),
+    '#8 carry is visible',
+  )
+})
+
+test('Zone 4 advances Canada and retreats the grey block in layers through the thirds', () => {
+  const zone4 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-4')
+
+  assert.ok(zone4)
+
+  const positions = new Map(
+    zone4.players.map((player) => [player.id, previewPointToPitchPercent(player)]),
+  )
+  const initialPositions = new Map(positions)
+  const carryIndex = zone4.steps.findIndex((step) => step.id === 'zone-4-eight-carry')
+
+  zone4.steps.slice(0, carryIndex + 1).forEach((step) => {
+    if (step.playerId && step.playerTo) positions.set(step.playerId, previewPointToPitchPercent(step.playerTo))
+    step.playerMoves?.forEach((move) => positions.set(move.playerId, previewPointToPitchPercent(move.to)))
+  })
+
+  ;['home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'home-8', 'home-9', 'home-10']
+    .forEach((playerId) => {
+      assert.ok(
+        (positions.get(playerId)?.y ?? 0) > (initialPositions.get(playerId)?.y ?? 0),
+        `${playerId} advances behind or ahead of the ball`,
+      )
+    })
+  ;['away-2', 'away-4', 'away-5', 'away-6', 'away-8'].forEach((playerId) => {
+    assert.ok(
+      (positions.get(playerId)?.y ?? 0) > (initialPositions.get(playerId)?.y ?? 0),
+      `${playerId} retreats toward goal as the block is broken`,
+    )
+  })
+})
+
+test('Zone 4 preserves #7 to #10 to #9 to #10 before the cutback interception', () => {
+  const zone4 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-4')
+
+  assert.ok(zone4)
+
+  const lossIndex = zone4.steps.findIndex((step) => step.id === zone4.lossStepId)
+  const actionPairs = zone4.steps.slice(0, lossIndex + 1)
+    .filter((step) => step.ballFromPlayerId && step.ballToPlayerId)
+    .map((step) => [step.ballFromPlayerId, step.ballToPlayerId])
+
+  assert.deepEqual(actionPairs.slice(-4), [
+    ['home-7', 'home-10'],
+    ['home-10', 'home-9'],
+    ['home-9', 'home-10'],
+    ['home-10', 'away-9'],
+  ])
+})
+
+test('Zone 4 grey reaction layers wide pressure, pivot screen, centre-back cover, and far-side narrowing', () => {
+  const zone4 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-4')
+  const carry = zone4?.steps.find((step) => step.id === 'zone-4-eight-carry')
+  const delays = Object.fromEntries(
+    carry?.playerMoves
+      ?.filter((move) => ['away-2', 'away-6', 'away-5', 'away-4'].includes(move.playerId))
+      .map((move) => [move.playerId, move.startDelay ?? 0]) ?? [],
+  )
+
+  assert.deepEqual(delays, {
+    'away-2': 0,
+    'away-6': 0.04,
+    'away-5': 0.08,
+    'away-4': 0.12,
+  })
+})
+
+test('DT staggered reactions finish inside their authored action window', () => {
+  DEFENSIVE_TRANSITION_PAGE_CASES.forEach((testCase) => {
+    testCase.steps.forEach((step) => {
+      step.playerMoves?.forEach((move) => {
+        assert.ok(
+          (move.startDelay ?? 0) <= step.duration - 0.16 + Number.EPSILON,
+          `${testCase.id} ${step.id}: ${move.playerId} delay leaves time to complete`,
+        )
+      })
+    })
+  })
 })
 
 test('every DT ball movement stays attached to its named owner and receiver', () => {
