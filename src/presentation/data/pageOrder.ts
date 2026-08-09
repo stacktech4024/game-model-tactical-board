@@ -42,7 +42,7 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   'defensive-organization': 'Defensive organization',
   'set-pieces': 'Set pieces',
   'live-board': 'Live tactical board',
-  players: 'Squad roles',
+  players: 'Positional profiles',
   skills: 'Skill development',
   methodology: 'Training methodology',
   closing: 'Closing',

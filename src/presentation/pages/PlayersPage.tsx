@@ -1,49 +1,31 @@
 import { useMemo, useState } from 'react'
-import { FULLBACK_WIDE_CHANNEL_OVERLAP_SCENARIO } from '../../data/fullbackWideChannelOverlapScenario'
+import { FORMATION_POSITIONS } from '../../data/formations'
 import { PICKERING_SQUAD } from '../../data/squad'
-import type { SquadPlayer } from '../../domain/players/playerTypes'
-import { PresentationLayout } from '../PresentationLayout'
-import { POSITIONAL_PROFILES } from '../data/positionalProfiles'
-import type { PositionalProfile } from '../data/positionalProfiles'
-import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { pitchToScreen } from '../../domain/pitch/coordTransforms'
-import type { ScenarioArrow, ScenarioDefinition, ScenarioPlayerArrowType } from '../../domain/scenarios/scenarioTypes'
+import { PixiPitchPreview, PITCH_PADDING } from '../../renderers/pixi/PixiPitchPreview'
+import { PresentationLayout } from '../PresentationLayout'
 import {
-  PixiPitchPreview,
-  PITCH_PADDING,
-  type PixiPitchPreviewRoute,
-  type PixiPitchPreviewStep,
-} from '../../renderers/pixi/PixiPitchPreview'
+  POSITIONAL_PROFILES,
+  PROFILE_MOMENT_LABELS,
+  getProfileForPosition,
+  getPositionalProfile,
+  type PositionalProfileId,
+  type ProfileMomentId,
+} from '../data/positionalProfiles'
 
-type PositionalProfileGroup = 'GK' | 'CB' | 'FB' | 'CDM' | 'CAM' | 'WF' | 'ST'
-
-const BOARD_WIDTH = 480
-const BOARD_HEIGHT = 741
-const FULLBACK_PREVIEW_PLAYERS = [
-  { side: 'home' as const, number: 7 },
-  { side: 'home' as const, number: 2 },
-  { side: 'home' as const, number: 10 },
-  { side: 'home' as const, number: 9 },
-  { side: 'away' as const, number: 3 },
-  { side: 'away' as const, number: 6 },
-  { side: 'away' as const, number: 5 },
-]
-const PLAYER_ARROW_TYPES: ScenarioPlayerArrowType[] = ['run', 'press', 'recovery']
-
-// Resting 1-4-1-2-3 shape, reusing the same real formation data the
-// tactical board itself uses - keeps this page's pitch geometry consistent
-// with everywhere else instead of inventing a separate layout. #6 sits
-// alone as the deep pivot, #8/#10 as the two midfielders ahead of him,
-// #7/#9/#11 across the front three.
-const REST_FORMATION = FORMATION_POSITIONS['attacking-433']
-
-// How far in front of a selected player (in pitch metres, toward the
-// attacking goal) the ball sits - just enough to read as "at his feet"
-// rather than dead-center on the shirt number.
+const BOARD_WIDTH = 254
+const BOARD_HEIGHT = Math.round(BOARD_WIDTH * (PITCH.LENGTH / PITCH.WIDTH))
+const AO_REFERENCE_FORMATION = FORMATION_POSITIONS['attacking-442']
 const BALL_OFFSET_METERS = 1.6
+const MOMENT_IDS = Object.keys(PROFILE_MOMENT_LABELS) as ProfileMomentId[]
 
-const CENTER_SPOT = { x: PITCH.WIDTH / 2, y: PITCH.LENGTH / 2 }
+const PRIORITY_CATEGORIES = [
+  { id: 'physical', label: 'Physical' },
+  { id: 'social', label: 'Social' },
+  { id: 'mental', label: 'Mental' },
+  { id: 'skillSet', label: 'Skill Set' },
+] as const
 
 function pitchToPercentage(point: { x: number; y: number }) {
   return {
@@ -52,388 +34,225 @@ function pitchToPercentage(point: { x: number; y: number }) {
   }
 }
 
-function getScenarioArrow(scenario: ScenarioDefinition, arrowId: string): ScenarioArrow {
-  const arrow = scenario.arrows?.find((item) => item.id === arrowId)
-
-  if (!arrow) {
-    throw new Error(`Missing ${scenario.id} arrow: ${arrowId}`)
-  }
-
-  return arrow
-}
-
-function getScenarioPlayerId(side: 'home' | 'away', number: number) {
-  return `${side}-${number}`
-}
-
-function getScenarioPlayerStart(
-  scenario: ScenarioDefinition,
-  side: 'home' | 'away',
-  number: number,
-) {
-  const authoredMovement = scenario.arrows?.find((arrow) => {
-    const arrowSide = arrow.side ?? 'home'
-
-    return arrowSide === side && arrow.playerNumber === number && PLAYER_ARROW_TYPES.includes(arrow.type as ScenarioPlayerArrowType)
-  })
-
-  if (authoredMovement) {
-    return authoredMovement.from
-  }
-
-  const formation = side === 'home'
-    ? FORMATION_POSITIONS[scenario.formationMode]
-    : OPPOSITION_POSITIONS[scenario.formationMode]
-
-  return formation[number]
-}
-
-function buildFullbackScenarioPreview(scenario: ScenarioDefinition) {
-  const overlap = getScenarioArrow(scenario, 'fullback-overlap-run')
-  const tenLate = getScenarioArrow(scenario, 'wide-overlap-ten-late-arrival')
-  const nearPost = getScenarioArrow(scenario, 'wide-overlap-nine-near-post')
-  const cutback = getScenarioArrow(scenario, 'wide-overlap-cutback-to-ten')
-  const finish = getScenarioArrow(scenario, 'wide-overlap-ten-finish')
-
-  const steps: PixiPitchPreviewStep[] = [
-    {
-      id: 'hold-width',
-      cue: '#7 holds the wide channel',
-      emphasizePlayerId: getScenarioPlayerId('home', 7),
-      duration: 0.22,
-    },
-    {
-      id: 'overlap',
-      cue: '#2 overlaps from deep',
-      playerId: getScenarioPlayerId('home', 2),
-      playerTo: pitchToPercentage(overlap.to),
-      duration: 0.68,
-    },
-    {
-      id: 'late-arrival',
-      cue: '#10 arrives late; #9 attacks near post',
-      playerId: getScenarioPlayerId('home', 10),
-      playerTo: pitchToPercentage(tenLate.to),
-      playerMoves: [{ playerId: getScenarioPlayerId('home', 9), to: pitchToPercentage(nearPost.to) }],
-      duration: 0.56,
-    },
-    {
-      id: 'cutback',
-      cue: 'Cutback into the late runner',
-      ballFrom: pitchToPercentage(cutback.from),
-      ballTo: pitchToPercentage(cutback.to),
-      duration: 0.52,
-    },
-    {
-      id: 'finish',
-      cue: '#10 finishes; #9 remains the secondary option',
-      ballFrom: pitchToPercentage(finish.from),
-      ballTo: pitchToPercentage(finish.to),
-      emphasizePlayerId: getScenarioPlayerId('home', 10),
-      duration: 0.42,
-    },
-  ]
-
-  const routes: PixiPitchPreviewRoute[] = (scenario.arrows ?? [])
-    .filter((arrow) => arrow.type !== 'shot')
-    .map((arrow) => ({
-      id: arrow.id,
-      from: pitchToPercentage(arrow.from),
-      to: pitchToPercentage(arrow.to),
-      type: arrow.type as PixiPitchPreviewRoute['type'],
-      revealOnStepId:
-        arrow.id === 'fullback-overlap-run' || arrow.id === 'wide-overlap-away-three-delay'
-          ? 'overlap'
-          : arrow.id === 'wide-overlap-ten-late-arrival'
-            || arrow.id === 'wide-overlap-nine-near-post'
-            || arrow.id === 'wide-overlap-away-six-screen'
-            || arrow.id === 'wide-overlap-away-five-track-nine'
-            ? 'late-arrival'
-            : 'cutback',
-    }))
-
-  return {
-    players: FULLBACK_PREVIEW_PLAYERS.map((player) => {
-      const start = getScenarioPlayerStart(scenario, player.side, player.number)
-      const percentage = pitchToPercentage(start)
-
-      return {
-        id: getScenarioPlayerId(player.side, player.number),
-        label: player.side === 'home' ? `#${player.number}` : `A${player.number}`,
-        x: percentage.x,
-        y: percentage.y,
-        tone: player.side === 'away' ? ('opponent' as const) : ('primary' as const),
-      }
-    }),
-    ballPosition: pitchToPercentage(scenario.ballStart ?? CENTER_SPOT),
-    steps,
-    routes,
-    caption: scenario.description,
-  }
-}
-
-function getProfileGroup(position: string): PositionalProfileGroup {
-  if (position === 'RB' || position === 'LB') {
-    return 'FB'
-  }
-
-  if (position === 'RW' || position === 'LW') {
-    return 'WF'
-  }
-
-  if (position === 'CM') {
-    return 'CDM'
-  }
-
-  return position as PositionalProfileGroup
-}
-
-function getProfileForPlayer(player: SquadPlayer): PositionalProfile {
-  const profileGroup = getProfileGroup(player.position)
-  const profile = POSITIONAL_PROFILES.find((item) => item.position === profileGroup)
-
-  if (!profile) {
-    throw new Error(`No positional profile found for ${player.position}`)
-  }
-
-  return profile
-}
-
 export function PlayersPage() {
-  const [selectedPlayerNumber, setSelectedPlayerNumber] = useState<number | null>(null)
-  const [isFullbackScenarioOpen, setIsFullbackScenarioOpen] = useState(false)
-  const [fullbackScenarioCue, setFullbackScenarioCue] = useState('#7 holds the wide channel')
+  const [selectedProfileId, setSelectedProfileId] = useState<PositionalProfileId>('goalkeeper')
+  const [activeMomentId, setActiveMomentId] = useState<ProfileMomentId>('attackingOrganization')
   const players = useMemo(
     () => [...PICKERING_SQUAD].sort((first, second) => first.number - second.number),
     [],
   )
-  const fullbackScenario = FULLBACK_WIDE_CHANNEL_OVERLAP_SCENARIO
-  const fullbackScenarioPreview = useMemo(
-    () => buildFullbackScenarioPreview(fullbackScenario),
-    [fullbackScenario],
-  )
-  const selectedPlayer = players.find((player) => player.number === selectedPlayerNumber) ?? null
-  const selectedProfile = selectedPlayer ? getProfileForPlayer(selectedPlayer) : null
-  const showFullbackScenario = selectedProfile?.position === 'FB'
+  const selectedProfile = getPositionalProfile(selectedProfileId)
+  const selectedNumbers = new Set(selectedProfile.occupants.map((occupant) => occupant.number))
+  const primaryOccupant = selectedProfile.occupants[0]
+  const primaryOccupantNumber = primaryOccupant.number
 
-  // PixiPitchPreview infers each token's displayed shirt number from this
-  // array's index (index 0 -> #1, index 1 -> #2, ...), so the squad must be
-  // provided in strict number order for the rendered numbers to be correct.
   const pixiPlayers = useMemo(
-    () =>
-      players.map((player) => {
-        const position = REST_FORMATION[player.number]
-        const percentage = pitchToPercentage(position)
+    () => players.map((player) => {
+      const percentage = pitchToPercentage(AO_REFERENCE_FORMATION[player.number])
 
-        return {
-          id: player.id,
-          label: player.name,
-          x: percentage.x,
-          y: percentage.y,
-          tone: player.isGoalkeeper ? ('keeper' as const) : undefined,
-        }
-      }),
+      return {
+        id: player.id,
+        label: player.name,
+        x: percentage.x,
+        y: percentage.y,
+        tone: player.isGoalkeeper ? ('keeper' as const) : undefined,
+      }
+    }),
     [players],
   )
 
-  const ballPosition = useMemo(() => {
-    const formationSpot = selectedPlayerNumber ? REST_FORMATION[selectedPlayerNumber] : null
-
-    if (!formationSpot) {
-      return pitchToPercentage(CENTER_SPOT)
-    }
-
-    return pitchToPercentage({
-      x: formationSpot.x,
-      y: Math.min(PITCH.LENGTH, formationSpot.y + BALL_OFFSET_METERS),
-    })
-  }, [selectedPlayerNumber])
+  const primaryFormationSpot = AO_REFERENCE_FORMATION[primaryOccupantNumber]
+  const ballPosition = pitchToPercentage({
+    x: primaryFormationSpot.x,
+    y: Math.min(PITCH.LENGTH, primaryFormationSpot.y + BALL_OFFSET_METERS),
+  })
 
   const overlaySpots = useMemo(
-    () =>
-      players.map((player) => {
-        const position = REST_FORMATION[player.number]
-        const screen = pitchToScreen(position.x, position.y, BOARD_WIDTH, BOARD_HEIGHT, PITCH_PADDING)
+    () => players.map((player) => {
+      const position = AO_REFERENCE_FORMATION[player.number]
+      const screen = pitchToScreen(position.x, position.y, BOARD_WIDTH, BOARD_HEIGHT, PITCH_PADDING)
 
-        return { player, screen }
-      }),
+      return { player, screen }
+    }),
     [players],
   )
+
+  const selectProfile = (profileId: PositionalProfileId) => {
+    setSelectedProfileId(profileId)
+    setActiveMomentId('attackingOrganization')
+  }
+
+  const handleMomentKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      return
+    }
+
+    event.preventDefault()
+    const nextIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? MOMENT_IDS.length - 1
+        : (index + (event.key === 'ArrowRight' ? 1 : -1) + MOMENT_IDS.length) % MOMENT_IDS.length
+    const nextMomentId = MOMENT_IDS[nextIndex]
+
+    setActiveMomentId(nextMomentId)
+    document.getElementById(`profile-moment-tab-${nextMomentId}`)?.focus()
+  }
 
   return (
     <PresentationLayout pageId="players" noPadding>
-      <p className="presentation-eyebrow">Section 3 - the who</p>
-      <h1 className="presentation-title">Player roles</h1>
-      <p className="presentation-body">
-        Select a shirt number to connect the player to their role profile in and out of possession.
-      </p>
+      <header className="positional-profiles-header">
+        <div>
+          <p className="presentation-eyebrow">Section 3 - the who</p>
+          <h1 className="presentation-title">Positional profiles</h1>
+        </div>
+        <p className="presentation-body">
+          Select a role to connect Canada Soccer priorities with responsibilities in all four Moments.
+        </p>
+      </header>
 
-      <section className="players-lab">
-        <div className="players-board" aria-label="Pickering squad numbers">
-          <div className="players-board__canvas" style={{ width: BOARD_WIDTH, height: BOARD_HEIGHT }}>
-            <PixiPitchPreview width={BOARD_WIDTH} height={BOARD_HEIGHT} players={pixiPlayers} ballPosition={ballPosition} />
+      <nav className="profile-selector" aria-label="Select a positional profile">
+        {POSITIONAL_PROFILES.map((profile) => {
+          const isActive = profile.id === selectedProfileId
+
+          return (
+            <button
+              key={profile.id}
+              type="button"
+              className={isActive ? 'profile-selector__button is-active' : 'profile-selector__button'}
+              aria-pressed={isActive}
+              aria-label={`${profile.positionName}, ${profile.numbers}`}
+              onClick={() => selectProfile(profile.id)}
+            >
+              <strong>{profile.shortLabel}</strong>
+              <span>{profile.numbers}</span>
+            </button>
+          )
+        })}
+      </nav>
+
+      <section className="positional-profile-lab">
+        <aside className="profile-formation-card" aria-label="Attacking Organization 1-4-4-2 reference">
+          <div className="profile-formation-card__header">
+            <span>AO reference</span>
+            <strong>1-4-4-2</strong>
+          </div>
+          <div className="profile-formation-card__pitch" style={{ width: BOARD_WIDTH, height: BOARD_HEIGHT }}>
+            <PixiPitchPreview
+              width={BOARD_WIDTH}
+              height={BOARD_HEIGHT}
+              players={pixiPlayers}
+              ballPosition={ballPosition}
+              tokenScale={0.78}
+            />
             {overlaySpots.map(({ player, screen }) => {
-              const isActive = player.number === selectedPlayerNumber
+              const isActive = selectedNumbers.has(player.number)
 
               return (
                 <button
                   key={player.id}
                   type="button"
-                  className={['players-board__spot', isActive ? 'is-active' : ''].join(' ')}
+                  className={isActive ? 'profile-formation-card__spot is-active' : 'profile-formation-card__spot'}
                   style={{ left: screen.sx, top: screen.sy }}
                   aria-pressed={isActive}
-                  aria-label={`#${player.number} ${player.name}, ${player.position}`}
-                  onClick={() => setSelectedPlayerNumber(player.number)}
+                  aria-label={`Select ${getProfileForPosition(player.position).positionName}: #${player.number} ${player.name}`}
+                  onClick={() => selectProfile(getProfileForPosition(player.position).id)}
                 />
               )
             })}
           </div>
-        </div>
-
-        <aside className="players-detail" aria-live="polite">
-          {selectedPlayer && selectedProfile ? (
-            <>
-              <span>{selectedProfile.fullName} role</span>
-              <h2>
-                #{selectedPlayer.number} {selectedPlayer.name} - {selectedPlayer.position}
-              </h2>
-              <p><strong>Style:</strong> {selectedProfile.style}</p>
-              <p><strong>In possession:</strong> {selectedProfile.attackingOrg}</p>
-              <p><strong>Out of possession:</strong> {selectedProfile.defensiveOrg}</p>
-              {showFullbackScenario && (
-                <button
-                  type="button"
-                  className="presentation-diagram-card presentation-diagram-card--button"
-                  onClick={() => {
-                    setFullbackScenarioCue('#7 holds the wide channel')
-                    setIsFullbackScenarioOpen(true)
-                  }}
-                >
-                  <div style={{ display: 'grid', minHeight: 250, placeItems: 'center' }}>
-                    <PixiPitchPreview
-                      width={160}
-                      height={247}
-                      players={fullbackScenarioPreview.players}
-                      ballPosition={fullbackScenarioPreview.ballPosition}
-                      routes={fullbackScenarioPreview.routes}
-                    />
-                  </div>
-                  <span className="presentation-diagram-card__caption">
-                    {fullbackScenario.title}
-                  </span>
-                </button>
-              )}
-              <div className="players-detail__traits" aria-label={`${selectedProfile.fullName} key qualities`}>
-                {selectedProfile.traits.map((trait) => (
-                  <div key={trait.label} className="players-detail__trait">
-                    <span className="players-detail__trait-icon" aria-hidden="true">
-                      {trait.icon}
-                    </span>
-                    <span className="players-detail__trait-label">{trait.label}</span>
-                  </div>
-                ))}
-              </div>
-
-            </>
-          ) : (
-            <>
-              <span>Squad role profile</span>
-              <h2>Select a player number to see their role.</h2>
-              <p>
-                The profile panel uses the squad's specific position and maps it to the shared
-                positional role library.
-              </p>
-            </>
-          )}
+          <p>Select a player or role. Highlighted players share the active profile.</p>
         </aside>
-      </section>
 
-      {isFullbackScenarioOpen && fullbackScenario && fullbackScenarioPreview && (
-        <div
-          className="diagram-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${fullbackScenario.momentOfGame} details`}
-        >
-          <button
-            type="button"
-            className="diagram-modal__backdrop"
-            aria-label="Close diagram details"
-            onClick={() => setIsFullbackScenarioOpen(false)}
-          />
-          <section className="diagram-modal__panel">
-            <button
-              type="button"
-              className="diagram-modal__close"
-              aria-label="Close diagram details"
-              onClick={() => setIsFullbackScenarioOpen(false)}
-            >
-              Close
-            </button>
-            <div
-              className="transition-modal-pitch"
-              style={{ display: 'grid', placeItems: 'center', overflow: 'hidden' }}
-            >
-              <div className="transition-modal-pitch__preview">
-                <PixiPitchPreview
-                  width={480}
-                  height={741}
-                  players={fullbackScenarioPreview.players}
-                  ballPosition={fullbackScenarioPreview.ballPosition}
-                  steps={fullbackScenarioPreview.steps}
-                  routes={fullbackScenarioPreview.routes}
-                  repeatDelay={1.1}
-                  onCueChange={setFullbackScenarioCue}
-                />
-                <div className="mini-pitch__cue" aria-live="polite">
-                  {fullbackScenarioCue}
-                </div>
-                <div className="mini-pitch__caption">
-                  {fullbackScenarioPreview.caption}
-                </div>
-                <div className="mini-pitch__legend" aria-label="Diagram key">
-                  <span>
-                    <i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />
-                    Pass
-                  </span>
-                  <span>
-                    <i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />
-                    Player run
-                  </span>
-                </div>
-              </div>
+        <article className="positional-profile-detail" aria-live="polite">
+          <div className="positional-profile-detail__identity">
+            <div>
+              <span>{selectedProfile.numbers}</span>
+              <h2>{selectedProfile.positionName}</h2>
+              <p>{selectedProfile.style}</p>
             </div>
-            <div className="diagram-modal__content">
-              <span>Moment of the Game: {fullbackScenario.momentOfGame}</span>
-              <h2>{fullbackScenario.system.shape}</h2>
-              <p><strong>System:</strong> {fullbackScenario.system.description}</p>
-              <p><strong>Field Geography:</strong> {fullbackScenario.fieldGeography.description}</p>
-              <p><strong>Strategy:</strong> {fullbackScenario.strategy}</p>
-              <div>
-                <strong>Tactics</strong>
-                <div className="presentation-chip-row">
-                  {fullbackScenario.tactics.map((tactic) => (
-                    <span key={tactic} className="presentation-chip presentation-chip--small">
-                      {tactic}
-                    </span>
-                  ))}
+            <div className="profile-occupants" aria-label={`${selectedProfile.positionName} squad occupants`}>
+              {selectedProfile.occupants.map((occupant) => (
+                <span key={occupant.id}>
+                  <strong>#{occupant.number}</strong> {occupant.name}
+                  <small>{occupant.position}</small>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {selectedProfile.roleEmphases && (
+            <div className="profile-role-emphases" aria-label="Central midfield role emphases">
+              {selectedProfile.roleEmphases.map((emphasis) => (
+                <div key={emphasis.number}>
+                  <strong>{emphasis.label}</strong>
+                  <span>{emphasis.priorities.join(' / ')}</span>
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
+
+          <div className="profile-priority-grid" aria-label={`${selectedProfile.positionName} profile priorities`}>
+            {PRIORITY_CATEGORIES.map((category) => (
+              <section
+                key={category.id}
+                className={category.id === 'skillSet' ? 'profile-priority-card profile-priority-card--skills' : 'profile-priority-card'}
+              >
+                <h3>{category.label}</h3>
+                <ul>
+                  {selectedProfile[category.id].map((priority) => <li key={priority}>{priority}</li>)}
+                </ul>
+              </section>
+            ))}
+          </div>
+
+          <section className="profile-moments">
+            <div className="profile-moment-tabs" role="tablist" aria-label={`${selectedProfile.positionName} responsibilities by Moment`}>
+              {MOMENT_IDS.map((momentId, index) => {
+                const moment = PROFILE_MOMENT_LABELS[momentId]
+                const isActive = momentId === activeMomentId
+
+                return (
+                  <button
+                    key={momentId}
+                    id={`profile-moment-tab-${momentId}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="profile-moment-panel"
+                    tabIndex={isActive ? 0 : -1}
+                    className={isActive ? 'profile-moment-tab is-active' : 'profile-moment-tab'}
+                    onClick={() => setActiveMomentId(momentId)}
+                    onKeyDown={(event) => handleMomentKeyDown(event, index)}
+                  >
+                    <strong>{moment.short}</strong>
+                    <span>{moment.full}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div
+              id="profile-moment-panel"
+              className="profile-moment-panel"
+              role="tabpanel"
+              aria-labelledby={`profile-moment-tab-${activeMomentId}`}
+            >
               <div>
-                <strong>Skill Set</strong>
-                <div className="presentation-chip-row">
-                  {fullbackScenario.skillSet.map((skill) => (
-                    <span key={skill} className="presentation-chip presentation-chip--small">
-                      {skill}
-                    </span>
+                <span>{PROFILE_MOMENT_LABELS[activeMomentId].full}</span>
+                <ul>
+                  {selectedProfile.moments[activeMomentId].map((responsibility) => (
+                    <li key={responsibility}>{responsibility}</li>
                   ))}
-                </div>
+                </ul>
               </div>
-              <p><strong>Key coaching point:</strong> {fullbackScenario.phaseSteps[0]?.coachingCue}</p>
+              <p className="profile-evidence">
+                <strong>Training evidence:</strong> {selectedProfile.evidence[0].session} - {selectedProfile.evidence[0].focus}
+              </p>
             </div>
           </section>
-        </div>
-      )}
+        </article>
+      </section>
     </PresentationLayout>
   )
 }

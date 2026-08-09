@@ -27,7 +27,7 @@ const FULLBACK_TABS: {
     id: 'out-of-possession',
     label: 'Out of Possession',
     headline: 'Win the wide duel first',
-    cues: ['Defend 1v1 wide', 'Communicate with centre-back', 'Protect Channel 1', 'Prevent easy entry inside'],
+    cues: ['Defend 1v1 wide', 'Communicate with centre-back', 'Protect inside first', 'Direct into Channel 1'],
   },
   {
     id: 'transition',
@@ -49,9 +49,9 @@ export function SkillsPage() {
     () => getFullbackSkillPixiScenario(activeTabId),
     [activeTabId],
   )
-  const fullbackProfile = POSITIONAL_PROFILES.find((profile) => profile.position === 'FB')
+  const fullbackProfile = POSITIONAL_PROFILES.find((profile) => profile.id === 'fullbacks')
   const selectedProfile = POSITIONAL_PROFILES.find(
-    (profile) => profile.position === selectedProfilePosition,
+    (profile) => profile.id === selectedProfilePosition,
   )
 
   const handleTabChange = (tabId: FullbackSkillVariant) => {
@@ -86,7 +86,7 @@ export function SkillsPage() {
             <div className="mini-pitch__caption">{pixiScenario.caption}</div>
           </div>
           <div>
-            <span className="skill-role-label">{fullbackProfile?.fullName ?? 'Full back'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
+            <span className="skill-role-label">{fullbackProfile?.positionName ?? 'Fullbacks'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
             <h2>{activeTab.headline}</h2>
             <p>{fullbackProfile?.style}</p>
           </div>
@@ -133,26 +133,26 @@ export function SkillsPage() {
                 <div className="profile-chip-grid" aria-label="Position profiles">
                   {POSITIONAL_PROFILES.map((profile) => (
                     <button
-                      key={profile.position}
+                      key={profile.id}
                       type="button"
-                      aria-pressed={profile.position === selectedProfilePosition}
+                      aria-pressed={profile.id === selectedProfilePosition}
                       className={
-                        profile.position === selectedProfilePosition
+                        profile.id === selectedProfilePosition
                           ? 'profile-chip is-active'
                           : 'profile-chip'
                       }
-                      onClick={() => setSelectedProfilePosition(profile.position)}
+                      onClick={() => setSelectedProfilePosition(profile.id)}
                     >
-                      <strong>{profile.position}</strong> {profile.numbers}
+                      <strong>{profile.shortLabel}</strong> {profile.numbers}
                     </button>
                   ))}
                 </div>
                 {selectedProfile && (
                   <section className="profile-detail" aria-live="polite">
-                    <span>{selectedProfile.fullName} · {selectedProfile.numbers}</span>
+                    <span>{selectedProfile.positionName} · {selectedProfile.numbers}</span>
                     <h2>{selectedProfile.style}</h2>
-                    <p><strong>In possession:</strong> {selectedProfile.attackingOrg}</p>
-                    <p><strong>Out of possession:</strong> {selectedProfile.defensiveOrg}</p>
+                    <p><strong>In possession:</strong> {selectedProfile.moments.attackingOrganization.join('; ')}.</p>
+                    <p><strong>Out of possession:</strong> {selectedProfile.moments.defensiveOrganization.join('; ')}.</p>
                   </section>
                 )}
               </>
