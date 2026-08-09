@@ -416,6 +416,223 @@
   margin: 0;
 }
 
+.defensive-organization-pitch-card > .pixi-pitch-preview {
+  position: relative;
+  z-index: 0;
+}
+
+.defensive-organization-geography {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 50%;
+  width: min(100%, 480px);
+  aspect-ratio: 480 / 741;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.defensive-organization-geography__pitch {
+  position: absolute;
+  inset: 4.32% 6.67%;
+  overflow: hidden;
+}
+
+.defensive-organization-geography__channel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-content: start center;
+  gap: 2px;
+  padding-top: 12%;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.defensive-organization-geography__channel b,
+.defensive-organization-geography__channel small {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.68);
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.defensive-organization-geography__channel--central {
+  left: 33.333%;
+  width: 33.333%;
+  border-inline: 1px solid rgba(248, 113, 113, 0.46);
+  background: rgba(127, 29, 29, 0.09);
+  color: #fecaca;
+}
+
+.defensive-organization-geography__channel--half-space {
+  right: 16.667%;
+  width: 16.667%;
+  border-left: 1px solid rgba(251, 146, 60, 0.48);
+  background: rgba(194, 65, 12, 0.08);
+  color: #fed7aa;
+}
+
+.defensive-organization-geography__channel--wide {
+  right: 0;
+  width: 16.667%;
+  border-left: 1px solid rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.1);
+  color: #fef08a;
+}
+
+.defensive-organization-panel {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.defensive-organization-panel > span {
+  margin-bottom: -7px;
+}
+
+.defensive-organization-problem,
+.defensive-organization-game-plan,
+.defensive-organization-phase,
+.defensive-organization-tactics,
+.defensive-organization-skills {
+  display: grid;
+  gap: 8px;
+}
+
+.defensive-organization-problem {
+  border-left: 3px solid rgba(148, 163, 184, 0.55);
+  padding-left: 11px;
+}
+
+.defensive-organization-problem > strong {
+  color: #f8fafc;
+  font-size: 0.77rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.defensive-organization-problem p,
+.defensive-organization-tactics p {
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.defensive-organization-game-plan {
+  padding: 14px;
+  border: 1px solid rgba(204, 0, 0, 0.28);
+  border-radius: 13px;
+  background: rgba(127, 29, 29, 0.09);
+}
+
+.defensive-organization-game-plan > span,
+.defensive-organization-phase > span,
+.defensive-organization-tactics > span,
+.defensive-organization-skills > span {
+  margin-bottom: 0;
+}
+
+.defensive-organization-game-plan h2 {
+  margin: 0;
+}
+
+.defensive-organization-game-plan dl,
+.defensive-organization-game-plan dl > div {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.defensive-organization-game-plan dl {
+  gap: 10px;
+}
+
+.defensive-organization-game-plan dt {
+  color: #f8fafc;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.defensive-organization-game-plan dd {
+  margin: 0;
+  color: #cdd8ea;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.defensive-organization-phase {
+  padding: 13px 14px;
+  border: 1px solid rgba(250, 204, 21, 0.32);
+  border-radius: 13px;
+  background: rgba(250, 204, 21, 0.07);
+}
+
+.defensive-organization-phase > strong {
+  color: #fef08a;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+}
+
+.defensive-organization-phase p {
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.defensive-organization-tactics ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.defensive-organization-tactics li {
+  display: grid;
+  grid-template-columns: 27px 1fr;
+  gap: 9px;
+  align-items: start;
+  padding: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.42);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.defensive-organization-tactics li.is-active {
+  border-color: rgba(204, 0, 0, 0.58);
+  background: rgba(204, 0, 0, 0.12);
+}
+
+.defensive-organization-tactics li > b {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: #cc0000;
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.defensive-organization-tactics li > div {
+  display: grid;
+  gap: 2px;
+}
+
+.defensive-organization-tactics li strong {
+  color: #f8fafc;
+  font-size: 0.84rem;
+}
+
+.defensive-organization-skills .presentation-chip-row {
+  margin-top: 0;
+}
+
 .attacking-transition-detail {
   display: grid;
   align-content: start;
