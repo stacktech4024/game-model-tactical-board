@@ -2,85 +2,122 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import { PresentationLayout } from '../PresentationLayout'
-import { CORNER_PIXI_SCENARIO } from '../data/cornerPixiAdapter'
-import { CORNER_PREVIEW_STEPS } from '../data/cornerScenario'
-import { SET_PIECES_PAGE_CASE } from '../data/setPiecesPageData'
+import {
+  SET_PIECES_PAGE_CASES,
+  type SetPieceCaseId,
+} from '../data/setPiecesPageData'
 
 export function SetPiecesPage() {
-  const scenario = SET_PIECES_PAGE_CASE
-  const [cue, setCue] = useState(CORNER_PREVIEW_STEPS[0]?.cue ?? '')
+  const [activeCaseId, setActiveCaseId] = useState<SetPieceCaseId>('attacking-corner')
+  const activeCase = SET_PIECES_PAGE_CASES.find((item) => item.id === activeCaseId) ?? SET_PIECES_PAGE_CASES[0]
+  const [cue, setCue] = useState(activeCase.preview.steps[0]?.cue ?? '')
+
+  const selectCase = (caseId: SetPieceCaseId) => {
+    const nextCase = SET_PIECES_PAGE_CASES.find((item) => item.id === caseId) ?? SET_PIECES_PAGE_CASES[0]
+
+    setActiveCaseId(nextCase.id)
+    setCue(nextCase.preview.steps[0]?.cue ?? '')
+  }
 
   return (
     <PresentationLayout pageId="set-pieces" noPadding>
       <p className="presentation-eyebrow">Dedicated page - set pieces</p>
       <h1 className="presentation-title">Set Pieces</h1>
-      <p className="presentation-body">
-        On set pieces, we use rehearsed routines with clear roles, disguise, delivery timing,
-        central finishing targets, second-ball support, and rest-defence protection.
+      <p className="presentation-body set-pieces-intro">
+        Planned restarts use clear roles, organization, and responsibilities connected to the same
+        Game Model principles used in open play.
       </p>
 
-      <section className="analysis-lab">
-        <div className="analysis-pitch-card">
+      <section className="analysis-lab set-pieces-lab">
+        <div className="analysis-pitch-card set-pieces-pitch-card">
           <PixiPitchPreview
+            key={activeCase.id}
             width={480}
             height={741}
-            players={CORNER_PIXI_SCENARIO.players}
-            ballPosition={CORNER_PIXI_SCENARIO.ballPosition}
-            steps={CORNER_PIXI_SCENARIO.steps}
-            routes={CORNER_PIXI_SCENARIO.routes}
-            tokenScale={scenario.tokenScale}
-            repeatDelay={scenario.repeatDelay}
+            players={activeCase.preview.players}
+            ballPosition={activeCase.preview.ballPosition}
+            steps={activeCase.preview.steps}
+            routes={activeCase.preview.routes}
+            tokenScale={activeCase.tokenScale}
+            repeatDelay={activeCase.repeatDelay}
+            fadeRouteHistory
             onCueChange={setCue}
           />
           <div className="mini-pitch__cue" aria-live="polite">{cue}</div>
-          <div className="mini-pitch__caption">{scenario.caption}</div>
+          <div className="mini-pitch__caption">{activeCase.caption}</div>
           <div className="mini-pitch__legend" aria-label="Diagram key">
-            <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />Delivery</span>
-            <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />Attack / support run</span>
+            <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--pass" />Ball action</span>
+            <span><i className="mini-pitch__legend-mark mini-pitch__legend-mark--run" />Run / shift</span>
           </div>
         </div>
 
         <aside className="analysis-tabs">
-          <section className="analysis-detail" aria-live="polite">
-            <span>Set Pieces</span>
-            <h2>{scenario.setPieceType}</h2>
-            <div>
-              <strong>System</strong>
-              <p>{scenario.system.description}</p>
+          <div className="analysis-tab-list set-pieces-tab-list" role="tablist" aria-label="Set-piece restart">
+            {SET_PIECES_PAGE_CASES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={item.id === activeCase.id}
+                className={item.id === activeCase.id ? 'analysis-tab is-active' : 'analysis-tab'}
+                onClick={() => selectCase(item.id)}
+              >
+                {item.tabLabel}
+              </button>
+            ))}
+          </div>
+
+          <section className="analysis-detail set-pieces-panel" aria-live="polite">
+            <div className="set-pieces-panel__heading">
+              <span>Set Pieces · {activeCase.implementation}</span>
+              <h2>{activeCase.setPieceType}</h2>
             </div>
-            <div>
-              <strong>Strategy</strong>
-              <div className="presentation-chip-row">
-                <span className="presentation-chip presentation-chip--small">{scenario.strategy}</span>
+
+            <dl className="set-pieces-game-plan">
+              <div>
+                <dt>System / Organization</dt>
+                <dd>{activeCase.organization}</dd>
               </div>
-            </div>
-            <div>
-              <strong>Tactics</strong>
-              <div className="presentation-chip-row">
-                {scenario.tactics.map((tactic) => <span key={tactic} className="presentation-chip presentation-chip--small">{tactic}</span>)}
+              <div>
+                <dt>Strategy</dt>
+                <dd>{activeCase.strategy}</dd>
               </div>
-            </div>
-            <div>
-              <strong>Skill Set</strong>
+            </dl>
+
+            <section className="set-pieces-tactics">
+              <span>Tactics</span>
+              <ol>
+                {activeCase.tactics.map((tactic, index) => (
+                  <li key={tactic}><b>{index + 1}</b><p>{tactic}</p></li>
+                ))}
+              </ol>
+            </section>
+
+            <section className="set-pieces-skills">
+              <span>Skill Set</span>
               <div className="presentation-chip-row">
-                {scenario.skillSet.map((skill) => <span key={skill} className="presentation-chip presentation-chip--small">{skill}</span>)}
+                {activeCase.skillSet.map((skill) => (
+                  <span key={skill} className="presentation-chip presentation-chip--small">{skill}</span>
+                ))}
               </div>
-            </div>
-            <div>
-              <strong>Canada Soccer attacking principles</strong>
+            </section>
+
+            <section className="set-pieces-principles">
+              <span>Restart principles</span>
               <div className="presentation-chip-row">
-                {scenario.principles.map((principle) => <span key={principle} className="presentation-chip presentation-chip--small">{principle}</span>)}
+                {activeCase.principles.map((principle) => (
+                  <span key={principle} className="presentation-chip presentation-chip--small">{principle}</span>
+                ))}
               </div>
-            </div>
-            <div>
-              <strong>Not authored yet</strong>
-              <div className="presentation-chip-row">
-                {scenario.futureSetPieces.map((item) => <span key={item} className="presentation-chip presentation-chip--small">{item}</span>)}
-              </div>
-            </div>
-            <Link className="presentation-link-button" to={`/presentation/live-board?scenario=${scenario.liveBoardScenarioId}`}>
-              Open in live board
-            </Link>
+            </section>
+
+            <p className="set-pieces-reality-reference">{activeCase.realityReference}</p>
+
+            {activeCase.liveBoardScenarioId && (
+              <Link className="presentation-link-button" to={`/presentation/live-board?scenario=${activeCase.liveBoardScenarioId}`}>
+                Open attacking corner in live board
+              </Link>
+            )}
           </section>
         </aside>
       </section>

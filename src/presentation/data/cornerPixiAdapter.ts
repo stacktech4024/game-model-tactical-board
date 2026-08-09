@@ -7,7 +7,7 @@ import {
   CORNER_PREVIEW_PLAYERS,
   CORNER_PREVIEW_ROUTES,
   CORNER_PREVIEW_STEPS,
-} from './cornerScenario'
+} from './cornerScenario.ts'
 
 type CornerPixiScenario = Pick<
   PixiPitchPreviewProps,
