@@ -146,7 +146,7 @@ test('throw-in begins in a legal state with four support relationships and track
   assert.ok(getPlayer(throwIn, 'ti-home-2').x > 100, 'reset must restore the legal thrower position')
 })
 
-test('attacking corner uses a connected cluster, staggered manipulation, targeted contact, and secure second phase', () => {
+test('attacking corner uses a connected cluster, angled runs, contested contact, and a controlled second phase', () => {
   const corner = getCase('attacking-corner')
   const clusterIds = ['ac-home-4', 'ac-home-5', 'ac-home-9', 'ac-home-10', 'ac-home-11']
   const cluster = clusterIds.map((id) => getPlayer(corner, id))
@@ -164,17 +164,34 @@ test('attacking corner uses a connected cluster, staggered manipulation, targete
   const delivery = corner.preview.steps.find((step) => step.id === 'ac-delivery')
   const attackingRuns = delivery?.playerMoves?.filter((move) => clusterIds.includes(move.playerId)) ?? []
   const primaryRun = attackingRuns.find((move) => move.playerId === 'ac-home-9')
+  const atDelivery = replayUntil(corner, 'ac-delivery')
 
   assert.ok(manipulation?.playerMoves?.some((move) => move.playerId === 'ac-home-4'))
   assert.ok(manipulation?.playerMoves?.some((move) => move.playerId === 'ac-home-10'))
   assert.equal(attackingRuns.length, 5)
   assert.equal(new Set(attackingRuns.map((move) => move.startDelay ?? 0)).size, 5)
+  attackingRuns.forEach((move) => {
+    const start = atDelivery.positions.get(move.playerId)
+
+    assert.ok(start)
+    assert.ok(move.to.x < start.x && move.to.y < start.y, `${move.playerId} must run diagonally in from the far side`)
+  })
   assert.deepEqual(delivery?.ballTo, primaryRun?.to, 'changed-angle delivery must target the primary #9 run')
 
+  const deliveryIndex = corner.preview.steps.findIndex((step) => step.id === 'ac-delivery')
+  const firstContact = corner.preview.steps.find((step) => step.id === 'ac-first-contact')
   const secondBall = corner.preview.steps.find((step) => step.id === 'ac-second-ball')
 
+  assert.deepEqual(firstContact?.ballFrom, delivery?.ballTo)
+  assert.equal(firstContact?.emphasizePlayerId, 'ac-home-9')
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-home-9'))
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-away-5'))
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-home-8'))
   assert.equal(secondBall?.emphasizePlayerId, 'ac-home-8')
   assert.equal(secondBall?.playerId, 'ac-home-6')
+  assert.ok(secondBall?.playerMoves?.some((move) => move.playerId === 'ac-home-2'))
+  assert.ok(corner.preview.steps.indexOf(firstContact!) > deliveryIndex)
+  assert.ok(corner.preview.steps.indexOf(secondBall!) > corner.preview.steps.indexOf(firstContact!))
   assert.ok(getPlayer(corner, 'ac-home-2').y >= 57)
   assert.ok(getPlayer(corner, 'ac-home-6').y >= 57)
 })
@@ -225,6 +242,8 @@ test('wide free kick has a connected setup, hybrid defence, staggered runs, and 
     lineXs.slice(1).every((x, index) => x - lineXs[index] <= 7),
     'attacking line must begin connected rather than scattered',
   )
+  assert.ok(wideFreeKick.preview.ballPosition.x >= 85, 'delivery must start on the right side')
+  assert.ok(Math.max(...lineXs) <= 45, 'attacking line must start on the opposite left side')
   assert.match(wideFreeKick.organization, /hybrid.*priority-space zones.*matched aerial threats/i)
 
   const zonalLine = ['wf-away-2', 'wf-away-4', 'wf-away-5', 'wf-away-11']
@@ -240,13 +259,20 @@ test('wide free kick has a connected setup, hybrid defence, staggered runs, and 
   const attackingRuns = delivery?.playerMoves?.filter((move) => attackingLineIds.includes(move.playerId)) ?? []
   const delays = attackingRuns.map((move) => move.startDelay ?? 0)
   const primaryRun = attackingRuns.find((move) => move.playerId === 'wf-home-9')
+  const atDelivery = replayUntil(wideFreeKick, 'wf-delivery')
 
   assert.equal(attackingRuns.length, 5, 'all five connected attackers must release on delivery')
   assert.equal(new Set(delays).size, attackingRuns.length, 'attacking runs must use staggered timing')
+  attackingRuns.forEach((move) => {
+    const start = atDelivery.positions.get(move.playerId)
+
+    assert.ok(start)
+    assert.ok(move.to.x > start.x && move.to.y < start.y, `${move.playerId} must attack diagonally from left to right`)
+  })
   assert.deepEqual(delivery?.ballTo, primaryRun?.to, 'delivery must target #9 rather than the nearest player')
 })
 
-test('wide free-kick runners are onside at delivery and retain second-ball/rest-defence roles', () => {
+test('wide free-kick runners are onside at delivery, contest first contact, and retain a controlled second phase', () => {
   const wideFreeKick = getCase('wide-free-kick')
   const atDelivery = replayUntil(wideFreeKick, 'wf-delivery')
   const opponentYs = wideFreeKick.preview.players
@@ -264,11 +290,23 @@ test('wide free-kick runners are onside at delivery and retain second-ball/rest-
     assert.ok(runner.y >= offsideLine, `${id} must be onside when #7 kicks the ball`)
   })
 
+  const delivery = wideFreeKick.preview.steps.find((step) => step.id === 'wf-delivery')
+  const deliveryIndex = wideFreeKick.preview.steps.findIndex((step) => step.id === 'wf-delivery')
+  const firstContact = wideFreeKick.preview.steps.find((step) => step.id === 'wf-first-contact')
   const secondBall = wideFreeKick.preview.steps.find((step) => step.id === 'wf-second-ball')
 
+  assert.deepEqual(firstContact?.ballFrom, delivery?.ballTo)
+  assert.equal(firstContact?.emphasizePlayerId, 'wf-home-9')
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'wf-home-9'))
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'wf-away-6'))
+  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'wf-home-8'))
   assert.equal(secondBall?.emphasizePlayerId, 'wf-home-8')
   assert.equal(secondBall?.playerId, 'wf-home-6')
-  assert.match(secondBall?.cue ?? '', /#8.*#6.*#2\/#3.*rest defence/i)
+  ;['wf-home-2', 'wf-home-3'].forEach((id) => {
+    assert.ok(secondBall?.playerMoves?.some((move) => move.playerId === id))
+  })
+  assert.ok(wideFreeKick.preview.steps.indexOf(firstContact!) > deliveryIndex)
+  assert.ok(wideFreeKick.preview.steps.indexOf(secondBall!) > wideFreeKick.preview.steps.indexOf(firstContact!))
   ;['wf-home-2', 'wf-home-3', 'wf-home-6'].forEach((id) => {
     assert.ok(getPlayer(wideFreeKick, id).y >= 55, `${id} must begin behind the attacking group`)
   })
@@ -339,4 +377,5 @@ test('the page provides an accessible selector and remounts the preview to preve
   assert.match(pageSource, /key=\{activeCase\.id\}/)
   assert.match(pageSource, /System \/ Organization/)
   assert.doesNotMatch(pageSource, /Not authored yet/)
+  assert.doesNotMatch(pageSource, /realityReference/)
 })

@@ -111,8 +111,6 @@ export function SetPiecesPage() {
               </div>
             </section>
 
-            <p className="set-pieces-reality-reference">{activeCase.realityReference}</p>
-
             {activeCase.liveBoardScenarioId && (
               <Link className="presentation-link-button" to={`/presentation/live-board?scenario=${activeCase.liveBoardScenarioId}`}>
                 Open attacking corner in live board

@@ -545,13 +545,6 @@
   font-size: 0.7rem;
 }
 
-.set-pieces-reality-reference {
-  border-left: 3px solid rgba(250, 204, 21, 0.58);
-  padding-left: 9px;
-  font-size: 0.74rem !important;
-  line-height: 1.38 !important;
-}
-
 .defensive-organization-pitch-card > .pixi-pitch-preview {
   position: relative;
   z-index: 0;

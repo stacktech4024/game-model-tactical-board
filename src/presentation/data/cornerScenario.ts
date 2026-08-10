@@ -67,16 +67,16 @@ export const CORNER_PREVIEW_STEPS: PixiPitchPreviewStep[] = [
   },
   {
     id: 'ac-manipulation',
-    cue: 'MANIPULATE — near, crossing, primary, decoy, and far runners separate at different moments.',
+    cue: 'MANIPULATE — the far-side group separates at different moments to create angled runs across the defenders.',
     playerMoves: [
-      { playerId: 'ac-home-4', to: { x: 46, y: 23 } },
-      { playerId: 'ac-home-10', to: { x: 53, y: 24 }, startDelay: 0.04 },
-      { playerId: 'ac-home-5', to: { x: 60, y: 23 }, startDelay: 0.08 },
-      { playerId: 'ac-home-9', to: { x: 65, y: 25 }, startDelay: 0.13 },
-      { playerId: 'ac-home-11', to: { x: 71, y: 24 }, startDelay: 0.18 },
-      { playerId: 'ac-away-3', to: { x: 52, y: 25 }, startDelay: 0.09 },
-      { playerId: 'ac-away-8', to: { x: 63, y: 26 }, startDelay: 0.15 },
-      { playerId: 'ac-away-10', to: { x: 71, y: 26 }, startDelay: 0.21 },
+      { playerId: 'ac-home-4', to: { x: 54, y: 25 } },
+      { playerId: 'ac-home-10', to: { x: 60, y: 25 }, startDelay: 0.04 },
+      { playerId: 'ac-home-5', to: { x: 65, y: 25 }, startDelay: 0.08 },
+      { playerId: 'ac-home-9', to: { x: 70, y: 25 }, startDelay: 0.13 },
+      { playerId: 'ac-home-11', to: { x: 76, y: 25 }, startDelay: 0.18 },
+      { playerId: 'ac-away-3', to: { x: 56, y: 26 }, startDelay: 0.09 },
+      { playerId: 'ac-away-8', to: { x: 68, y: 26 }, startDelay: 0.15 },
+      { playerId: 'ac-away-10', to: { x: 75, y: 26 }, startDelay: 0.21 },
     ],
     duration: 0.5,
   },
@@ -100,12 +100,15 @@ export const CORNER_PREVIEW_STEPS: PixiPitchPreviewStep[] = [
   },
   {
     id: 'ac-first-contact',
-    cue: 'FIRST CONTACT — #9 attacks with momentum; the central zonal defender contests and clears toward #8.',
+    cue: 'FIRST CONTACT — #9 attacks with momentum as the central defender and goalkeeper contest; the partial clearance drops toward #8.',
     ballFrom: { x: 51, y: 11 },
     ballTo: { x: 48, y: 35 },
     emphasizePlayerId: 'ac-home-9',
     playerMoves: [
+      { playerId: 'ac-home-9', to: { x: 51, y: 10 } },
       { playerId: 'ac-away-5', to: { x: 50, y: 12 } },
+      { playerId: 'ac-away-8', to: { x: 51, y: 13 }, startDelay: 0.06 },
+      { playerId: 'ac-away-1', to: { x: 50, y: 5 }, startDelay: 0.1 },
       { playerId: 'ac-home-8', to: { x: 48, y: 36 }, startDelay: 0.17 },
       { playerId: 'ac-away-7', to: { x: 49, y: 35 }, startDelay: 0.22 },
     ],
@@ -113,13 +116,14 @@ export const CORNER_PREVIEW_STEPS: PixiPitchPreviewStep[] = [
   },
   {
     id: 'ac-second-ball',
-    cue: 'SECOND BALL — #8 secures the partial clearance and resets through #6 while #2 protects the counter.',
+    cue: 'SECOND BALL — #8 secures the partial clearance and recycles through #6 while #2 adjusts to protect the counter.',
     ballFrom: { x: 48, y: 35 },
     ballTo: { x: 55, y: 49 },
     playerId: 'ac-home-6',
     playerTo: { x: 55, y: 49 },
     emphasizePlayerId: 'ac-home-8',
     playerMoves: [
+      { playerId: 'ac-home-8', to: { x: 48, y: 35 } },
       { playerId: 'ac-home-2', to: { x: 75, y: 59 }, startDelay: 0.15 },
       { playerId: 'ac-away-9', to: { x: 52, y: 52 }, startDelay: 0.2 },
     ],
@@ -140,4 +144,4 @@ export const CORNER_PREVIEW_ROUTES: PixiPitchPreviewRoute[] = [
 ]
 
 export const CORNER_PREVIEW_CAPTION =
-  'Short-angle trigger, connected back-side cluster, staggered three-zone release, targeted first contact, contested clearance, second-ball control, and rest defence.'
+  'Short-angle trigger, connected far-side cluster, diagonal three-zone runs, targeted and contested first contact, second-ball control, and connected rest defence.'
