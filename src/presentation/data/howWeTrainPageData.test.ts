@@ -13,6 +13,43 @@ function getExample(id: HowWeTrainExample['id']) {
   return getHowWeTrainExample(id)
 }
 
+function getVisualPlayer(exampleId: HowWeTrainExample['id'], playerId: string) {
+  const player = getExample(exampleId).visualScenario.players.find((item) => item.id === playerId)
+
+  assert.ok(player, `${exampleId}: missing player ${playerId}`)
+  return player
+}
+
+function getVisualStep(exampleId: HowWeTrainExample['id'], stepId: string) {
+  const step = getExample(exampleId).visualScenario.steps.find((item) => item.id === stepId)
+
+  assert.ok(step, `${exampleId}: missing step ${stepId}`)
+  return step
+}
+
+function getMovementFacing(exampleId: HowWeTrainExample['id'], stepId: string, playerId: string) {
+  const move = getVisualStep(exampleId, stepId).playerMoves?.find((item) => item.playerId === playerId)
+
+  assert.ok(move, `${exampleId}/${stepId}: missing movement for ${playerId}`)
+  assert.ok(Number.isFinite(move.facingAngle), `${exampleId}/${stepId}: missing movement facing for ${playerId}`)
+  return move.facingAngle
+}
+
+function getStationaryFacing(exampleId: HowWeTrainExample['id'], stepId: string, playerId: string) {
+  const facing = getVisualStep(exampleId, stepId).playerFacings?.find((item) => item.playerId === playerId)
+
+  assert.ok(facing, `${exampleId}/${stepId}: missing stationary facing for ${playerId}`)
+  return facing.facingAngle
+}
+
+function facingDifference(first: number, second: number) {
+  return Math.abs(((first - second + 540) % 360) - 180)
+}
+
+function movementBearing(from: { x: number; y: number }, to: { x: number; y: number }) {
+  return (Math.atan2(to.x - from.x, to.y - from.y) * 180) / Math.PI
+}
+
 test('How We Train exposes four approved examples with Central to Wide as the default', () => {
   assert.equal(HOW_WE_TRAIN_DEFAULT_EXAMPLE_ID, 'central-wide')
   assert.deepEqual(
@@ -139,4 +176,135 @@ test('the page implements accessible keyboard tabs, remounts visuals, and links 
   assert.match(pageSource, /to="\/presentation\/players"/)
   assert.match(pageSource, /to="\/presentation\/skills"/)
   assert.match(pageSource, /<PresentationLayout pageId="how-we-train"/)
+})
+
+test('every How We Train visual authors starting, carrier, movement, and stationary facing data', () => {
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    example.visualScenario.players.forEach((player) => {
+      assert.ok(Number.isFinite(player.facingAngle), `${example.id}: starting facing for ${player.id}`)
+    })
+
+    const carrierSteps = example.visualScenario.steps.filter((step) => step.playerId)
+
+    assert.ok(carrierSteps.length > 0, `${example.id}: carrier or receiver steps`)
+    carrierSteps.forEach((step) => {
+      assert.ok(Number.isFinite(step.facingAngle), `${example.id}/${step.id}: carrier or receiver facing`)
+    })
+
+    const movements = example.visualScenario.steps.flatMap((step) => step.playerMoves ?? [])
+
+    assert.ok(movements.length > 0, `${example.id}: player movements`)
+    movements.forEach((move) => {
+      assert.ok(Number.isFinite(move.facingAngle), `${example.id}: movement facing for ${move.playerId}`)
+    })
+
+    assert.ok(
+      example.visualScenario.steps.some((step) => (step.playerFacings?.length ?? 0) > 0),
+      `${example.id}: stationary reorientation`,
+    )
+  })
+})
+
+test('Central to Wide shows open central reception, third-player vision, and wide preparation', () => {
+  assert.equal(getVisualPlayer('central-wide', 'cw-6').facingAngle, -55)
+  assert.equal(getVisualStep('central-wide', 'cw-circulate').facingAngle, 48)
+  assert.equal(getVisualStep('central-wide', 'cw-third-player').facingAngle, 72)
+  assert.equal(getMovementFacing('central-wide', 'cw-third-player', 'cw-2'), -107)
+  assert.equal(getStationaryFacing('central-wide', 'cw-wide-release', 'cw-7'), 165)
+  assert.equal(getVisualStep('central-wide', 'cw-wide-release').facingAngle, 8)
+  assert.equal(getVisualStep('central-wide', 'cw-penetrate').facingAngle, 0)
+})
+
+test('Wide Pressure encodes inside-out pressure, half-turned cover, and the forced outside carrier', () => {
+  assert.equal(getVisualPlayer('wide-pressure', 'wp-7').facingAngle, 90)
+  assert.equal(getMovementFacing('wide-pressure', 'wp-press', 'wp-7'), 90)
+  assert.equal(getMovementFacing('wide-pressure', 'wp-press', 'wp-2'), 50)
+  assert.equal(getMovementFacing('wide-pressure', 'wp-press', 'wp-6'), 71)
+  assert.notEqual(
+    getMovementFacing('wide-pressure', 'wp-press', 'wp-7'),
+    getMovementFacing('wide-pressure', 'wp-press', 'wp-2'),
+  )
+  assert.equal(getVisualStep('wide-pressure', 'wp-press').facingAngle, 90)
+  assert.equal(getVisualStep('wide-pressure', 'wp-contain').facingAngle, 180)
+  assert.equal(getStationaryFacing('wide-pressure', 'wp-contain', 'wp-4'), 68)
+})
+
+test('Press to Regain follows the carrier and changes #9 orientation between counter and retain pictures', () => {
+  assert.deepEqual(
+    ['pr-7', 'pr-9', 'pr-11'].map((id) => getVisualPlayer('press-regain', id).facingAngle),
+    [53, -34, -63],
+  )
+  assert.deepEqual(
+    ['pr-7', 'pr-9', 'pr-11'].map((id) => getMovementFacing('press-regain', 'pr-press', id)),
+    [117, 172, -115],
+  )
+  assert.equal(getVisualStep('press-regain', 'pr-regain').facingAngle, 170)
+  assert.equal(getStationaryFacing('press-regain', 'pr-counter-picture', 'pr-9'), -60)
+  assert.equal(getStationaryFacing('press-regain', 'pr-retain-picture', 'pr-9'), -145)
+  assert.ok(
+    facingDifference(
+      getStationaryFacing('press-regain', 'pr-counter-picture', 'pr-9'),
+      getStationaryFacing('press-regain', 'pr-retain-picture', 'pr-9'),
+    ) >= 80,
+  )
+  assert.equal(getMovementFacing('press-regain', 'pr-press', 'pr-6'), 37)
+  assert.equal(getMovementFacing('press-regain', 'pr-press', 'pr-8'), -45)
+})
+
+test('Line Break and React opens the receiver, then turns pressure and cover toward the new carrier', () => {
+  assert.equal(getVisualPlayer('line-break-react', 'lr-10').facingAngle, -70)
+  assert.equal(getMovementFacing('line-break-react', 'lr-create', 'lr-10'), -60)
+  assert.equal(getVisualStep('line-break-react', 'lr-break').facingAngle, 20)
+  assert.equal(getStationaryFacing('line-break-react', 'lr-loss', 'lr-10'), 135)
+  assert.equal(getStationaryFacing('line-break-react', 'lr-loss', 'lr-8'), -27)
+  assert.equal(getMovementFacing('line-break-react', 'lr-react', 'lr-10'), 135)
+  assert.equal(getMovementFacing('line-break-react', 'lr-react', 'lr-8'), 22)
+})
+
+test('large movement-facing differences are intentional football actions rather than stale defaults', () => {
+  const intentionalLargeMismatches = new Set([
+    'central-wide/cw-third-player/cw-2',
+    'central-wide/cw-third-player/cw-7',
+    'central-wide/cw-wide-release/cw-a4',
+    'press-regain/pr-regain/pr-7',
+    'line-break-react/lr-create/lr-10',
+    'line-break-react/lr-create/lr-7',
+    'line-break-react/lr-create/lr-9',
+    'line-break-react/lr-break/lr-8',
+    'line-break-react/lr-react/lr-8',
+  ])
+  const actualLargeMismatches: string[] = []
+
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    const positions = new Map(
+      example.visualScenario.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+
+    example.visualScenario.steps.forEach((step) => {
+      step.playerMoves?.forEach((move) => {
+        const from = positions.get(move.playerId)
+
+        assert.ok(from, `${example.id}/${step.id}: missing position for ${move.playerId}`)
+        assert.ok(Number.isFinite(move.facingAngle), `${example.id}/${step.id}: missing authored facing`)
+
+        const distance = Math.hypot(move.to.x - from.x, move.to.y - from.y)
+        const difference = facingDifference(
+          movementBearing(from, move.to),
+          move.facingAngle as number,
+        )
+
+        if (distance >= 5 && difference >= 55) {
+          actualLargeMismatches.push(`${example.id}/${step.id}/${move.playerId}`)
+        }
+
+        positions.set(move.playerId, move.to)
+      })
+
+      if (step.playerId && step.playerTo) {
+        positions.set(step.playerId, step.playerTo)
+      }
+    })
+  })
+
+  assert.deepEqual(new Set(actualLargeMismatches), intentionalLargeMismatches)
 })
