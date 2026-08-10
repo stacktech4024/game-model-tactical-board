@@ -6,6 +6,7 @@ import {
   HOW_WE_TRAIN_DEFAULT_EXAMPLE_ID,
   HOW_WE_TRAIN_EXAMPLES,
   getHowWeTrainExample,
+  splitHowWeTrainVisualScenario,
   type HowWeTrainExample,
 } from './howWeTrainPageData.ts'
 
@@ -157,11 +158,18 @@ test('How We Train is routed and ordered between Skill Development and Training 
   assert.equal(PRESENTATION_PAGE_ORDER.length, 15)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
+  assert.match(appSource, /path="\/presentation\/how-we-train\/examples"/)
+  assert.match(appSource, /element=\{<HowWeTrainExamplesPage \/>\}/)
 })
 
-test('the page implements accessible keyboard tabs, remounts visuals, and links to Profiles and Skills', () => {
-  const pageSource = readFileSync(new URL('../pages/HowWeTrainPage.tsx', import.meta.url), 'utf8')
+test('the overview reduces density and the supporting page preserves accessible example navigation', () => {
+  const overviewSource = readFileSync(new URL('../pages/HowWeTrainPage.tsx', import.meta.url), 'utf8')
+  const pageSource = readFileSync(new URL('../pages/HowWeTrainExamplesPage.tsx', import.meta.url), 'utf8')
 
+  assert.match(overviewSource, /OUR TRAINING PROCESS/)
+  assert.match(overviewSource, /Choose one practice to explore/)
+  assert.match(overviewSource, /how-we-train\/examples\?example=/)
+  assert.doesNotMatch(overviewSource, /<PixiPitchPreview/)
   assert.match(pageSource, /role="tablist"/)
   assert.match(pageSource, /role="tab"/)
   assert.match(pageSource, /role="tabpanel"/)
@@ -172,10 +180,88 @@ test('the page implements accessible keyboard tabs, remounts visuals, and links 
   assert.match(pageSource, /event\.key === 'Home'/)
   assert.match(pageSource, /event\.key === 'End'/)
   assert.match(pageSource, /tabRefs\.current\[nextIndex\]\?\.focus\(\)/)
-  assert.match(pageSource, /key=\{activeExample\.id\}/)
+  assert.match(pageSource, /function TrainingPhaseCard/)
+  assert.match(pageSource, /phase=\{visualPhases\[0\]\}/)
+  assert.match(pageSource, /phase=\{visualPhases\[1\]\}/)
+  assert.match(pageSource, /DIAGRAM \{index \+ 1\}/)
   assert.match(pageSource, /to="\/presentation\/players"/)
   assert.match(pageSource, /to="\/presentation\/skills"/)
   assert.match(pageSource, /<PresentationLayout pageId="how-we-train"/)
+})
+
+test('all player tokens use realistic role numbers with no N or A placeholders', () => {
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    const labelsByTeam = new Map<string, string[]>()
+
+    example.visualScenario.players.forEach((player) => {
+      assert.match(player.label, /^(?:[1-9]|10|11)$/, `${example.id}/${player.id}: shirt number`)
+      const team = player.side === 'away' ? 'away' : 'home'
+      labelsByTeam.set(team, [...(labelsByTeam.get(team) ?? []), player.label])
+    })
+
+    labelsByTeam.forEach((labels, team) => {
+      assert.equal(new Set(labels).size, labels.length, `${example.id}/${team}: duplicate role number`)
+    })
+  })
+})
+
+test('every opposition player has an authored body-orientation action in every step', () => {
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    const oppositionIds = example.visualScenario.players
+      .filter((player) => player.side === 'away')
+      .map((player) => player.id)
+
+    example.visualScenario.steps.forEach((step) => {
+      const orientedIds = new Set([
+        ...(step.playerId && Number.isFinite(step.facingAngle) ? [step.playerId] : []),
+        ...(step.playerMoves ?? []).filter((move) => Number.isFinite(move.facingAngle)).map((move) => move.playerId),
+        ...(step.playerFacings ?? []).map((facing) => facing.playerId),
+      ])
+
+      oppositionIds.forEach((playerId) => {
+        assert.ok(orientedIds.has(playerId), `${example.id}/${step.id}: missing opposition orientation for ${playerId}`)
+      })
+    })
+  })
+})
+
+test('the second diagram begins from the first diagram final game state', () => {
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    const [firstPhase, secondPhase] = splitHowWeTrainVisualScenario(example.visualScenario)
+    const splitIndex = Math.ceil(example.visualScenario.steps.length / 2)
+
+    assert.deepEqual(firstPhase.steps, example.visualScenario.steps.slice(0, splitIndex))
+    assert.deepEqual(secondPhase.steps, example.visualScenario.steps.slice(splitIndex))
+    assert.equal(firstPhase.steps.length + secondPhase.steps.length, example.visualScenario.steps.length)
+
+    const finalFirstBall = [...firstPhase.steps].reverse().find((step) => step.ballTo)?.ballTo
+    if (finalFirstBall) assert.deepEqual(secondPhase.ballPosition, finalFirstBall)
+
+    const expectedPositions = new Map(
+      example.visualScenario.players.map((player) => [player.id, { x: player.x, y: player.y }]),
+    )
+    const expectedFacings = new Map(
+      example.visualScenario.players.map((player) => [player.id, player.facingAngle]),
+    )
+
+    firstPhase.steps.forEach((step) => {
+      if (step.playerId && step.playerTo) expectedPositions.set(step.playerId, step.playerTo)
+      if (step.playerId && Number.isFinite(step.facingAngle)) expectedFacings.set(step.playerId, step.facingAngle)
+      step.playerMoves?.forEach((move) => {
+        expectedPositions.set(move.playerId, move.to)
+        expectedFacings.set(move.playerId, move.facingAngle)
+      })
+      step.playerFacings?.forEach((facing) => expectedFacings.set(facing.playerId, facing.facingAngle))
+    })
+
+    secondPhase.players.forEach((player) => {
+      const expectedPosition = expectedPositions.get(player.id)
+      assert.deepEqual(
+        { x: player.x, y: player.y, facingAngle: player.facingAngle },
+        { x: expectedPosition?.x, y: expectedPosition?.y, facingAngle: expectedFacings.get(player.id) },
+      )
+    })
+  })
 })
 
 test('every How We Train visual authors starting, carrier, movement, and stationary facing data', () => {

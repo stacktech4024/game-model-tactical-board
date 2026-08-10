@@ -89,6 +89,51 @@ export type HowWeTrainExample = {
   visualScenario: HowWeTrainVisualScenario
 }
 
+export function splitHowWeTrainVisualScenario(
+  scenario: HowWeTrainVisualScenario,
+): [HowWeTrainVisualScenario, HowWeTrainVisualScenario] {
+  const splitIndex = Math.ceil(scenario.steps.length / 2)
+  const firstSteps = scenario.steps.slice(0, splitIndex)
+  const secondSteps = scenario.steps.slice(splitIndex)
+  const positions = new Map(scenario.players.map((player) => [player.id, { x: player.x, y: player.y }]))
+  const facings = new Map(scenario.players.map((player) => [player.id, player.facingAngle]))
+  let ballPosition = { ...scenario.ballPosition }
+
+  firstSteps.forEach((step) => {
+    if (step.playerId && step.playerTo) positions.set(step.playerId, step.playerTo)
+    if (step.playerId && Number.isFinite(step.facingAngle)) facings.set(step.playerId, step.facingAngle)
+    step.playerMoves?.forEach((move) => {
+      positions.set(move.playerId, move.to)
+      if (Number.isFinite(move.facingAngle)) facings.set(move.playerId, move.facingAngle)
+    })
+    step.playerFacings?.forEach((facing) => facings.set(facing.playerId, facing.facingAngle))
+    if (step.ballTo) ballPosition = { ...step.ballTo }
+  })
+
+  const firstStepIds = new Set(firstSteps.map((step) => step.id))
+  const secondStepIds = new Set(secondSteps.map((step) => step.id))
+  const secondPlayers = scenario.players.map((player) => ({
+    ...player,
+    ...positions.get(player.id),
+    facingAngle: facings.get(player.id),
+  }))
+
+  return [
+    {
+      ...scenario,
+      steps: firstSteps,
+      routes: scenario.routes.filter((route) => !route.revealOnStepId || firstStepIds.has(route.revealOnStepId)),
+    },
+    {
+      ...scenario,
+      players: secondPlayers,
+      ballPosition,
+      steps: secondSteps,
+      routes: scenario.routes.filter((route) => !route.revealOnStepId || secondStepIds.has(route.revealOnStepId)),
+    },
+  ]
+}
+
 const home = (
   id: string,
   label: string,
@@ -138,20 +183,20 @@ const centralWideVisual: HowWeTrainVisualScenario = {
     home('cw-8', '8', 62, 55, -55),
     home('cw-2', '2', 87, 58, -120),
     home('cw-7', '7', 90, 78, -145),
-    home('cw-n1', 'N', 36, 54, -155),
-    home('cw-n2', 'N', 54, 70, -160),
-    away('cw-a1', 'A', 49, 36, -115),
-    away('cw-a2', 'A', 58, 46, -125),
-    away('cw-a3', 'A', 70, 56, -110),
-    away('cw-a4', 'A', 78, 68, -120),
-    away('cw-a5', 'A', 42, 65, 175),
-    away('cw-a6', 'A', 55, 82, 170),
+    home('cw-n1', '10', 36, 54, -155),
+    home('cw-n2', '9', 54, 70, -160),
+    away('cw-a1', '9', 49, 36, -115),
+    away('cw-a2', '10', 58, 46, -125),
+    away('cw-a3', '6', 70, 56, -110),
+    away('cw-a4', '8', 78, 68, -120),
+    away('cw-a5', '7', 42, 65, 175),
+    away('cw-a6', '11', 55, 82, 170),
   ],
   ballPosition: { x: 40, y: 28 },
   steps: [
     {
       id: 'cw-circulate',
-      cue: 'CIRCULATE — scan and move the ball calmly while the central lane is protected.',
+      cue: 'CIRCULATE — #9 presses, #10 screens #8, and the grey midfield protects the central lane.',
       ballFrom: { x: 40, y: 28 },
       ballTo: { x: 48, y: 43 },
       playerId: 'cw-6',
@@ -166,12 +211,16 @@ const centralWideVisual: HowWeTrainVisualScenario = {
         { playerId: 'cw-8', facingAngle: -135 },
         { playerId: 'cw-2', facingAngle: -120 },
         { playerId: 'cw-7', facingAngle: -145 },
+        { playerId: 'cw-a3', facingAngle: -120 },
+        { playerId: 'cw-a4', facingAngle: -124 },
+        { playerId: 'cw-a5', facingAngle: 165 },
+        { playerId: 'cw-a6', facingAngle: -170 },
       ],
       duration: 0.48,
     },
     {
       id: 'cw-third-player',
-      cue: 'THIRD PLAYER — #8 supports beyond pressure as #2 recognizes the wide release.',
+      cue: 'THIRD PLAYER — #6 tracks #8 while the grey back line stays half-turned to ball and runners.',
       ballFrom: { x: 48, y: 43 },
       ballTo: { x: 62, y: 55 },
       playerId: 'cw-8',
@@ -186,12 +235,17 @@ const centralWideVisual: HowWeTrainVisualScenario = {
         { playerId: 'cw-6', facingAngle: 48 },
         { playerId: 'cw-4', facingAngle: 42 },
         { playerId: 'cw-n2', facingAngle: -148 },
+        { playerId: 'cw-a1', facingAngle: 41 },
+        { playerId: 'cw-a2', facingAngle: 34 },
+        { playerId: 'cw-a4', facingAngle: -120 },
+        { playerId: 'cw-a5', facingAngle: 150 },
+        { playerId: 'cw-a6', facingAngle: 176 },
       ],
       duration: 0.5,
     },
     {
       id: 'cw-wide-release',
-      cue: 'SWITCH — pressure commits centrally and #8 releases #2 into Channel 1.',
+      cue: 'SWITCH — #8 releases #2 as the grey #8 recovers outside and the far side squeezes across.',
       ballFrom: { x: 62, y: 55 },
       ballTo: { x: 92, y: 64 },
       playerId: 'cw-2',
@@ -205,12 +259,17 @@ const centralWideVisual: HowWeTrainVisualScenario = {
         { playerId: 'cw-8', facingAngle: 72 },
         { playerId: 'cw-7', facingAngle: 165 },
         { playerId: 'cw-6', facingAngle: 62 },
+        { playerId: 'cw-a1', facingAngle: 40 },
+        { playerId: 'cw-a2', facingAngle: 44 },
+        { playerId: 'cw-a3', facingAngle: 65 },
+        { playerId: 'cw-a5', facingAngle: 130 },
+        { playerId: 'cw-a6', facingAngle: 150 },
       ],
       duration: 0.56,
     },
     {
       id: 'cw-penetrate',
-      cue: 'COMBINE WIDE — #2 connects with #7 toward Zone 4 while support remains underneath.',
+      cue: 'COMBINE WIDE — #2 connects with #7 while grey defenders delay, cover inside, and protect depth.',
       ballFrom: { x: 92, y: 64 },
       ballTo: { x: 91, y: 83 },
       playerId: 'cw-7',
@@ -223,6 +282,12 @@ const centralWideVisual: HowWeTrainVisualScenario = {
       playerFacings: [
         { playerId: 'cw-2', facingAngle: 4 },
         { playerId: 'cw-n2', facingAngle: 52 },
+        { playerId: 'cw-a1', facingAngle: 47 },
+        { playerId: 'cw-a2', facingAngle: 55 },
+        { playerId: 'cw-a3', facingAngle: 80 },
+        { playerId: 'cw-a4', facingAngle: 160 },
+        { playerId: 'cw-a5', facingAngle: 110 },
+        { playerId: 'cw-a6', facingAngle: 120 },
       ],
       duration: 0.48,
     },
@@ -243,10 +308,10 @@ const widePressureVisual: HowWeTrainVisualScenario = {
     home('wp-2', '2', 72, 45, 50),
     home('wp-6', '6', 58, 48, 68),
     home('wp-4', '4', 57, 34, 50),
-    away('wp-a7', 'A', 88, 60, 90),
-    away('wp-a8', 'A', 72, 68, 117),
-    away('wp-a9', 'A', 58, 62, 88),
-    away('wp-a2', 'A', 91, 43, -10),
+    away('wp-a7', '11', 88, 60, 90),
+    away('wp-a8', '8', 72, 68, 117),
+    away('wp-a9', '10', 58, 62, 88),
+    away('wp-a2', '2', 91, 43, -10),
   ],
   ballPosition: { x: 88, y: 60 },
   steps: [
@@ -260,6 +325,9 @@ const widePressureVisual: HowWeTrainVisualScenario = {
         { playerId: 'wp-6', facingAngle: 68 },
         { playerId: 'wp-4', facingAngle: 50 },
         { playerId: 'wp-a7', facingAngle: 90 },
+        { playerId: 'wp-a8', facingAngle: 117 },
+        { playerId: 'wp-a9', facingAngle: 88 },
+        { playerId: 'wp-a2', facingAngle: -10 },
       ],
       duration: 0.35,
     },
@@ -301,6 +369,7 @@ const widePressureVisual: HowWeTrainVisualScenario = {
         { playerId: 'wp-6', facingAngle: 88 },
         { playerId: 'wp-4', facingAngle: 68 },
         { playerId: 'wp-a8', facingAngle: 135 },
+        { playerId: 'wp-a9', facingAngle: 104 },
       ],
       duration: 0.48,
     },
@@ -321,10 +390,10 @@ const pressRegainVisual: HowWeTrainVisualScenario = {
     home('pr-6', '6', 42, 46, 9),
     home('pr-8', '8', 58, 46, -25),
     home('pr-10', '10', 50, 54, -13),
-    away('pr-a4', 'A', 46, 72, 164),
-    away('pr-a5', 'A', 60, 72, -95),
-    away('pr-a6', 'A', 50, 58, 0),
-    away('pr-a2', 'A', 76, 65, -98),
+    away('pr-a4', '4', 46, 72, 164),
+    away('pr-a5', '5', 60, 72, -95),
+    away('pr-a6', '6', 50, 58, 0),
+    away('pr-a2', '2', 76, 65, -98),
   ],
   ballPosition: { x: 46, y: 72 },
   steps: [
@@ -362,6 +431,10 @@ const pressRegainVisual: HowWeTrainVisualScenario = {
       playerMoves: [
         { playerId: 'pr-7', to: { x: 30, y: 76 }, facingAngle: 120 },
         { playerId: 'pr-6', to: { x: 43, y: 55 }, startDelay: 0.08, facingAngle: 31 },
+        { playerId: 'pr-a6', to: { x: 52, y: 62 }, startDelay: 0.04, facingAngle: -45 },
+        { playerId: 'pr-a4', to: { x: 47, y: 68 }, startDelay: 0.08, facingAngle: 164 },
+        { playerId: 'pr-a5', to: { x: 58, y: 69 }, startDelay: 0.1, facingAngle: -116 },
+        { playerId: 'pr-a2', to: { x: 72, y: 63 }, startDelay: 0.12, facingAngle: -101 },
       ],
       playerFacings: [
         { playerId: 'pr-8', facingAngle: -34 },
@@ -380,6 +453,10 @@ const pressRegainVisual: HowWeTrainVisualScenario = {
         { playerId: 'pr-11', facingAngle: -85 },
         { playerId: 'pr-8', facingAngle: -18 },
         { playerId: 'pr-10', facingAngle: -34 },
+        { playerId: 'pr-a4', facingAngle: -70 },
+        { playerId: 'pr-a5', facingAngle: -100 },
+        { playerId: 'pr-a6', facingAngle: -48 },
+        { playerId: 'pr-a2', facingAngle: -108 },
       ],
       duration: 0.38,
     },
@@ -392,6 +469,10 @@ const pressRegainVisual: HowWeTrainVisualScenario = {
         { playerId: 'pr-8', facingAngle: -32 },
         { playerId: 'pr-10', facingAngle: -18 },
         { playerId: 'pr-7', facingAngle: 132 },
+        { playerId: 'pr-a4', facingAngle: 178 },
+        { playerId: 'pr-a5', facingAngle: -145 },
+        { playerId: 'pr-a6', facingAngle: -135 },
+        { playerId: 'pr-a2', facingAngle: -115 },
       ],
       duration: 0.38,
     },
@@ -413,10 +494,10 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
     home('lr-10', '10', 51, 64, -70),
     home('lr-7', '7', 24, 68, 147),
     home('lr-9', '9', 58, 82, -165),
-    away('lr-a6', 'A', 48, 54, -160),
-    away('lr-a8', 'A', 61, 57, -113),
-    away('lr-a4', 'A', 43, 75, 178),
-    away('lr-a5', 'A', 62, 75, -170),
+    away('lr-a6', '6', 48, 54, -160),
+    away('lr-a8', '8', 61, 57, -113),
+    away('lr-a4', '4', 43, 75, 178),
+    away('lr-a5', '5', 62, 75, -170),
   ],
   ballPosition: { x: 42, y: 40 },
   steps: [
@@ -433,6 +514,8 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
         { playerId: 'lr-6', facingAngle: 21 },
         { playerId: 'lr-8', facingAngle: -110 },
         { playerId: 'lr-a8', facingAngle: -104 },
+        { playerId: 'lr-a4', facingAngle: 178 },
+        { playerId: 'lr-a5', facingAngle: -170 },
       ],
       duration: 0.46,
     },
@@ -452,6 +535,9 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
         { playerId: 'lr-6', facingAngle: 21 },
         { playerId: 'lr-9', facingAngle: -163 },
         { playerId: 'lr-7', facingAngle: 143 },
+        { playerId: 'lr-a6', facingAngle: 14 },
+        { playerId: 'lr-a4', facingAngle: 175 },
+        { playerId: 'lr-a5', facingAngle: -160 },
       ],
       duration: 0.52,
     },
@@ -468,6 +554,9 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
         { playerId: 'lr-8', facingAngle: -27 },
         { playerId: 'lr-6', facingAngle: 38 },
         { playerId: 'lr-7', facingAngle: 96 },
+        { playerId: 'lr-a6', facingAngle: 24 },
+        { playerId: 'lr-a4', facingAngle: 138 },
+        { playerId: 'lr-a5', facingAngle: -142 },
       ],
       duration: 0.34,
     },
@@ -484,6 +573,7 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
         { playerId: 'lr-a8', facingAngle: 145 },
         { playerId: 'lr-a4', facingAngle: 145 },
         { playerId: 'lr-a5', facingAngle: -160 },
+        { playerId: 'lr-a6', facingAngle: 32 },
         { playerId: 'lr-9', facingAngle: -150 },
       ],
       duration: 0.5,
