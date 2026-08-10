@@ -165,6 +165,111 @@ const away = (
   facingAngle,
 })
 
+const goalkeeper = (
+  id: string,
+  side: 'home' | 'away',
+  y: number,
+  facingAngle: number,
+): PreviewPlayer => ({
+  id,
+  label: '1',
+  x: 50,
+  y,
+  tone: 'keeper',
+  side,
+  facingAngle,
+})
+
+function facingToward(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+): number {
+  return Math.round((Math.atan2(to.x - from.x, from.y - to.y) * 180) / Math.PI)
+}
+
+function orientRedTowardZoneFour(
+  scenario: HowWeTrainVisualScenario,
+): HowWeTrainVisualScenario {
+  const mirrorPoint = (point: { x: number; y: number }) => ({
+    x: point.x,
+    y: 100 - point.y,
+  })
+
+  return {
+    ...scenario,
+    players: scenario.players.map((player) => ({
+      ...player,
+      y: 100 - player.y,
+    })),
+    ballPosition: mirrorPoint(scenario.ballPosition),
+    steps: scenario.steps.map((step) => ({
+      ...step,
+      playerTo: step.playerTo ? mirrorPoint(step.playerTo) : undefined,
+      playerMoves: step.playerMoves?.map((move) => ({
+        ...move,
+        to: mirrorPoint(move.to),
+      })),
+      ballFrom: step.ballFrom ? mirrorPoint(step.ballFrom) : undefined,
+      ballTo: step.ballTo ? mirrorPoint(step.ballTo) : undefined,
+    })),
+    routes: scenario.routes.map((route) => ({
+      ...route,
+      from: mirrorPoint(route.from),
+      to: mirrorPoint(route.to),
+    })),
+  }
+}
+
+function addGoalkeeperDirectionAnchors(
+  scenarioId: HowWeTrainExampleId,
+  scenario: HowWeTrainVisualScenario,
+): HowWeTrainVisualScenario {
+  const homeGoalkeeperId = `${scenarioId}-home-gk`
+  const awayGoalkeeperId = `${scenarioId}-away-gk`
+  const homeGoalkeeperPosition = { x: 50, y: 94 }
+  const awayGoalkeeperPosition = { x: 50, y: 6 }
+  let liveBallPosition = { ...scenario.ballPosition }
+
+  const steps = scenario.steps.map((step) => {
+    liveBallPosition = step.ballTo ? { ...step.ballTo } : liveBallPosition
+
+    return {
+      ...step,
+      playerFacings: [
+        ...(step.playerFacings ?? []),
+        {
+          playerId: homeGoalkeeperId,
+          facingAngle: facingToward(homeGoalkeeperPosition, liveBallPosition),
+        },
+        {
+          playerId: awayGoalkeeperId,
+          facingAngle: facingToward(awayGoalkeeperPosition, liveBallPosition),
+        },
+      ],
+    }
+  })
+
+  return {
+    ...scenario,
+    players: [
+      goalkeeper(
+        homeGoalkeeperId,
+        'home',
+        homeGoalkeeperPosition.y,
+        facingToward(homeGoalkeeperPosition, scenario.ballPosition),
+      ),
+      ...scenario.players,
+      goalkeeper(
+        awayGoalkeeperId,
+        'away',
+        awayGoalkeeperPosition.y,
+        facingToward(awayGoalkeeperPosition, scenario.ballPosition),
+      ),
+    ],
+    steps,
+  }
+}
+
 const direct = (value: string): EvidenceDetail => ({
   value,
   status: 'DIRECT SESSION EVIDENCE',
@@ -175,7 +280,7 @@ const confirmationNeeded = (value = 'Coach confirmation needed'): EvidenceDetail
   status: 'COACH CONFIRMATION NEEDED',
 })
 
-const centralWideVisual: HowWeTrainVisualScenario = {
+const centralWideVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('central-wide', orientRedTowardZoneFour({
   players: [
     home('cw-4', '4', 40, 28, 30),
     home('cw-5', '5', 60, 28, -45),
@@ -300,9 +405,9 @@ const centralWideVisual: HowWeTrainVisualScenario = {
     { id: 'cw-wide-combination', from: { x: 92, y: 64 }, to: { x: 91, y: 83 }, type: 'pass', revealOnStepId: 'cw-penetrate' },
   ],
   caption: 'Confirmed MD+1 6v6+2 problem: central circulation, third-player support, wide release, and Zone 4 progression.',
-}
+}))
 
-const widePressureVisual: HowWeTrainVisualScenario = {
+const widePressureVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('wide-pressure', orientRedTowardZoneFour({
   players: [
     home('wp-7', '7', 72, 60, 90),
     home('wp-2', '2', 72, 45, 50),
@@ -380,9 +485,9 @@ const widePressureVisual: HowWeTrainVisualScenario = {
     { id: 'wp-force-route', from: { x: 88, y: 60 }, to: { x: 96, y: 51 }, type: 'pass', revealOnStepId: 'wp-contain' },
   ],
   caption: 'Role illustration: inside-out pressure, secondary cover, and a connected shift that forces play toward Channel 1.',
-}
+}))
 
-const pressRegainVisual: HowWeTrainVisualScenario = {
+const pressRegainVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('press-regain', orientRedTowardZoneFour({
   players: [
     home('pr-7', '7', 30, 60, 53),
     home('pr-9', '9', 50, 66, -34),
@@ -485,9 +590,9 @@ const pressRegainVisual: HowWeTrainVisualScenario = {
     { id: 'pr-retain-option', from: { x: 49, y: 65 }, to: { x: 43, y: 55 }, type: 'recovery', revealOnStepId: 'pr-retain-picture' },
   ],
   caption: 'Role illustration: coordinated pressure, regain, scan, and the live counter-or-retain decision.',
-}
+}))
 
-const lineBreakReactVisual: HowWeTrainVisualScenario = {
+const lineBreakReactVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('line-break-react', orientRedTowardZoneFour({
   players: [
     home('lr-6', '6', 42, 40, 21),
     home('lr-8', '8', 58, 46, -111),
@@ -586,7 +691,7 @@ const lineBreakReactVisual: HowWeTrainVisualScenario = {
     { id: 'lr-cover', from: { x: 63, y: 54 }, to: { x: 57, y: 57 }, type: 'recovery', revealOnStepId: 'lr-react' },
   ],
   caption: 'Role illustration: create the lane, break the line, lose possession, and apply immediate pressure with cover.',
-}
+}))
 
 export const HOW_WE_TRAIN_DEFAULT_EXAMPLE_ID: HowWeTrainExampleId = 'central-wide'
 

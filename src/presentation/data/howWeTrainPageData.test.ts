@@ -48,7 +48,7 @@ function facingDifference(first: number, second: number) {
 }
 
 function movementBearing(from: { x: number; y: number }, to: { x: number; y: number }) {
-  return (Math.atan2(to.x - from.x, to.y - from.y) * 180) / Math.PI
+  return (Math.atan2(to.x - from.x, from.y - to.y) * 180) / Math.PI
 }
 
 test('How We Train exposes four approved examples with Central to Wide as the default', () => {
@@ -184,6 +184,10 @@ test('the overview reduces density and the supporting page preserves accessible 
   assert.match(pageSource, /phase=\{visualPhases\[0\]\}/)
   assert.match(pageSource, /phase=\{visualPhases\[1\]\}/)
   assert.match(pageSource, /DIAGRAM \{index \+ 1\}/)
+  assert.match(pageSource, /Red attacks · Zone 4/)
+  assert.match(pageSource, /Red defends · Zone 1/)
+  assert.match(pageSource, /Yellow #1 — coached GK/)
+  assert.match(pageSource, /Cyan #1 — opposition GK/)
   assert.match(pageSource, /to="\/presentation\/players"/)
   assert.match(pageSource, /to="\/presentation\/skills"/)
   assert.match(pageSource, /<PresentationLayout pageId="how-we-train"/)
@@ -201,6 +205,42 @@ test('all player tokens use realistic role numbers with no N or A placeholders',
 
     labelsByTeam.forEach((labels, team) => {
       assert.equal(new Set(labels).size, labels.length, `${example.id}/${team}: duplicate role number`)
+    })
+  })
+})
+
+test('both goalkeepers anchor the attacking direction and track the live ball picture', () => {
+  HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    const goalkeepers = example.visualScenario.players.filter((player) => player.tone === 'keeper')
+    const homeGoalkeeper = goalkeepers.find((player) => player.side === 'home')
+    const awayGoalkeeper = goalkeepers.find((player) => player.side === 'away')
+
+    assert.equal(goalkeepers.length, 2, `${example.id}: two goalkeeper anchors`)
+    assert.ok(homeGoalkeeper, `${example.id}: coached goalkeeper`)
+    assert.ok(awayGoalkeeper, `${example.id}: opposition goalkeeper`)
+    assert.equal(homeGoalkeeper.label, '1')
+    assert.equal(awayGoalkeeper.label, '1')
+    assert.ok(homeGoalkeeper.y > 90, `${example.id}: coached goalkeeper anchors Zone 1`)
+    assert.ok(awayGoalkeeper.y < 10, `${example.id}: opposition goalkeeper anchors Zone 4`)
+
+    let liveBallPosition = example.visualScenario.ballPosition
+
+    example.visualScenario.steps.forEach((step) => {
+      liveBallPosition = step.ballTo ?? liveBallPosition
+
+      ;[homeGoalkeeper, awayGoalkeeper].forEach((keeper) => {
+        const facing = step.playerFacings?.find((item) => item.playerId === keeper.id)
+        const expectedFacing = movementBearing(
+          { x: keeper.x, y: keeper.y },
+          liveBallPosition,
+        )
+
+        assert.ok(facing, `${example.id}/${step.id}: ${keeper.id} reorients`)
+        assert.ok(
+          facingDifference(facing.facingAngle, expectedFacing) <= 1,
+          `${example.id}/${step.id}: ${keeper.id} faces the live ball picture`,
+        )
+      })
     })
   })
 })

@@ -3813,6 +3813,14 @@
   background: #64748b;
 }
 
+.how-we-train-team-dot.is-yellow {
+  background: #facc15;
+}
+
+.how-we-train-team-dot.is-cyan {
+  background: #22d3ee;
+}
+
 .how-we-train-detail-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -3838,8 +3846,9 @@
 
 .how-we-train-team-key {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
-  min-width: 250px;
+  min-width: 330px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 10px;
   background: rgba(2, 6, 23, 0.58);
@@ -3847,6 +3856,17 @@
   color: #e2e8f0;
   font-size: 0.62rem;
   font-weight: 800;
+}
+
+.how-we-train-team-key > strong,
+.how-we-train-team-key small {
+  grid-column: 1 / -1;
+}
+
+.how-we-train-team-key > strong {
+  color: #f8fafc;
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
 }
 
 .how-we-train-team-key small {
@@ -3925,6 +3945,25 @@
   width: 300px;
   border-right: 0;
   border-left: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.how-we-train-pitch-direction {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(250, 204, 21, 0.24);
+  background: rgba(2, 6, 23, 0.92);
+  padding: 5px 8px;
+  color: #f8fafc;
+  font-size: 0.52rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.how-we-train-pitch-direction b {
+  color: #facc15;
+  font-size: 0.7rem;
 }
 
 .how-we-train-phase-card .mini-pitch__cue {

@@ -73,6 +73,10 @@ function TrainingPhaseCard({
     <article className="how-we-train-phase-card">
       <header><b>DIAGRAM {index + 1}</b><h3>{copy.title}</h3><p>{copy.detail}</p></header>
       <div className="how-we-train-pitch-card">
+        <div className="how-we-train-pitch-direction" aria-label="Red attacks toward Zone 4 and defends toward Zone 1">
+          <span><b aria-hidden="true">↑</b> Red attacks · Zone 4</span>
+          <span>Red defends · Zone 1 <b aria-hidden="true">↓</b></span>
+        </div>
         <PixiPitchPreview
           width={PREVIEW_WIDTH}
           height={PREVIEW_HEIGHT}
@@ -125,9 +129,12 @@ export function HowWeTrainExamplesPage() {
           <h1 className="presentation-title">{activeExample.title}</h1>
           <p className="presentation-body">{activeExample.shortPurpose}</p>
         </div>
-        <div className="how-we-train-team-key" aria-label="Team colour key">
-          <span><i className="how-we-train-team-dot is-red" />Red — coached team</span>
-          <span><i className="how-we-train-team-dot is-grey" />Grey — opposition team</span>
+        <div className="how-we-train-team-key" aria-label="Team colour and pitch direction key">
+          <span><i className="how-we-train-team-dot is-red" />Red — coached outfield</span>
+          <span><i className="how-we-train-team-dot is-grey" />Grey — opposition outfield</span>
+          <span><i className="how-we-train-team-dot is-yellow" />Yellow #1 — coached GK</span>
+          <span><i className="how-we-train-team-dot is-cyan" />Cyan #1 — opposition GK</span>
+          <strong>↑ RED ATTACKS ZONE 4 · RED DEFENDS ZONE 1 ↓</strong>
           <small>Numbers show roles · token direction shows body orientation</small>
         </div>
       </header>

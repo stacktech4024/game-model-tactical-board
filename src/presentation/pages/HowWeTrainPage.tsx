@@ -90,7 +90,9 @@ export function HowWeTrainPage() {
         <aside className="how-we-train-realism-note" aria-label="Diagram realism standard">
           <div><i className="how-we-train-team-dot is-red" />Red — coached team</div>
           <div><i className="how-we-train-team-dot is-grey" />Grey — opposition team</div>
-          <p>Shirt numbers identify positional roles. Token direction shows where each player is oriented as the action changes.</p>
+          <div><i className="how-we-train-team-dot is-yellow" />Yellow #1 — coached GK</div>
+          <div><i className="how-we-train-team-dot is-cyan" />Cyan #1 — opposition GK</div>
+          <p>Red attacks toward Zone 4 and defends toward Zone 1. Goalkeepers anchor both ends; token direction shows each player’s body orientation as the action changes.</p>
           <Link to={`/presentation/how-we-train/examples?example=${HOW_WE_TRAIN_EXAMPLES[0].id}`}>View the animated examples</Link>
         </aside>
       </main>
