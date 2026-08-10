@@ -12,6 +12,7 @@ import { SetPiecesPage } from './presentation/pages/SetPiecesPage'
 import { LiveBoardPage } from './presentation/pages/LiveBoardPage'
 import { PlayersPage } from './presentation/pages/PlayersPage'
 import { SkillsPage } from './presentation/pages/SkillsPage'
+import { HowWeTrainPage } from './presentation/pages/HowWeTrainPage'
 import { MethodologyPage } from './presentation/pages/MethodologyPage'
 import { ClosingPage } from './presentation/pages/ClosingPage'
 
@@ -32,6 +33,7 @@ function App() {
       <Route path="/presentation/live-board" element={<LiveBoardPage />} />
       <Route path="/presentation/players" element={<PlayersPage />} />
       <Route path="/presentation/skills" element={<SkillsPage />} />
+      <Route path="/presentation/how-we-train" element={<HowWeTrainPage />} />
       <Route path="/presentation/methodology" element={<MethodologyPage />} />
       <Route path="/presentation/closing" element={<ClosingPage />} />
       <Route path="*" element={<Navigate to="/presentation/cover" replace />} />

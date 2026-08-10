@@ -19,7 +19,7 @@ test('Pitch Geography is page 4 between Our Identity and Game Analysis', () => {
     'pitch-geography',
     'game-analysis',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 14)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 15)
   assert.equal(PRESENTATION_PAGE_LABELS['pitch-geography'], 'Pitch Geography')
 })
 
