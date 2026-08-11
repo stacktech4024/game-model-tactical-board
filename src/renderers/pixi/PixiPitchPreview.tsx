@@ -75,6 +75,7 @@ export type PixiPitchPreviewRoute = {
 export type PixiPitchPreviewProps = {
   width: number
   height: number
+  accessibleLabel?: string
   players: PixiPitchPreviewPlayer[]
   ballPosition: { x: number; y: number }
   steps?: PixiPitchPreviewStep[]
@@ -150,6 +151,7 @@ function buildPlayerAdapter(players: PixiPitchPreviewPlayer[]) {
 export function PixiPitchPreview({
   width,
   height,
+  accessibleLabel = 'Animated tactical football diagram',
   players,
   ballPosition,
   steps = EMPTY_STEPS,
@@ -342,6 +344,53 @@ export function PixiPitchPreview({
         const initialBallPosition = {
           x: ballToken.position.x,
           y: ballToken.position.y,
+        }
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+        if (prefersReducedMotion) {
+          steps.forEach((step) => {
+            if (step.playerId && step.playerTo) {
+              playerTokensById.get(step.playerId)?.position.set(
+                percentageToScreenPosition(step.playerTo.x, step.playerTo.y, width, height).x,
+                percentageToScreenPosition(step.playerTo.x, step.playerTo.y, width, height).y,
+              )
+            }
+
+            if (step.playerId && step.facingAngle !== undefined) {
+              const sprite = playerSpritesById.get(step.playerId)
+              if (sprite) sprite.rotation = facingAngleToSpriteRotation(step.facingAngle)
+            }
+
+            step.playerMoves?.forEach((move) => {
+              const token = playerTokensById.get(move.playerId)
+              const sprite = playerSpritesById.get(move.playerId)
+              const position = percentageToScreenPosition(move.to.x, move.to.y, width, height)
+
+              token?.position.set(position.x, position.y)
+              if (sprite && move.facingAngle !== undefined) {
+                sprite.rotation = facingAngleToSpriteRotation(move.facingAngle)
+              }
+            })
+
+            step.playerFacings?.forEach((facing) => {
+              const sprite = playerSpritesById.get(facing.playerId)
+              if (sprite) sprite.rotation = facingAngleToSpriteRotation(facing.facingAngle)
+            })
+
+            if (step.ballTo) {
+              const position = percentageToScreenPosition(step.ballTo.x, step.ballTo.y, width, height)
+              ballToken.position.set(position.x, position.y)
+            }
+          })
+
+          routeGraphicsByRevealStepId.forEach((stepRoutes) => {
+            stepRoutes.forEach((routeGraphics) => {
+              routeGraphics.alpha = 1
+            })
+          })
+          onCueChangeRef.current?.(steps.at(-1)?.cue ?? '')
+          return
         }
 
         const ctx = gsap.context(() => {
@@ -686,5 +735,12 @@ export function PixiPitchPreview({
     }
   }, [ballPosition, fadeRouteHistory, height, players, repeatDelay, routes, steps, tokenScale, width])
 
-  return <div ref={containerRef} className="pixi-pitch-preview" />
+  return (
+    <div
+      ref={containerRef}
+      className="pixi-pitch-preview"
+      role="img"
+      aria-label={accessibleLabel}
+    />
+  )
 }

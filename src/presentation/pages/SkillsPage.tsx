@@ -1,164 +1,196 @@
-import { useMemo, useState } from 'react'
-import { PresentationLayout } from '../PresentationLayout'
-import { POSITIONAL_PROFILES } from '../data/positionalProfiles'
-import { getFullbackSkillPixiScenario } from '../data/fullbackSkillPixiAdapter'
-import type { FullbackSkillVariant } from '../data/fullbackSkillScenario'
+import { useMemo, useRef, useState } from 'react'
+import type { KeyboardEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { PITCH } from '../../domain/pitch/pitchConstants'
 import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
+import { PresentationLayout } from '../PresentationLayout'
+import { getFullbackSkillPixiScenario } from '../data/fullbackSkillPixiAdapter'
+import {
+  FULLBACK_DEFAULT_SKILL_ID,
+  FULLBACK_SKILL_ORDER,
+  getFullbackSkillScenario,
+  type FullbackCoachingDetail,
+  type FullbackSkillVariant,
+} from '../data/fullbackSkillScenario'
 
-const PIXI_PREVIEW_WIDTH = 360
+const PIXI_PREVIEW_WIDTH = 268
 const PIXI_PREVIEW_HEIGHT = Math.round(
   PIXI_PREVIEW_WIDTH * (PITCH.LENGTH / PITCH.WIDTH),
 )
 
-const FULLBACK_TABS: {
-  id: FullbackSkillVariant
-  label: string
-  headline: string
-  cues: string[]
-}[] = [
-  {
-    id: 'in-possession',
-    label: 'In Possession',
-    headline: 'Be the wide-channel release',
-    cues: ['Scan before receiving', 'Support wide channel', 'Overlap or underlap on cue', 'Cross, combine, or reset'],
-  },
-  {
-    id: 'out-of-possession',
-    label: 'Out of Possession',
-    headline: 'Win the wide duel first',
-    cues: ['Defend 1v1 wide', 'Communicate with centre-back', 'Protect inside first', 'Direct into Channel 1'],
-  },
-  {
-    id: 'transition',
-    label: 'Transition',
-    headline: 'Attack high, recover honestly',
-    cues: ['Recover quickly on loss', 'Recognize counter-support moments', 'Balance overlap with rest defence'],
-  },
+const COACHING_FIELDS: { key: keyof FullbackCoachingDetail; label: string }[] = [
+  { key: 'who', label: 'Who' },
+  { key: 'what', label: 'What' },
+  { key: 'when', label: 'When' },
+  { key: 'where', label: 'Where' },
+  { key: 'why', label: 'Why' },
+  { key: 'how', label: 'How' },
 ]
 
 export function SkillsPage() {
-  const [activeTabId, setActiveTabId] = useState(FULLBACK_TABS[0].id)
+  const [activeSkillId, setActiveSkillId] = useState<FullbackSkillVariant>(
+    FULLBACK_DEFAULT_SKILL_ID,
+  )
   const [activeCue, setActiveCue] = useState(
-    getFullbackSkillPixiScenario(FULLBACK_TABS[0].id).steps?.[0]?.cue ?? '',
+    getFullbackSkillPixiScenario(FULLBACK_DEFAULT_SKILL_ID).steps?.[0]?.cue ?? '',
   )
-  const [showAllProfiles, setShowAllProfiles] = useState(false)
-  const [selectedProfilePosition, setSelectedProfilePosition] = useState<string | null>(null)
-  const activeTab = FULLBACK_TABS.find((tab) => tab.id === activeTabId) ?? FULLBACK_TABS[0]
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const activeSkill = getFullbackSkillScenario(activeSkillId)
   const pixiScenario = useMemo(
-    () => getFullbackSkillPixiScenario(activeTabId),
-    [activeTabId],
-  )
-  const fullbackProfile = POSITIONAL_PROFILES.find((profile) => profile.id === 'fullbacks')
-  const selectedProfile = POSITIONAL_PROFILES.find(
-    (profile) => profile.id === selectedProfilePosition,
+    () => getFullbackSkillPixiScenario(activeSkillId),
+    [activeSkillId],
   )
 
-  const handleTabChange = (tabId: FullbackSkillVariant) => {
-    const nextScenario = getFullbackSkillPixiScenario(tabId)
+  const selectSkill = (skillId: FullbackSkillVariant) => {
+    const nextScenario = getFullbackSkillPixiScenario(skillId)
 
-    setActiveTabId(tabId)
+    setActiveSkillId(skillId)
     setActiveCue(nextScenario.steps?.[0]?.cue ?? '')
+  }
+
+  const handleSkillKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+  ) => {
+    let nextIndex: number
+
+    if (event.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1) % FULLBACK_SKILL_ORDER.length
+    } else if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + FULLBACK_SKILL_ORDER.length) % FULLBACK_SKILL_ORDER.length
+    } else if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = FULLBACK_SKILL_ORDER.length - 1
+    } else {
+      return
+    }
+
+    event.preventDefault()
+    const nextSkillId = FULLBACK_SKILL_ORDER[nextIndex]
+    selectSkill(nextSkillId)
+    tabRefs.current[nextIndex]?.focus()
   }
 
   return (
     <PresentationLayout pageId="skills" noPadding>
-      <p className="presentation-eyebrow">Section 3 — the how</p>
-      <h1 className="presentation-title">Skill development: fullback #2/#3</h1>
-      <p className="presentation-body">
-        The wide-channel build depends on the fullback's scanning, timing, and decision — overlap,
-        underlap, cross, or reset.
-      </p>
+      <header className="fullback-skills-header">
+        <div>
+          <p className="presentation-eyebrow">Section 3 — the individual execution</p>
+          <h1 className="presentation-title">Skill Development: Fullbacks</h1>
+          <p className="presentation-body">
+            What #2 Aaron and #3 Christian must recognize and execute within our Game Model.
+          </p>
+        </div>
+        <div className="fullback-player-card" aria-label="Selected position and players">
+          <span>Fullbacks</span>
+          <strong>#2 Aaron · #3 Christian</strong>
+        </div>
+      </header>
 
-      <section className="skill-lab">
-        <div className="fullback-visual-card" aria-label="Fullback role visual">
+      <div className="fullback-skill-selector" role="tablist" aria-label="Fullback skill examples">
+        {FULLBACK_SKILL_ORDER.map((skillId, index) => {
+          const skill = getFullbackSkillScenario(skillId)
+          const isActive = skillId === activeSkillId
+
+          return (
+            <button
+              key={skillId}
+              ref={(node) => { tabRefs.current[index] = node }}
+              id={`fullback-skill-tab-${skillId}`}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls="fullback-skill-panel"
+              tabIndex={isActive ? 0 : -1}
+              className={isActive ? 'fullback-skill-tab is-active' : 'fullback-skill-tab'}
+              onClick={() => selectSkill(skillId)}
+              onKeyDown={(event) => handleSkillKeyDown(event, index)}
+            >
+              <span>0{index + 1}</span>
+              {skill.tabLabel}
+            </button>
+          )
+        })}
+      </div>
+
+      <section
+        id="fullback-skill-panel"
+        className="fullback-skill-workspace"
+        role="tabpanel"
+        aria-labelledby={`fullback-skill-tab-${activeSkillId}`}
+        tabIndex={0}
+      >
+        <figure className="fullback-skill-visual">
           <div className="mini-pitch fullback-skill-pitch">
             <PixiPitchPreview
-              key={activeTabId}
+              key={activeSkillId}
               width={PIXI_PREVIEW_WIDTH}
               height={PIXI_PREVIEW_HEIGHT}
+              accessibleLabel={pixiScenario.animationDescription}
               players={pixiScenario.players}
               ballPosition={pixiScenario.ballPosition}
               steps={pixiScenario.steps}
+              routes={pixiScenario.routes}
+              fadeRouteHistory
+              repeatDelay={2}
               onCueChange={setActiveCue}
             />
             <div className="mini-pitch__cue" aria-live="polite">{activeCue}</div>
-            <div className="mini-pitch__caption">{pixiScenario.caption}</div>
+            <figcaption className="mini-pitch__caption">{pixiScenario.caption}</figcaption>
           </div>
-          <div>
-            <span className="skill-role-label">{fullbackProfile?.positionName ?? 'Fullbacks'} · {fullbackProfile?.numbers ?? '#2/#3'}</span>
-            <h2>{activeTab.headline}</h2>
-            <p>{fullbackProfile?.style}</p>
-          </div>
-        </div>
+        </figure>
 
-        <aside className="skill-tabs">
-          <div className="analysis-tab-list" role="tablist" aria-label="Fullback skill moments">
-            {FULLBACK_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={tab.id === activeTabId}
-                className={tab.id === activeTabId ? 'analysis-tab is-active' : 'analysis-tab'}
-                onClick={() => handleTabChange(tab.id)}
-              >
-                {tab.label}
-              </button>
+        <article className="fullback-skill-detail">
+          <div className="fullback-skill-detail__header">
+            <div className="fullback-skill-meta" aria-label="Game Model context">
+              <span>{activeSkill.moment}</span>
+              <span>{activeSkill.system}</span>
+              <span>{activeSkill.geography}</span>
+            </div>
+            <h2>{activeSkill.title}</h2>
+            <p>{activeSkill.gameModelReason}</p>
+          </div>
+
+          <dl className="fullback-coaching-grid">
+            {COACHING_FIELDS.map((field) => (
+              <div key={field.key}>
+                <dt>{field.label}</dt>
+                <dd>{activeSkill.coachingDetail[field.key]}</dd>
+              </div>
             ))}
+          </dl>
+
+          <div className="fullback-skill-lower">
+            <section className="fullback-success-card">
+              <h3>Success looks like</h3>
+              <ul>
+                {activeSkill.observableSuccess.map((criterion) => (
+                  <li key={criterion}>{criterion}</li>
+                ))}
+              </ul>
+            </section>
+
+            <aside className="fullback-training-card">
+              <span>How We Train</span>
+              <Link to={activeSkill.relatedTraining.href}>{activeSkill.relatedTraining.label} →</Link>
+              <p>{activeSkill.relatedTraining.note}</p>
+            </aside>
           </div>
 
-          <section className="analysis-detail" aria-live="polite">
-            <span>Fullback coaching cues</span>
-            <h2>{activeTab.headline}</h2>
-            <div className="presentation-chip-row">
-              {activeTab.cues.map((cue) => (
-                <span key={cue} className="presentation-chip presentation-chip--small">
-                  {cue}
+          <div className="fullback-match-transfer" aria-label="Match transfer sequence">
+            <span className="fullback-match-transfer__label">Match transfer</span>
+            <div>
+              {activeSkill.matchTransfer.map((action, index) => (
+                <span key={action}>
+                  {action}
+                  {index < activeSkill.matchTransfer.length - 1 && <b aria-hidden="true">→</b>}
                 </span>
               ))}
             </div>
-          </section>
-
-          <section className="profile-drawer">
-            <button
-              type="button"
-              className="profile-drawer__toggle"
-              onClick={() => setShowAllProfiles((current) => !current)}
-            >
-              {showAllProfiles ? 'Hide all profiles' : 'View all profiles'}
-            </button>
-            {showAllProfiles && (
-              <>
-                <div className="profile-chip-grid" aria-label="Position profiles">
-                  {POSITIONAL_PROFILES.map((profile) => (
-                    <button
-                      key={profile.id}
-                      type="button"
-                      aria-pressed={profile.id === selectedProfilePosition}
-                      className={
-                        profile.id === selectedProfilePosition
-                          ? 'profile-chip is-active'
-                          : 'profile-chip'
-                      }
-                      onClick={() => setSelectedProfilePosition(profile.id)}
-                    >
-                      <strong>{profile.shortLabel}</strong> {profile.numbers}
-                    </button>
-                  ))}
-                </div>
-                {selectedProfile && (
-                  <section className="profile-detail" aria-live="polite">
-                    <span>{selectedProfile.positionName} · {selectedProfile.numbers}</span>
-                    <h2>{selectedProfile.style}</h2>
-                    <p><strong>In possession:</strong> {selectedProfile.moments.attackingOrganization.join('; ')}.</p>
-                    <p><strong>Out of possession:</strong> {selectedProfile.moments.defensiveOrganization.join('; ')}.</p>
-                  </section>
-                )}
-              </>
-            )}
-          </section>
-        </aside>
+            <p>{activeSkill.transferStatement}</p>
+          </div>
+        </article>
       </section>
     </PresentationLayout>
   )

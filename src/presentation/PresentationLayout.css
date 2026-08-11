@@ -4670,3 +4670,395 @@
     margin-top: 5px;
   }
 }
+
+/* Checkpoint 23G-B — projector-first Fullback Skill Development */
+.fullback-skills-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+}
+
+.fullback-skills-header .presentation-eyebrow {
+  margin-bottom: 5px;
+}
+
+.fullback-skills-header .presentation-title {
+  margin-bottom: 5px;
+  font-size: clamp(1.75rem, 2.8vw, 2.35rem);
+}
+
+.fullback-skills-header .presentation-body {
+  margin: 0;
+  max-width: 760px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.fullback-player-card {
+  display: grid;
+  gap: 3px;
+  min-width: 230px;
+  border: 1px solid rgba(204, 0, 0, 0.5);
+  border-radius: 12px;
+  background: rgba(204, 0, 0, 0.1);
+  padding: 9px 12px;
+}
+
+.fullback-player-card span {
+  color: #fca5a5;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.fullback-player-card strong {
+  font-size: 0.9rem;
+}
+
+.fullback-skill-selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.fullback-skill-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #dbeafe;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 850;
+  padding: 8px 10px;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.fullback-skill-tab > span {
+  color: #f87171;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.fullback-skill-tab:hover,
+.fullback-skill-tab.is-active {
+  border-color: rgba(204, 0, 0, 0.78);
+  background: rgba(204, 0, 0, 0.16);
+}
+
+.fullback-skill-tab:focus-visible,
+.fullback-skill-workspace:focus-visible,
+.fullback-training-card a:focus-visible {
+  outline: 3px solid #facc15;
+  outline-offset: 3px;
+}
+
+.fullback-skill-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
+  gap: 12px;
+  min-width: 0;
+  margin-top: 10px;
+}
+
+.fullback-skill-visual,
+.fullback-skill-detail {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.48);
+}
+
+.fullback-skill-visual {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 10px;
+}
+
+.fullback-skill-pitch {
+  width: min(100%, 268px);
+  min-height: 0;
+}
+
+.fullback-skill-pitch .pixi-pitch-preview,
+.fullback-skill-pitch .pixi-pitch-preview canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fullback-skill-pitch .mini-pitch__cue {
+  top: 8px;
+  right: 8px;
+  max-width: 142px;
+  font-size: 0.7rem;
+  letter-spacing: 0.055em;
+}
+
+.fullback-skill-pitch .mini-pitch__caption {
+  right: 7px;
+  bottom: 7px;
+  font-size: 0.64rem;
+}
+
+.fullback-skill-detail {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 11px 12px;
+}
+
+.fullback-skill-detail__header {
+  display: grid;
+  gap: 5px;
+}
+
+.fullback-skill-detail__header h2 {
+  margin: 0;
+  font-size: 1.22rem;
+  line-height: 1.1;
+}
+
+.fullback-skill-detail__header p {
+  margin: 0;
+  color: #cdd8ea;
+  font-size: 0.8rem;
+  line-height: 1.34;
+}
+
+.fullback-skill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.fullback-skill-meta span {
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.2);
+  color: #fecaca;
+  font-size: 0.66rem;
+  font-weight: 850;
+  padding: 3px 7px;
+}
+
+.fullback-coaching-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+}
+
+.fullback-coaching-grid > div {
+  min-width: 0;
+  border-left: 2px solid rgba(204, 0, 0, 0.7);
+  background: rgba(15, 23, 42, 0.58);
+  padding: 5px 7px;
+}
+
+.fullback-coaching-grid dt {
+  color: #f87171;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.fullback-coaching-grid dd {
+  margin: 2px 0 0;
+  color: #e5eef9;
+  font-size: 0.73rem;
+  line-height: 1.25;
+}
+
+.fullback-skill-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(230px, 0.95fr);
+  gap: 7px;
+}
+
+.fullback-success-card,
+.fullback-training-card {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.54);
+  padding: 7px 8px;
+}
+
+.fullback-success-card h3,
+.fullback-training-card > span {
+  display: block;
+  margin: 0 0 4px;
+  color: #f8fafc;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fullback-success-card ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding-left: 15px;
+}
+
+.fullback-success-card li {
+  color: #cdd8ea;
+  font-size: 0.71rem;
+  line-height: 1.24;
+}
+
+.fullback-training-card a {
+  color: #fca5a5;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.fullback-training-card p {
+  margin: 4px 0 0;
+  color: #aebed4;
+  font-size: 0.69rem;
+  line-height: 1.28;
+}
+
+.fullback-match-transfer {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 9px;
+  background: rgba(120, 53, 15, 0.13);
+  padding: 6px 8px;
+}
+
+.fullback-match-transfer__label {
+  color: #fde68a;
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fullback-match-transfer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.fullback-match-transfer > div span {
+  color: #fef3c7;
+  font-size: 0.64rem;
+  font-weight: 850;
+}
+
+.fullback-match-transfer b {
+  margin-left: 3px;
+  color: #f59e0b;
+}
+
+.fullback-match-transfer p {
+  margin: 0;
+  color: #dbeafe;
+  font-size: 0.69rem;
+  line-height: 1.25;
+}
+
+@media (min-width: 721px) and (max-height: 800px) {
+  .fullback-skills-header .presentation-title {
+    font-size: 1.62rem;
+  }
+
+  .fullback-skills-header .presentation-body {
+    font-size: 0.78rem;
+  }
+
+  .fullback-player-card {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .fullback-skill-selector,
+  .fullback-skill-workspace {
+    margin-top: 7px;
+  }
+
+  .fullback-skill-tab {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .fullback-skill-workspace {
+    gap: 9px;
+  }
+
+  .fullback-skill-visual {
+    padding: 8px;
+  }
+
+  .fullback-skill-pitch {
+    width: min(100%, 252px);
+  }
+
+  .fullback-skill-detail {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .fullback-skill-detail__header h2 {
+    font-size: 1.08rem;
+  }
+
+  .fullback-skill-detail__header p,
+  .fullback-coaching-grid dd {
+    font-size: 0.69rem;
+  }
+
+  .fullback-success-card li,
+  .fullback-training-card p,
+  .fullback-match-transfer p {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .fullback-skills-header,
+  .fullback-skill-workspace,
+  .fullback-skill-lower {
+    grid-template-columns: 1fr;
+  }
+
+  .fullback-player-card {
+    min-width: 0;
+  }
+
+  .fullback-skill-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .fullback-skill-tab {
+    min-height: 42px;
+  }
+
+  .fullback-skill-pitch {
+    width: min(100%, 250px);
+  }
+
+  .fullback-coaching-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fullback-skill-tab {
+    transition: none;
+  }
+}

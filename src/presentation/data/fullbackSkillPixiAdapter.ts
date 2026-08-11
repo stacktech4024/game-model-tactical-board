@@ -5,13 +5,14 @@ import type {
 import {
   FULLBACK_SKILL_SCENARIOS,
   type FullbackSkillVariant,
-} from './fullbackSkillScenario'
+} from './fullbackSkillScenario.ts'
 
 export type FullbackSkillPixiScenario = Pick<
   PixiPitchPreviewProps,
-  'players' | 'ballPosition' | 'steps'
+  'players' | 'ballPosition' | 'steps' | 'routes'
 > & {
   caption: string
+  animationDescription: string
 }
 
 export function getFullbackSkillPixiScenario(
@@ -22,6 +23,9 @@ export function getFullbackSkillPixiScenario(
     id: step.id,
     playerId: step.playerId,
     playerTo: step.playerTo,
+    facingAngle: step.facingAngle,
+    playerMoves: step.playerMoves,
+    playerFacings: step.playerFacings,
     ballFrom: step.ballFrom,
     ballTo: step.ballTo,
     duration: step.duration,
@@ -37,9 +41,13 @@ export function getFullbackSkillPixiScenario(
       x: player.start.x,
       y: player.start.y,
       tone: player.tone,
+      side: player.side,
+      facingAngle: player.facingAngle,
     })),
     ballPosition: scenario.ballStart,
     steps,
+    routes: scenario.routes,
     caption: scenario.caption,
+    animationDescription: scenario.animationDescription,
   }
 }
