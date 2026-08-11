@@ -25,14 +25,6 @@ const TRAINING_STEPS = [
   },
 ]
 
-const MICROCYCLE = [
-  { day: 'MD+1', focus: 'Recovery, reflection, video' },
-  { day: 'MD+2', focus: 'Unit correction + technical detail' },
-  { day: 'MD+3', focus: 'Game moment focus, higher intensity' },
-  { day: 'MD-1', focus: 'Activation, team shape, set pieces, lower load' },
-  { day: 'Match Day', focus: 'Apply the model' },
-]
-
 const TRANSFER_CHECKS = [
   'Did the fullback recognize the overlap cue?',
   'Did the winger create width or drive inside at the right time?',
@@ -98,16 +90,7 @@ export function MethodologyPage() {
         </section>
       </section>
 
-      <section className="method-lower-grid">
-        <div className="microcycle-timeline" aria-label="Microcycle timeline">
-          {MICROCYCLE.map((item) => (
-            <article key={item.day} className="microcycle-item">
-              <span>{item.day}</span>
-              <p>{item.focus}</p>
-            </article>
-          ))}
-        </div>
-
+      <section className="method-lower-grid method-lower-grid--without-microcycle">
         <div className="method-check-card">
           <h2>Did it transfer?</h2>
           <ul>

@@ -145,17 +145,18 @@ test('the Canada Soccer decision framework appears only for Press to Regain', ()
   assert.doesNotMatch(JSON.stringify(getExample('press-regain').decisionFramework), /CONCEIVE|DECEIVE/i)
 })
 
-test('How We Train is routed and ordered between Skill Development and Training Methodology', () => {
+test('How We Train is routed before Microcycle and Training Methodology', () => {
   const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
 
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-5), [
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-6), [
     'players',
     'skills',
     'how-we-train',
+    'microcycle',
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 15)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 16)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train\/examples"/)

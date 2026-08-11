@@ -1,15 +1,3 @@
-export type MicrocycleRow = {
-  day: string
-  focus: string
-}
-
-export const MICROCYCLE: MicrocycleRow[] = [
-  { day: 'MD+1', focus: 'Recovery — light activity, reflection, video review' },
-  { day: 'MD+2', focus: 'Tactical — address what broke down in the match; unit work, shape correction' },
-  { day: 'MD+3', focus: 'Technical/Tactical — game moment focus; high-intensity SSG' },
-  { day: 'MD-1', focus: 'Activation — short, sharp, set pieces, team shape walkthrough; low volume' },
-]
-
 export const COACHING_TOOLS = [
   {
     title: 'Freeze & recreate',

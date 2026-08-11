@@ -12,6 +12,7 @@ export type PresentationPageId =
   | 'players'
   | 'skills'
   | 'how-we-train'
+  | 'microcycle'
   | 'methodology'
   | 'closing'
 
@@ -29,6 +30,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'players',
   'skills',
   'how-we-train',
+  'microcycle',
   'methodology',
   'closing',
 ]
@@ -47,6 +49,7 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   players: 'Positional profiles',
   skills: 'Skill development',
   'how-we-train': 'How we train',
+  microcycle: 'Microcycle',
   methodology: 'Training methodology',
   closing: 'Closing',
 }

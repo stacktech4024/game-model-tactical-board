@@ -4057,3 +4057,616 @@
     border-top: 1px solid rgba(148, 163, 184, 0.16);
   }
 }
+
+/* Evidence-based Microcycle */
+.microcycle-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+}
+
+.microcycle-header .presentation-eyebrow {
+  margin-bottom: 4px;
+}
+
+.microcycle-header .presentation-title {
+  margin-bottom: 4px;
+  font-size: clamp(1.65rem, 2.45vw, 2.25rem);
+}
+
+.microcycle-header .presentation-body {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.microcycle-story {
+  display: grid;
+  gap: 3px;
+  min-width: 330px;
+  border-left: 3px solid #cc0000;
+  padding: 5px 0 5px 11px;
+  color: #93a4bd;
+  font-size: 0.56rem;
+  font-weight: 750;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.microcycle-story b {
+  color: #fca5a5;
+}
+
+.microcycle-story strong {
+  color: #f8fafc;
+}
+
+.microcycle-ribbon {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.microcycle-day-tab {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 11px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #dbeafe;
+  cursor: pointer;
+  padding: 8px 9px;
+  text-align: left;
+}
+
+.microcycle-day-tab > span {
+  grid-row: 1 / span 2;
+  color: #ef4444;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+}
+
+.microcycle-day-tab > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 0.64rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.microcycle-day-tab > small {
+  grid-column: 2;
+  color: #aebdd1;
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.microcycle-day-tab::after {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  width: 7px;
+  height: 22px;
+  border-radius: 999px;
+  background: #64748b;
+  content: '';
+}
+
+.microcycle-day-tab[data-load='MODERATE']::after,
+.microcycle-day-tab[data-load='LOW–MODERATE']::after {
+  background: #fbbf24;
+}
+
+.microcycle-day-tab[data-load='HIGH']::after {
+  background: #ef4444;
+}
+
+.microcycle-day-tab[data-load='MATCH']::after {
+  background: #38bdf8;
+}
+
+.microcycle-day-tab[data-load='REST']::after {
+  background: #64748b;
+}
+
+.microcycle-day-tab:hover,
+.microcycle-day-tab.is-active {
+  border-color: rgba(239, 68, 68, 0.76);
+  background: rgba(127, 29, 29, 0.18);
+}
+
+.microcycle-day-tab[data-load='REST'] {
+  opacity: 0.78;
+}
+
+.microcycle-day-tab:focus-visible {
+  outline: 3px solid #facc15;
+  outline-offset: 2px;
+}
+
+.microcycle-panel {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.88fr) minmax(340px, 1.08fr) minmax(270px, 0.9fr);
+  gap: 10px;
+  align-items: start;
+  margin-top: 9px;
+}
+
+.microcycle-panel:focus {
+  outline: none;
+}
+
+.microcycle-day-card,
+.microcycle-transfer-card,
+.microcycle-evidence-card,
+.microcycle-md1-card,
+.microcycle-individual-card {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 13px;
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.microcycle-day-card,
+.microcycle-transfer-card {
+  padding: 11px;
+}
+
+.microcycle-day-card > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.78fr);
+  gap: 9px;
+  align-items: end;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  padding-bottom: 8px;
+}
+
+.microcycle-day-card > header span,
+.microcycle-transfer-card > header span,
+.microcycle-evidence-card > header span,
+.microcycle-individual-card > header span,
+.microcycle-readiness span,
+.microcycle-why span,
+.microcycle-skills > span,
+.microcycle-transfer-flow section span,
+.microcycle-day-facts dt,
+.microcycle-load > span,
+.microcycle-rpe > span {
+  color: #ef4444;
+  font-size: 0.49rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.microcycle-day-card > header h2,
+.microcycle-transfer-card > header h2,
+.microcycle-evidence-card > header h2,
+.microcycle-individual-card > header h2 {
+  margin: 2px 0 0;
+  color: #f8fafc;
+  font-size: 0.88rem;
+  line-height: 1.16;
+}
+
+.microcycle-day-card > header p {
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.55rem;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.microcycle-load-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.microcycle-load,
+.microcycle-rpe {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 2px;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 7px;
+  background: rgba(15, 23, 42, 0.48);
+  padding: 6px;
+}
+
+.microcycle-load strong,
+.microcycle-rpe strong {
+  color: #f8fafc;
+  font-size: 0.63rem;
+  line-height: 1.15;
+}
+
+.microcycle-load__bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.microcycle-load__bar i {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.35);
+}
+
+.microcycle-load__bar i.is-filled {
+  background: #fbbf24;
+}
+
+.microcycle-load[data-load='HIGH'] .microcycle-load__bar i.is-filled {
+  background: #ef4444;
+}
+
+.microcycle-load[data-load='MATCH'] .microcycle-load__bar i.is-filled {
+  background: #38bdf8;
+}
+
+.microcycle-evidence-label {
+  display: block;
+  color: #86efac;
+  font-size: 0.4rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.microcycle-evidence-label[data-status='COACH-APPROVED PLANNING VALUE'] {
+  color: #fde68a;
+}
+
+.microcycle-evidence-label[data-status='CANADA SOCCER FRAMEWORK'] {
+  color: #bfdbfe;
+}
+
+.microcycle-evidence-label[data-status='COACH CONFIRMATION NEEDED'] {
+  color: #fdba74;
+}
+
+.microcycle-day-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin: 7px 0 0;
+}
+
+.microcycle-day-facts > div {
+  min-width: 0;
+  border-left: 2px solid rgba(239, 68, 68, 0.55);
+  background: rgba(15, 23, 42, 0.35);
+  padding: 5px 6px;
+}
+
+.microcycle-day-facts dd {
+  margin: 2px 0 0;
+  color: #cdd8ea;
+  font-size: 0.54rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.microcycle-readiness {
+  margin-top: 7px;
+  border-radius: 7px;
+  background: rgba(14, 116, 144, 0.1);
+  padding: 6px 7px;
+}
+
+.microcycle-readiness span {
+  color: #67e8f9;
+}
+
+.microcycle-readiness p,
+.microcycle-why p,
+.microcycle-skills p {
+  margin: 2px 0 0;
+  color: #aebdd1;
+  font-size: 0.52rem;
+  line-height: 1.3;
+}
+
+.microcycle-transfer-card {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+}
+
+.microcycle-transfer-flow {
+  display: grid;
+  gap: 5px;
+}
+
+.microcycle-transfer-flow section {
+  display: grid;
+  grid-template-columns: 23px minmax(0, 1fr);
+  gap: 7px;
+  align-items: start;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.46);
+  padding: 6px 7px;
+}
+
+.microcycle-transfer-flow section > b {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: #cc0000;
+  color: #fff;
+  font-size: 0.58rem;
+}
+
+.microcycle-transfer-flow ul {
+  display: grid;
+  gap: 2px;
+  margin: 3px 0 0;
+  padding-left: 14px;
+}
+
+.microcycle-transfer-flow li,
+.microcycle-transfer-flow p {
+  margin: 0;
+  color: #cdd8ea;
+  font-size: 0.58rem;
+  line-height: 1.3;
+}
+
+.microcycle-why {
+  border-left: 3px solid #fbbf24;
+  border-radius: 6px;
+  background: rgba(120, 53, 15, 0.1);
+  padding: 6px 7px;
+}
+
+.microcycle-why span {
+  color: #fde68a;
+}
+
+.microcycle-skills {
+  border-top: 1px solid rgba(148, 163, 184, 0.13);
+  padding-top: 6px;
+}
+
+.microcycle-skills a,
+.microcycle-evidence-card a {
+  display: inline-block;
+  margin-top: 3px;
+  color: #fecaca;
+  font-size: 0.48rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.microcycle-skills a:hover,
+.microcycle-skills a:focus-visible,
+.microcycle-evidence-card a:hover,
+.microcycle-evidence-card a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.microcycle-support-column {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.microcycle-evidence-card,
+.microcycle-md1-card,
+.microcycle-individual-card {
+  padding: 8px;
+}
+
+.microcycle-evidence-card > div {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.microcycle-evidence-card article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.13);
+  padding-top: 5px;
+}
+
+.microcycle-evidence-card article > div {
+  display: grid;
+  gap: 1px;
+}
+
+.microcycle-evidence-card article strong {
+  color: #f8fafc;
+  font-size: 0.58rem;
+}
+
+.microcycle-evidence-card article > div small,
+.microcycle-md1-card > small,
+.microcycle-individual-card > small {
+  color: #93a4bd;
+  font-size: 0.44rem;
+  line-height: 1.22;
+}
+
+.microcycle-evidence-card article p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.49rem;
+  line-height: 1.25;
+}
+
+.microcycle-evidence-card article > a {
+  grid-column: 1 / -1;
+}
+
+.microcycle-md1-card > header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 3px;
+  color: #f8fafc;
+  font-size: 0.56rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.microcycle-md1-card > p {
+  margin: 4px 0;
+  color: #aebdd1;
+  font-size: 0.48rem;
+  line-height: 1.24;
+}
+
+.microcycle-md1-card > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.microcycle-md1-card > div b {
+  border-radius: 999px;
+  background: rgba(30, 64, 175, 0.2);
+  color: #bfdbfe;
+  font-size: 0.44rem;
+  padding: 3px 5px;
+}
+
+.microcycle-individual-card {
+  border-color: rgba(34, 197, 94, 0.24);
+  background: rgba(20, 83, 45, 0.1);
+}
+
+.microcycle-individual-card > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1px 6px;
+}
+
+.microcycle-individual-card > header > span,
+.microcycle-individual-card > header > h2 {
+  grid-column: 1;
+}
+
+.microcycle-individual-card > header > small {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  text-align: right;
+}
+
+.microcycle-individual-card > p {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 4px;
+  margin: 5px 0 0;
+  color: #cdd8ea;
+  font-size: 0.5rem;
+  line-height: 1.25;
+}
+
+.microcycle-individual-card > p b {
+  color: #86efac;
+  font-size: 0.46rem;
+}
+
+.method-lower-grid--without-microcycle {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1040px) {
+  .microcycle-header {
+    grid-template-columns: 1fr;
+  }
+
+  .microcycle-story {
+    min-width: 0;
+  }
+
+  .microcycle-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .microcycle-support-column {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .microcycle-md1-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .microcycle-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .microcycle-day-tab:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .microcycle-panel,
+  .microcycle-support-column,
+  .method-lower-grid--without-microcycle {
+    grid-template-columns: 1fr;
+  }
+
+  .microcycle-support-column,
+  .microcycle-md1-card {
+    grid-column: auto;
+  }
+
+  .microcycle-day-card > header,
+  .microcycle-load-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .microcycle-day-card > header p {
+    text-align: left;
+  }
+}
+
+@media (min-width: 1041px) and (max-height: 760px) {
+  .microcycle-header .presentation-title {
+    font-size: 1.55rem;
+  }
+
+  .microcycle-ribbon {
+    margin-top: 7px;
+  }
+
+  .microcycle-panel {
+    margin-top: 7px;
+  }
+
+  .microcycle-day-card,
+  .microcycle-transfer-card {
+    padding: 8px;
+  }
+
+  .microcycle-readiness,
+  .microcycle-load-grid,
+  .microcycle-day-facts {
+    margin-top: 5px;
+  }
+}
