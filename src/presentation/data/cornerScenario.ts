@@ -100,34 +100,33 @@ export const CORNER_PREVIEW_STEPS: PixiPitchPreviewStep[] = [
   },
   {
     id: 'ac-first-contact',
-    cue: 'FIRST CONTACT — #9 attacks with momentum as the central defender and goalkeeper contest; the partial clearance drops toward #8.',
+    cue: 'FIRST CONTACT — #9 attacks with momentum as the central defender and goalkeeper react; his contact drops into #8’s path.',
     ballFrom: { x: 51, y: 11 },
-    ballTo: { x: 48, y: 35 },
+    ballTo: { x: 48, y: 22 },
     emphasizePlayerId: 'ac-home-9',
     playerMoves: [
       { playerId: 'ac-home-9', to: { x: 51, y: 10 } },
       { playerId: 'ac-away-5', to: { x: 50, y: 12 } },
       { playerId: 'ac-away-8', to: { x: 51, y: 13 }, startDelay: 0.06 },
       { playerId: 'ac-away-1', to: { x: 50, y: 5 }, startDelay: 0.1 },
-      { playerId: 'ac-home-8', to: { x: 48, y: 36 }, startDelay: 0.17 },
-      { playerId: 'ac-away-7', to: { x: 49, y: 35 }, startDelay: 0.22 },
+      { playerId: 'ac-home-8', to: { x: 48, y: 23 }, startDelay: 0.17 },
+      { playerId: 'ac-away-7', to: { x: 50, y: 25 }, startDelay: 0.22 },
     ],
     duration: 0.5,
   },
   {
-    id: 'ac-second-ball',
-    cue: 'SECOND BALL — #8 secures the partial clearance and recycles through #6 while #2 adjusts to protect the counter.',
-    ballFrom: { x: 48, y: 35 },
-    ballTo: { x: 55, y: 49 },
-    playerId: 'ac-home-6',
-    playerTo: { x: 55, y: 49 },
+    id: 'ac-finish',
+    cue: 'FINISH — #8 steps through the dropping ball and shoots through traffic. GOAL.',
+    ballFrom: { x: 48, y: 22 },
+    ballTo: { x: 50, y: 0 },
     emphasizePlayerId: 'ac-home-8',
     playerMoves: [
-      { playerId: 'ac-home-8', to: { x: 48, y: 35 } },
+      { playerId: 'ac-home-8', to: { x: 48, y: 21 } },
       { playerId: 'ac-home-2', to: { x: 75, y: 59 }, startDelay: 0.15 },
-      { playerId: 'ac-away-9', to: { x: 52, y: 52 }, startDelay: 0.2 },
+      { playerId: 'ac-away-5', to: { x: 49, y: 10 }, startDelay: 0.08 },
+      { playerId: 'ac-away-1', to: { x: 50, y: 3 }, startDelay: 0.12 },
     ],
-    duration: 0.48,
+    duration: 0.56,
   },
 ]
 
@@ -139,9 +138,9 @@ export const CORNER_PREVIEW_ROUTES: PixiPitchPreviewRoute[] = [
   { id: 'ac-decoy-run', from: { x: 63, y: 30 }, to: { x: 57, y: 16 }, type: 'run', revealOnStepId: 'ac-delivery' },
   { id: 'ac-far-run', from: { x: 78, y: 31 }, to: { x: 64, y: 12 }, type: 'run', revealOnStepId: 'ac-delivery' },
   { id: 'ac-delivery-ball', from: { x: 7, y: 8 }, to: { x: 51, y: 11 }, type: 'pass', revealOnStepId: 'ac-delivery' },
-  { id: 'ac-clearance', from: { x: 51, y: 11 }, to: { x: 48, y: 35 }, type: 'pass', revealOnStepId: 'ac-first-contact' },
-  { id: 'ac-reset', from: { x: 48, y: 35 }, to: { x: 55, y: 49 }, type: 'pass', revealOnStepId: 'ac-second-ball' },
+  { id: 'ac-contact', from: { x: 51, y: 11 }, to: { x: 48, y: 22 }, type: 'pass', revealOnStepId: 'ac-first-contact' },
+  { id: 'ac-shot', from: { x: 48, y: 22 }, to: { x: 50, y: 0 }, type: 'shot', revealOnStepId: 'ac-finish' },
 ]
 
 export const CORNER_PREVIEW_CAPTION =
-  'Short-angle trigger, connected far-side cluster, diagonal three-zone runs, targeted and contested first contact, second-ball control, and connected rest defence.'
+  'Short-angle trigger, connected far-side cluster, diagonal three-zone runs, contested first contact, and a decisive second-action finish.'

@@ -137,7 +137,7 @@ export function PlayersPage() {
             <span>AO reference</span>
             <strong>1-4-4-2</strong>
           </div>
-          <div className="profile-formation-card__pitch" style={{ width: BOARD_WIDTH, height: BOARD_HEIGHT }}>
+          <div className="profile-formation-card__pitch">
             <PixiPitchPreview
               width={BOARD_WIDTH}
               height={BOARD_HEIGHT}
@@ -153,7 +153,10 @@ export function PlayersPage() {
                   key={player.id}
                   type="button"
                   className={isActive ? 'profile-formation-card__spot is-active' : 'profile-formation-card__spot'}
-                  style={{ left: screen.sx, top: screen.sy }}
+                  style={{
+                    left: `${(screen.sx / BOARD_WIDTH) * 100}%`,
+                    top: `${(screen.sy / BOARD_HEIGHT) * 100}%`,
+                  }}
                   aria-pressed={isActive}
                   aria-label={`Select ${getProfileForPosition(player.position).positionName}: #${player.number} ${player.name}`}
                   onClick={() => selectProfile(getProfileForPosition(player.position).id)}
