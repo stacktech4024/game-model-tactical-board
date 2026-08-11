@@ -5754,3 +5754,431 @@
     text-align: left;
   }
 }
+
+/* Late-deck desktop rhythm — keep pages 12–15 visually consistent with diagram slides. */
+@media (min-width: 1400px) and (min-height: 850px) {
+  .how-we-train-header--overview .presentation-body {
+    font-size: 0.94rem;
+  }
+
+  .how-we-train-framework {
+    max-width: 590px;
+    font-size: 0.68rem;
+  }
+
+  .how-we-train-overview {
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 570px;
+    gap: 20px;
+    margin-top: 18px;
+  }
+
+  .how-we-train-process,
+  .how-we-train-example-index {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .how-we-train-process {
+    padding: 22px;
+  }
+
+  .how-we-train-process ol {
+    align-content: space-evenly;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .how-we-train-process li {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    padding-top: 13px;
+  }
+
+  .how-we-train-section-heading > span {
+    font-size: 0.7rem;
+  }
+
+  .how-we-train-section-heading h2 {
+    font-size: 1.48rem;
+  }
+
+  .how-we-train-section-heading p {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .how-we-train-process li b {
+    font-size: 0.82rem;
+  }
+
+  .how-we-train-process h3,
+  .how-we-train-example-grid h3 {
+    font-size: 0.94rem;
+  }
+
+  .how-we-train-process li p,
+  .how-we-train-example-grid article > p {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .how-we-train-example-grid {
+    grid-auto-rows: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .how-we-train-example-grid article {
+    gap: 9px;
+    padding: 16px;
+  }
+
+  .how-we-train-example-grid article > header {
+    font-size: 0.61rem;
+  }
+
+  .how-we-train-example-grid article > header b,
+  .how-we-train-example-grid a {
+    font-size: 0.72rem;
+  }
+
+  .how-we-train-example-grid dt {
+    font-size: 0.58rem;
+  }
+
+  .how-we-train-example-grid dd {
+    font-size: 0.69rem;
+    line-height: 1.36;
+  }
+
+  .how-we-train-realism-note {
+    gap: 10px 18px;
+    padding: 12px 15px;
+    font-size: 0.72rem;
+  }
+
+  .microcycle-header .presentation-title {
+    font-size: 2.45rem;
+  }
+
+  .microcycle-header .presentation-body {
+    font-size: 0.92rem;
+  }
+
+  .microcycle-story {
+    min-width: 390px;
+    gap: 4px;
+    padding: 7px 0 7px 13px;
+    font-size: 0.66rem;
+  }
+
+  .microcycle-ribbon {
+    gap: 10px;
+    margin-top: 13px;
+  }
+
+  .microcycle-day-tab {
+    gap: 4px 9px;
+    padding: 10px 11px;
+  }
+
+  .microcycle-day-tab > span {
+    font-size: 0.72rem;
+  }
+
+  .microcycle-day-tab > strong {
+    font-size: 0.76rem;
+  }
+
+  .microcycle-day-tab > small {
+    font-size: 0.58rem;
+  }
+
+  .microcycle-day-tab::after {
+    width: 8px;
+    height: 28px;
+  }
+
+  .microcycle-panel {
+    grid-template-columns: minmax(300px, 0.9fr) minmax(400px, 1.1fr) minmax(300px, 0.92fr);
+    min-height: 550px;
+    gap: 14px;
+    align-items: stretch;
+    margin-top: 12px;
+  }
+
+  .microcycle-day-card,
+  .microcycle-transfer-card {
+    padding: 15px;
+  }
+
+  .microcycle-day-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .microcycle-day-card > header {
+    gap: 12px;
+    padding-bottom: 11px;
+  }
+
+  .microcycle-day-card > header span,
+  .microcycle-transfer-card > header span,
+  .microcycle-evidence-card > header span,
+  .microcycle-individual-card > header span,
+  .microcycle-readiness span,
+  .microcycle-why span,
+  .microcycle-skills > span,
+  .microcycle-transfer-flow section span,
+  .microcycle-day-facts dt,
+  .microcycle-load > span,
+  .microcycle-rpe > span {
+    font-size: 0.58rem;
+  }
+
+  .microcycle-day-card > header h2,
+  .microcycle-transfer-card > header h2,
+  .microcycle-evidence-card > header h2,
+  .microcycle-individual-card > header h2 {
+    font-size: 1.03rem;
+  }
+
+  .microcycle-day-card > header p {
+    font-size: 0.64rem;
+  }
+
+  .microcycle-load-grid,
+  .microcycle-day-facts {
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  .microcycle-day-facts {
+    flex: 1;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .microcycle-day-facts > div {
+    display: grid;
+    align-content: center;
+  }
+
+  .microcycle-load,
+  .microcycle-rpe,
+  .microcycle-day-facts > div {
+    padding: 8px;
+  }
+
+  .microcycle-load strong,
+  .microcycle-rpe strong {
+    font-size: 0.74rem;
+  }
+
+  .microcycle-day-facts dd {
+    font-size: 0.64rem;
+    line-height: 1.36;
+  }
+
+  .microcycle-readiness {
+    margin-top: 10px;
+    padding: 9px 10px;
+  }
+
+  .microcycle-readiness p,
+  .microcycle-why p,
+  .microcycle-skills p {
+    font-size: 0.62rem;
+    line-height: 1.36;
+  }
+
+  .microcycle-transfer-card {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    gap: 10px;
+  }
+
+  .microcycle-transfer-flow {
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .microcycle-transfer-flow section {
+    grid-template-columns: 29px minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    padding: 9px 10px;
+  }
+
+  .microcycle-transfer-flow section > b {
+    width: 28px;
+    height: 28px;
+    font-size: 0.68rem;
+  }
+
+  .microcycle-transfer-flow li,
+  .microcycle-transfer-flow p {
+    font-size: 0.68rem;
+    line-height: 1.36;
+  }
+
+  .microcycle-why {
+    padding: 9px 10px;
+  }
+
+  .microcycle-skills {
+    padding-top: 9px;
+  }
+
+  .microcycle-skills a,
+  .microcycle-evidence-card a {
+    font-size: 0.58rem;
+  }
+
+  .microcycle-support-column {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .microcycle-evidence-card,
+  .microcycle-md1-card,
+  .microcycle-individual-card {
+    padding: 11px;
+  }
+
+  .microcycle-evidence-card {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .microcycle-evidence-card > div {
+    align-content: space-evenly;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .microcycle-evidence-card article {
+    gap: 3px 8px;
+    padding-top: 7px;
+  }
+
+  .microcycle-evidence-card article strong {
+    font-size: 0.68rem;
+  }
+
+  .microcycle-evidence-card article > div small,
+  .microcycle-md1-card > small,
+  .microcycle-individual-card > small {
+    font-size: 0.54rem;
+    line-height: 1.3;
+  }
+
+  .microcycle-evidence-card article p {
+    font-size: 0.59rem;
+    line-height: 1.32;
+  }
+
+  .microcycle-individual-card > p {
+    grid-template-columns: 34px minmax(0, 1fr);
+    margin-top: 7px;
+    font-size: 0.6rem;
+    line-height: 1.32;
+  }
+
+  .microcycle-individual-card > p b {
+    font-size: 0.56rem;
+  }
+}
+
+@media (min-width: 1700px) and (min-height: 950px) {
+  .how-we-train-overview {
+    min-height: 660px;
+    gap: 22px;
+  }
+
+  .how-we-train-process {
+    padding: 26px;
+  }
+
+  .how-we-train-section-heading h2 {
+    font-size: 1.62rem;
+  }
+
+  .how-we-train-section-heading p,
+  .how-we-train-process li p,
+  .how-we-train-example-grid article > p {
+    font-size: 0.86rem;
+  }
+
+  .how-we-train-process h3,
+  .how-we-train-example-grid h3 {
+    font-size: 1.04rem;
+  }
+
+  .how-we-train-example-grid article {
+    padding: 19px;
+  }
+
+  .how-we-train-example-grid dd,
+  .how-we-train-realism-note {
+    font-size: 0.76rem;
+  }
+
+  .microcycle-panel {
+    min-height: 645px;
+    gap: 16px;
+  }
+
+  .microcycle-day-card,
+  .microcycle-transfer-card {
+    padding: 18px;
+  }
+
+  .microcycle-day-card > header span,
+  .microcycle-transfer-card > header span,
+  .microcycle-evidence-card > header span,
+  .microcycle-individual-card > header span,
+  .microcycle-readiness span,
+  .microcycle-why span,
+  .microcycle-skills > span,
+  .microcycle-transfer-flow section span,
+  .microcycle-day-facts dt,
+  .microcycle-load > span,
+  .microcycle-rpe > span {
+    font-size: 0.64rem;
+  }
+
+  .microcycle-day-card > header h2,
+  .microcycle-transfer-card > header h2,
+  .microcycle-evidence-card > header h2,
+  .microcycle-individual-card > header h2 {
+    font-size: 1.14rem;
+  }
+
+  .microcycle-load strong,
+  .microcycle-rpe strong,
+  .microcycle-transfer-flow li,
+  .microcycle-transfer-flow p {
+    font-size: 0.74rem;
+  }
+
+  .microcycle-day-facts dd,
+  .microcycle-readiness p,
+  .microcycle-why p,
+  .microcycle-skills p {
+    font-size: 0.7rem;
+  }
+
+  .microcycle-evidence-card,
+  .microcycle-individual-card {
+    padding: 14px;
+  }
+
+  .microcycle-evidence-card article strong {
+    font-size: 0.74rem;
+  }
+
+  .microcycle-evidence-card article p,
+  .microcycle-individual-card > p {
+    font-size: 0.65rem;
+  }
+}
