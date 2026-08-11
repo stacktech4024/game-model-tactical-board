@@ -24,16 +24,7 @@ type LooseBallRelease = {
   arrowType: string
 }
 
-const KNOWN_LOOSE_BALL_RELEASES: LooseBallRelease[] = [
-  // This represents a loose turnover ball, not a clean player-controlled
-  // release. The arrow names #8 as the turnover focus, but #8 is not at the
-  // ball-start coordinate; resolving it needs an authored regain/loss touch.
-  { scenarioId: 'protect-lead-in-back-five', arrowId: 'fuse-loose-pass', arrowType: 'pass' },
-  // This progression starts from the original ball space after both wing-backs
-  // have already advanced. Assigning a release player would require changing
-  // the timing or adding an earlier support touch.
-  { scenarioId: 'back-five-to-wing-back-attack', arrowId: 'wing-back-combine-central', arrowType: 'pass' },
-]
+const KNOWN_LOOSE_BALL_RELEASES: LooseBallRelease[] = []
 
 function getScenario(id: string): ScenarioDefinition {
   const scenario = SCENARIOS.find((item) => item.id === id)
@@ -175,7 +166,9 @@ test('build-through-wide-channels connects every release from #1 through #9 and 
     'Find the left fullback',
     'Connect the winger',
     'Connect the third player',
-    'Play through and finish',
+    'Find the attacking midfielder',
+    'Release the striker',
+    'Finish in Zone 4',
   ])
   assertPlayerArrives(plan, 'wide-build-three-advance', 'home', 3)
   assertPlayerArrives(plan, 'wide-build-six-support', 'home', 6)
@@ -338,18 +331,50 @@ test('corner-short-decoy-wide-delivery moves from #7 to #3, then #2 heads across
   assertFinalBallAtIntentTarget(plan, 'corner-eight-header-goal')
 })
 
-test('counter-quickly-on-turnover has #6 secure and release before #9 finishes into goal', () => {
+test('counter-quickly-on-turnover shows opponent possession, a central interception, and a complete counter', () => {
   const scenario = getScenario('counter-quickly-on-turnover')
   const plan = buildPlanForScenario(scenario)
 
-  assertPhaseLabels(scenario, ['Regain', 'Release runners', 'Finish'])
-  assertPlayerArrives(plan, 'counter-six-secure-ball', 'home', 6)
+  assertPhaseLabels(scenario, [
+    'Opponent circulates',
+    'Opponent finds pivot',
+    'Win the turnover',
+    'First forward action',
+    'Release the channel',
+    'Cross before reset',
+    'Finish the counter',
+  ])
   assertReleasePlayerAtBall(plan, {
-    arrowId: 'counter-first-pass-forward',
-    side: 'home',
+    arrowId: 'counter-away-five-to-four',
+    side: 'away',
+    playerNumber: 5,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'counter-away-four-to-six',
+    side: 'away',
+    playerNumber: 4,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'counter-away-six-central-pass',
+    side: 'away',
     playerNumber: 6,
   })
-  assertPlayerArrives(plan, 'counter-nine-check-to-finish', 'home', 9)
+  assertPlayerArrives(plan, 'counter-eight-intercept', 'home', 8)
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'counter-eight-to-ten',
+    side: 'home',
+    playerNumber: 8,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'counter-ten-release-seven',
+    side: 'home',
+    playerNumber: 10,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'counter-seven-cross',
+    side: 'home',
+    playerNumber: 7,
+  })
   assertReleasePlayerAtBall(plan, {
     arrowId: 'counter-shot-goal',
     side: 'home',
@@ -373,19 +398,10 @@ test('main attacking scenarios include believable away off-ball defensive moveme
     {
       scenarioId: 'counter-quickly-on-turnover',
       arrowIds: [
-        'counter-away-ten-counterpress',
-        'counter-away-six-screen',
-        'counter-away-two-recover',
+        'counter-away-ten-first-pressure',
+        'counter-away-six-cover-forward',
+        'counter-away-two-recover-outside',
         'counter-away-five-track-nine',
-      ],
-    },
-    {
-      scenarioId: 'back-five-to-wing-back-attack',
-      arrowIds: [
-        'wing-back-away-three-delay',
-        'wing-back-away-eight-screen',
-        'wing-back-away-four-track-ten',
-        'wing-back-away-six-drop',
       ],
     },
     {
@@ -410,26 +426,84 @@ test('main attacking scenarios include believable away off-ball defensive moveme
   })
 })
 
-test('protect-lead-in-back-five shows opponent support and home rest-defence cover without changing the loose-ball policy', () => {
+test('5-second fuse shows possession, the loss, two pressure actions, and recovery into the block', () => {
   const scenario = getScenario('protect-lead-in-back-five')
   const plan = buildPlanForScenario(scenario)
 
-  ;['fuse-away-two-collect', 'fuse-away-six-support', 'fuse-away-nine-outlet'].forEach((arrowId) => {
-    const intent = getIntent(plan, arrowId)
-
-    assert.equal(intent.type, 'player-movement', `${scenario.id} ${arrowId}: expected player movement`)
-    assert.equal(intent.side, 'away', `${scenario.id} ${arrowId}: expected away movement`)
-    assertPlayerArrives(plan, arrowId, 'away', intent.playerNumber!)
+  assertPhaseLabels(scenario, [
+    'Possess before the loss',
+    'Progress possession',
+    'Possession turns over',
+    'First pressure',
+    'Follow the escape pass',
+    'Recover the block',
+  ])
+  ;[
+    { arrowId: 'fuse-five-to-six', side: 'home', playerNumber: 5 },
+    { arrowId: 'fuse-six-to-eight', side: 'home', playerNumber: 6 },
+    { arrowId: 'fuse-eight-risk-pass', side: 'home', playerNumber: 8 },
+    { arrowId: 'fuse-away-eight-to-ten', side: 'away', playerNumber: 8 },
+    { arrowId: 'fuse-away-ten-back-to-six', side: 'away', playerNumber: 10 },
+    { arrowId: 'fuse-away-six-escape-five', side: 'away', playerNumber: 6 },
+  ].forEach((expectation) => {
+    assertReleasePlayerAtBall(plan, expectation as ReleaseExpectation)
   })
 
-  ;['fuse-four-cover', 'fuse-five-cover', 'fuse-two-tuck'].forEach((arrowId) => {
-    const intent = getIntent(plan, arrowId)
+  assertPlayerArrives(plan, 'fuse-away-eight-intercept', 'away', 8)
+  assertPlayerArrives(plan, 'fuse-eight-first-press', 'home', 8)
+  assertPlayerArrives(plan, 'fuse-eight-follow-pass', 'home', 8)
 
-    assert.equal(intent.type, 'player-movement', `${scenario.id} ${arrowId}: expected player movement`)
-    assert.equal(intent.side, 'home', `${scenario.id} ${arrowId}: expected home movement`)
-    assertPlayerArrives(plan, arrowId, 'home', intent.playerNumber!)
+  ;[
+    ['fuse-three-recover-line', 3],
+    ['fuse-four-recover-line', 4],
+    ['fuse-five-recover-line', 5],
+    ['fuse-two-recover-line', 2],
+    ['fuse-eleven-recover-midfield', 11],
+    ['fuse-eight-recover-midfield', 8],
+    ['fuse-six-recover-midfield', 6],
+    ['fuse-seven-recover-midfield', 7],
+    ['fuse-ten-recover-front', 10],
+    ['fuse-nine-recover-front', 9],
+  ].forEach(([arrowId, playerNumber]) => {
+    assertPlayerArrives(plan, arrowId as string, 'home', playerNumber as number)
   })
 
   assert.deepEqual(getLooseBallReleases(), KNOWN_LOOSE_BALL_RELEASES)
-  assertScenarioTextIncludes(scenario, ['press', 'cover', 'counter'])
+  assertScenarioTextIncludes(scenario, ['five seconds', 'press', 'recover'])
+})
+
+test('compact block denies the centre, moves as a unit, regains the forced return, and scores', () => {
+  const scenario = getScenario('defensive-block-force-wide')
+  const plan = buildPlanForScenario(scenario)
+
+  assertPhaseLabels(scenario, [
+    'Opponent begins the build',
+    'Deny the central progression',
+    'Force the recycle',
+    'Opponent goes wide',
+    'Press the wide receiver',
+    'Win the inside return',
+    'Attack after the regain',
+    'Connect the striker',
+    'Finish the regain',
+  ])
+  ;[
+    { arrowId: 'do-away-one-to-five', side: 'away', playerNumber: 1 },
+    { arrowId: 'do-away-five-to-eight', side: 'away', playerNumber: 5 },
+    { arrowId: 'do-away-eight-back-to-five', side: 'away', playerNumber: 8 },
+    { arrowId: 'do-away-five-to-two', side: 'away', playerNumber: 5 },
+    { arrowId: 'do-away-two-to-seven', side: 'away', playerNumber: 2 },
+    { arrowId: 'do-away-seven-inside-pass', side: 'away', playerNumber: 7 },
+    { arrowId: 'do-eight-to-ten', side: 'home', playerNumber: 8 },
+    { arrowId: 'do-ten-to-nine', side: 'home', playerNumber: 10 },
+    { arrowId: 'do-shot-goal', side: 'home', playerNumber: 9 },
+  ].forEach((expectation) => {
+    assertReleasePlayerAtBall(plan, expectation as ReleaseExpectation)
+  })
+  assertPlayerArrives(plan, 'do-three-shift-unit', 'home', 3)
+  assertPlayerArrives(plan, 'do-three-continue-shift', 'home', 3)
+  assertPlayerArrives(plan, 'do-eight-intercept', 'home', 8)
+  assertMarkerAtIntentTarget(scenario, plan, 'do-goal-marker', 'do-shot-goal')
+  assertFinalBallAtIntentTarget(plan, 'do-shot-goal')
+  assertScenarioTextIncludes(scenario, ['compact', 'centre', 'force', 'regain'])
 })

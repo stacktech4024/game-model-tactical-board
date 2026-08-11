@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { TimelineScrubber } from '../editor/TimelineScrubber'
 import { VideoReferencePanel } from '../editor/VideoReferencePanel'
 import { FORMATION_LABELS, FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../data/formations'
-import { SCENARIOS } from '../data/scenarios'
+import { LIVE_BOARD_SCENARIOS, SCENARIOS } from '../data/scenarios'
 import type { ScenarioFormationMode } from '../domain/scenarios/scenarioTypes'
 import { buildScenarioPlan, getPhaseStepIndexAtProgress } from '../domain/simulation/scenarioPlan'
 import type { AnimatorState, ScenarioAnimator } from '../renderers/pixi/animation/scenarioAnimator'
@@ -113,7 +113,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
   }
 
   const handleScenarioSelect = (scenarioId: string) => {
-    const scenario = SCENARIOS.find((item) => item.id === scenarioId) ?? SCENARIOS[0]
+    const scenario = SCENARIOS.find((item) => item.id === scenarioId) ?? LIVE_BOARD_SCENARIOS[0]
 
     setSelectedScenarioId(scenario.id)
     setSelectedFormation(scenario.formationMode)
@@ -297,7 +297,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
                 value={selectedScenario.id}
                 onChange={(event) => handleScenarioSelect(event.target.value)}
               >
-                {SCENARIOS.map((scenario) => (
+                {LIVE_BOARD_SCENARIOS.map((scenario) => (
                   <option key={scenario.id} value={scenario.id}>
                     {scenario.title}
                   </option>
@@ -370,7 +370,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
             <>
               <h2>Scenarios</h2>
               <div className="scenario-list">
-                {SCENARIOS.map((scenario) => (
+                {LIVE_BOARD_SCENARIOS.map((scenario) => (
                   <button
                     key={scenario.id}
                     type="button"

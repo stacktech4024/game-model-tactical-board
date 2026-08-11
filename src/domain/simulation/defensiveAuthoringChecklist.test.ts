@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { SCENARIOS } from '../../data/scenarios.ts'
+import { LIVE_BOARD_SCENARIOS, SCENARIOS } from '../../data/scenarios.ts'
 import type {
   AuthoredScenarioArrow,
   ScenarioArrowType,
@@ -29,7 +29,6 @@ const MAIN_SCENARIO_IDS = [
   'build-through-wide-channels',
   'counter-quickly-on-turnover',
   'protect-lead-in-back-five',
-  'back-five-to-wing-back-attack',
   'corner-short-decoy-wide-delivery',
   'defensive-block-force-wide',
 ] as const
@@ -56,34 +55,23 @@ const MAIN_SCENARIO_OFF_BALL_CHECKLIST = [
     scenarioId: 'counter-quickly-on-turnover',
     expectedMoment: 'Attacking Transition',
     movements: [
-      { arrowId: 'counter-away-ten-counterpress', type: 'press', side: 'away', playerNumber: 10, labelTerms: ['counterpress'] },
-      { arrowId: 'counter-away-two-recover', type: 'recovery', side: 'away', playerNumber: 2, labelTerms: ['recover'] },
+      { arrowId: 'counter-away-ten-first-pressure', type: 'press', side: 'away', playerNumber: 10, labelTerms: ['pressure'] },
+      { arrowId: 'counter-away-six-cover-forward', type: 'recovery', side: 'away', playerNumber: 6, labelTerms: ['cover'] },
+      { arrowId: 'counter-away-two-recover-outside', type: 'recovery', side: 'away', playerNumber: 2, labelTerms: ['recover'] },
       { arrowId: 'counter-away-five-track-nine', type: 'recovery', side: 'away', playerNumber: 5, labelTerms: ['track'] },
-      { arrowId: 'counter-away-four-drop', type: 'recovery', side: 'away', playerNumber: 4, labelTerms: ['drop'] },
     ],
-    scenarioTerms: ['counter', 'forward', 'support'],
+    scenarioTerms: ['counter', 'forward', 'intercept'],
   },
   {
     scenarioId: 'protect-lead-in-back-five',
     expectedMoment: 'Defensive Transition',
     movements: [
-      { arrowId: 'fuse-away-two-collect', type: 'recovery', side: 'away', playerNumber: 2, labelTerms: ['collect'] },
-      { arrowId: 'fuse-away-six-support', type: 'run', side: 'away', playerNumber: 6, labelTerms: ['support'] },
-      { arrowId: 'fuse-four-cover', type: 'recovery', side: 'home', playerNumber: 4, labelTerms: ['cover'] },
-      { arrowId: 'fuse-two-tuck', type: 'recovery', side: 'home', playerNumber: 2, labelTerms: ['tuck'] },
+      { arrowId: 'fuse-away-eight-intercept', type: 'press', side: 'away', playerNumber: 8, labelTerms: ['intercept'] },
+      { arrowId: 'fuse-away-nine-outlet', type: 'run', side: 'away', playerNumber: 9, labelTerms: ['outlet'] },
+      { arrowId: 'fuse-eight-first-press', type: 'press', side: 'home', playerNumber: 8, labelTerms: ['reacts'] },
+      { arrowId: 'fuse-six-recover-midfield', type: 'recovery', side: 'home', playerNumber: 6, labelTerms: ['recover'] },
     ],
     scenarioTerms: ['press', 'cover', 'counter'],
-  },
-  {
-    scenarioId: 'back-five-to-wing-back-attack',
-    expectedMoment: 'Attacking Organization',
-    movements: [
-      { arrowId: 'wing-back-away-three-delay', type: 'press', side: 'away', playerNumber: 3, labelTerms: ['delay'] },
-      { arrowId: 'wing-back-away-eight-screen', type: 'recovery', side: 'away', playerNumber: 8, labelTerms: ['screen'] },
-      { arrowId: 'wing-back-away-four-track-ten', type: 'recovery', side: 'away', playerNumber: 4, labelTerms: ['track'] },
-      { arrowId: 'wing-back-away-six-drop', type: 'recovery', side: 'away', playerNumber: 6, labelTerms: ['drop'] },
-    ],
-    scenarioTerms: ['wing-back', 'central', 'rest'],
   },
   {
     scenarioId: 'corner-short-decoy-wide-delivery',
@@ -161,7 +149,7 @@ function assertMovementEvidence(scenario: ScenarioDefinition, evidence: Movement
   assertArrowIsPhaseReferenced(scenario, evidence.arrowId)
 }
 
-test('scenario list contains only the retained main six scenarios', () => {
+test('scenario list contains only the retained five scenarios', () => {
   assert.deepEqual(
     SCENARIOS.map((scenario) => scenario.id),
     MAIN_SCENARIO_IDS,
@@ -170,6 +158,13 @@ test('scenario list contains only the retained main six scenarios', () => {
   REMOVED_DEFENSIVE_SCENARIO_IDS.forEach((scenarioId) => {
     assert.equal(SCENARIOS.some((scenario) => scenario.id === scenarioId), false)
   })
+})
+
+test('general live-board selector omits the corner covered by the dedicated set-piece section', () => {
+  assert.deepEqual(
+    LIVE_BOARD_SCENARIOS.map((scenario) => scenario.id),
+    MAIN_SCENARIO_IDS.filter((scenarioId) => scenarioId !== 'corner-short-decoy-wide-delivery'),
+  )
 })
 
 test('main scenarios keep authored opponent and off-ball movement evidence', () => {
