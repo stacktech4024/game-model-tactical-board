@@ -11,15 +11,16 @@ import {
   PITCH_GEOGRAPHY_ZONES,
 } from './pitchGeographyPageData.ts'
 
-test('Pitch Geography is page 4 between Our Identity and Game Analysis', () => {
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(0, 5), [
+test('Pitch Geography remains page 4 between Our Identity and Moments of the Game', () => {
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(0, 6), [
     'cover',
     'intro',
     'philosophy',
     'pitch-geography',
+    'moments',
     'game-analysis',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 16)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 17)
   assert.equal(PRESENTATION_PAGE_LABELS['pitch-geography'], 'Pitch Geography')
 })
 

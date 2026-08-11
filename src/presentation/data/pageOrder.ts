@@ -3,6 +3,7 @@ export type PresentationPageId =
   | 'intro'
   | 'philosophy'
   | 'pitch-geography'
+  | 'moments'
   | 'game-analysis'
   | 'attacking-transition'
   | 'defensive-transition'
@@ -21,6 +22,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'intro',
   'philosophy',
   'pitch-geography',
+  'moments',
   'game-analysis',
   'attacking-transition',
   'defensive-transition',
@@ -40,6 +42,7 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   intro: 'Intro',
   philosophy: 'Our identity',
   'pitch-geography': 'Pitch Geography',
+  moments: 'Moments of the Game',
   'game-analysis': 'Game analysis',
   'attacking-transition': 'Attacking transition',
   'defensive-transition': 'Defensive transition',

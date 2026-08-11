@@ -156,7 +156,7 @@ test('How We Train is routed before Microcycle and Training Methodology', () => 
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 16)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 17)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train\/examples"/)
