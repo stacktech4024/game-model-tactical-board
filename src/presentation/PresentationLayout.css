@@ -6182,3 +6182,167 @@
     font-size: 0.65rem;
   }
 }
+
+/* Page 5 projector rhythm — enlarge the relationship, not just its frame. */
+@media (min-width: 1400px) and (min-height: 850px) {
+  .moments-header {
+    width: 100%;
+    max-width: 1380px;
+    margin-bottom: 18px;
+  }
+
+  .moments-header .presentation-title {
+    font-size: 3.05rem;
+  }
+
+  .moments-header__prompt {
+    max-width: 470px;
+    font-size: 1.02rem;
+  }
+
+  .moments-relationship {
+    width: 100%;
+    max-width: 1380px;
+    padding: 24px 32px;
+  }
+
+  .moments-cycle-grid {
+    grid-template-columns: minmax(300px, 1fr) minmax(180px, 0.55fr) minmax(300px, 1fr);
+    grid-template-rows: 160px 112px 160px;
+    gap: 10px 22px;
+    max-width: 1200px;
+  }
+
+  .moments-node {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 17px;
+    border-left-width: 5px;
+    border-radius: 16px;
+    padding: 20px 22px 20px 17px;
+  }
+
+  .moments-node__number {
+    font-size: 0.72rem;
+  }
+
+  .moments-node__abbreviation {
+    width: 48px;
+    height: 48px;
+    font-size: 0.9rem;
+  }
+
+  .moments-node h2 {
+    margin-bottom: 8px;
+    font-size: 1.28rem;
+  }
+
+  .moments-node p {
+    font-size: 0.88rem;
+    line-height: 1.42;
+  }
+
+  .moments-connector {
+    gap: 11px;
+  }
+
+  .moments-connector__cue {
+    font-size: 0.7rem;
+  }
+
+  .moments-connector__desktop-arrow {
+    font-size: 2.05rem;
+  }
+
+  .moments-set-pieces {
+    border-radius: 15px;
+    padding: 15px 18px;
+  }
+
+  .moments-set-pieces > span {
+    font-size: 0.64rem;
+  }
+
+  .moments-set-pieces h2 {
+    margin-bottom: 5px;
+    font-size: 1.16rem;
+  }
+
+  .moments-set-pieces p {
+    font-size: 0.76rem;
+    line-height: 1.34;
+  }
+
+  .moments-model-statement {
+    width: min(100%, 1180px);
+    margin-top: 16px;
+    padding: 12px 18px;
+    font-size: 0.98rem;
+  }
+}
+
+@media (min-width: 1700px) and (min-height: 950px) {
+  .moments-header,
+  .moments-relationship {
+    max-width: 1580px;
+  }
+
+  .moments-header .presentation-title {
+    font-size: 3.35rem;
+  }
+
+  .moments-header__prompt {
+    max-width: 520px;
+    font-size: 1.1rem;
+  }
+
+  .moments-relationship {
+    padding: 30px 38px;
+  }
+
+  .moments-cycle-grid {
+    grid-template-columns: minmax(340px, 1fr) minmax(210px, 0.56fr) minmax(340px, 1fr);
+    grid-template-rows: 190px 130px 190px;
+    gap: 12px 26px;
+    max-width: 1380px;
+  }
+
+  .moments-node {
+    gap: 20px;
+    padding: 24px 27px 24px 20px;
+  }
+
+  .moments-node__abbreviation {
+    width: 56px;
+    height: 56px;
+    font-size: 1rem;
+  }
+
+  .moments-node h2 {
+    font-size: 1.42rem;
+  }
+
+  .moments-node p {
+    font-size: 0.96rem;
+  }
+
+  .moments-connector__cue {
+    font-size: 0.76rem;
+  }
+
+  .moments-set-pieces {
+    padding: 18px 22px;
+  }
+
+  .moments-set-pieces h2 {
+    font-size: 1.28rem;
+  }
+
+  .moments-set-pieces p {
+    font-size: 0.82rem;
+  }
+
+  .moments-model-statement {
+    width: min(100%, 1340px);
+    font-size: 1.04rem;
+  }
+}
