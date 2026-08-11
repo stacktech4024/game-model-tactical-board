@@ -7,6 +7,7 @@ import type { ScenarioDefinition } from '../scenarios/scenarioTypes.ts'
 import {
   buildScenarioPlan,
   getArrowMoveDuration,
+  getPhaseStepIndexAtProgress,
   VIA_SEGMENT_GAP,
   PASS_SPEED_PROFILE,
   SHOT_SPEED_PROFILE,
@@ -549,8 +550,31 @@ test('buildScenarioPlan preserves phase step focus and key player metadata', () 
       zoneFocus: [3],
       channelFocus: [2],
       relatedArrows: ['late-pass', 'shot'],
+      playerOrientations: [],
+      timing: plan.phaseSteps[0].timing,
     },
   ])
+  assert.equal(plan.phaseSteps[0].timing.startProgress, 0)
+  assert.equal(plan.phaseSteps[0].timing.endProgress, 1)
+})
+
+test('getPhaseStepIndexAtProgress tolerates playback rounding at a phase boundary', () => {
+  const plan = buildScenarioPlan(makeScenario(), {})
+  const firstPhase = plan.phaseSteps[0]
+
+  plan.phaseSteps = [
+    {
+      ...firstPhase,
+      timing: { startTime: 0, endTime: 1, startProgress: 0, endProgress: 0.5 },
+    },
+    {
+      ...firstPhase,
+      id: 'second-step',
+      timing: { startTime: 1, endTime: 2, startProgress: 0.5, endProgress: 1 },
+    },
+  ]
+
+  assert.equal(getPhaseStepIndexAtProgress(plan, 0.5 - 0.0000001), 1)
 })
 
 test('buildScenarioPlan does not mutate the original scenario or formation object', () => {

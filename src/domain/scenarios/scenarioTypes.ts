@@ -7,6 +7,7 @@ export type ScenarioMoment =
 
 export type ScenarioFormationMode =
   | 'attacking-442'
+  | 'attacking-corner'
   | 'defensive-4231'
   | 'attacking-433'
   | 'defensive-532'
@@ -108,6 +109,13 @@ export type ScenarioMarker = {
   tone?: ScenarioMarkerTone
 }
 
+export type ScenarioPlayerOrientation = {
+  side?: 'home' | 'away'
+  playerNumber: number
+  /** 0 faces upfield toward the opponent goal; 90 faces right. */
+  facingAngle: number
+}
+
 export type ScenarioFieldGeography = {
   zones: HighlightZone[]
   channels: number[]
@@ -122,6 +130,10 @@ export type ScenarioPhaseStep = {
   zoneFocus: HighlightZone[]
   channelFocus: number[]
   relatedArrows?: string[]
+  /** Optional action order that defines the exact start of this teaching phase. */
+  startOrder?: number
+  /** Authored body shapes for stationary or pre-action players in this phase. */
+  playerOrientations?: ScenarioPlayerOrientation[]
 }
 
 export type ScenarioSystem = {

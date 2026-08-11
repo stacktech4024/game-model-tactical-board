@@ -126,6 +126,8 @@ function makePlan(): ScenarioPlan {
         zoneFocus: [1],
         channelFocus: [1],
         relatedArrows: ['pass'],
+        playerOrientations: [],
+        timing: { startTime: 0, endTime: 1.125, startProgress: 0, endProgress: 0.5 },
       },
       {
         id: 'middle-step',
@@ -135,6 +137,8 @@ function makePlan(): ScenarioPlan {
         zoneFocus: [2, 3],
         channelFocus: [2],
         relatedArrows: [],
+        playerOrientations: [],
+        timing: { startTime: 1.125, endTime: 2.25, startProgress: 0.5, endProgress: 1 },
       },
       {
         id: 'final-step',
@@ -147,6 +151,8 @@ function makePlan(): ScenarioPlan {
         zoneFocus: [4],
         channelFocus: [3],
         relatedArrows: ['pass'],
+        playerOrientations: [],
+        timing: { startTime: 2.25, endTime: 2.25, startProgress: 1, endProgress: 1 },
       },
     ],
   }

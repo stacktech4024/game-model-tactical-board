@@ -65,6 +65,8 @@ function copyPhaseStep(phaseStep: PlannedPhaseStep): PlannedPhaseStep {
     zoneFocus: [...phaseStep.zoneFocus],
     channelFocus: [...phaseStep.channelFocus],
     relatedArrows: [...phaseStep.relatedArrows],
+    playerOrientations: phaseStep.playerOrientations.map((orientation) => ({ ...orientation })),
+    timing: { ...phaseStep.timing },
   }
 }
 
@@ -175,7 +177,7 @@ function copyAnimationIntent(
 }
 
 function getTotalDuration(intents: ScheduledAnimationIntent[]): number {
-  return intents.at(-1)?.timing.endTime ?? 0
+  return intents.reduce((maximum, intent) => Math.max(maximum, intent.timing.endTime), 0)
 }
 
 function applyIntentPositions(
@@ -239,7 +241,13 @@ function getActivePhaseStep(
     return undefined
   }
 
-  const activeIndex = Math.round(progress * (phaseSteps.length - 1))
+  let activeIndex = 0
+
+  phaseSteps.forEach((phaseStep, index) => {
+    if (progress >= phaseStep.timing.startProgress) {
+      activeIndex = index
+    }
+  })
 
   return phaseSteps[activeIndex]
 }

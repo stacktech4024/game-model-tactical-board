@@ -13,7 +13,7 @@ import {
   type HowWeTrainVisualScenario,
 } from '../data/howWeTrainPageData'
 
-const PREVIEW_WIDTH = 300
+const PREVIEW_WIDTH = 360
 const PREVIEW_HEIGHT = Math.round(PREVIEW_WIDTH * (PITCH.LENGTH / PITCH.WIDTH))
 
 const DESIGN_LABELS: { key: keyof (typeof HOW_WE_TRAIN_EXAMPLES)[number]['design']; label: string }[] = [
@@ -121,11 +121,11 @@ export function HowWeTrainExamplesPage() {
   }
 
   return (
-    <PresentationLayout pageId="how-we-train" noPadding>
+    <PresentationLayout pageId="how-we-train-session" noPadding>
       <header className="how-we-train-detail-header">
         <div>
           <Link to="/presentation/how-we-train">← How We Train overview</Link>
-          <p className="presentation-eyebrow">Animated training examples</p>
+          <p className="presentation-eyebrow">Session design · Page 1 of 2</p>
           <h1 className="presentation-title">{activeExample.title}</h1>
           <p className="presentation-body">{activeExample.shortPurpose}</p>
         </div>
@@ -176,20 +176,20 @@ export function HowWeTrainExamplesPage() {
           <div><span>Evidence</span><strong>{activeExample.evidenceStrength}</strong></div>
         </div>
 
-        <section className="how-we-train-diagram-section" aria-labelledby="training-diagrams-title">
-          <header>
-            <span>GAME-REALISTIC PICTURES</span>
-            <h2 id="training-diagrams-title">Read both teams across two connected diagrams</h2>
-            <p>Diagram 2 begins from Diagram 1’s final positions and orientations.</p>
-          </header>
-          <div className="how-we-train-diagrams">
-            <TrainingPhaseCard key={`${activeExample.id}-0`} exampleId={activeExample.id} index={0} phase={visualPhases[0]} />
-            <TrainingPhaseCard key={`${activeExample.id}-1`} exampleId={activeExample.id} index={1} phase={visualPhases[1]} />
-          </div>
-          <p className="how-we-train-diagram-caption">{activeExample.visualScenario.caption}</p>
-        </section>
+        <div className="how-we-train-session-grid">
+          <section className="how-we-train-diagram-section" aria-labelledby="training-diagrams-title">
+            <header>
+              <span>GAME-REALISTIC PICTURES</span>
+              <h2 id="training-diagrams-title">Read both teams across two connected diagrams</h2>
+              <p>Diagram 2 begins from Diagram 1’s final positions and orientations.</p>
+            </header>
+            <div className="how-we-train-diagrams">
+              <TrainingPhaseCard key={`${activeExample.id}-0`} exampleId={activeExample.id} index={0} phase={visualPhases[0]} />
+              <TrainingPhaseCard key={`${activeExample.id}-1`} exampleId={activeExample.id} index={1} phase={visualPhases[1]} />
+            </div>
+            <p className="how-we-train-diagram-caption">{activeExample.visualScenario.caption}</p>
+          </section>
 
-        <div className="how-we-train-detail-grid">
           <section className="how-we-train-activity-detail" aria-label={`${activeExample.title} activity design`}>
             <div className="how-we-train-activity-heading">
               <span>{activeExample.system} · {activeExample.principles.join(' · ')}</span>
@@ -209,19 +209,9 @@ export function HowWeTrainExamplesPage() {
               <div className="how-we-train-role-chips" aria-label="Related positional profiles">{activeExample.profileReferences.map((profile) => <span key={profile.profileId}>{profile.label}</span>)}</div>
               <div className="how-we-train-link-row"><Link to="/presentation/players">View Positional Profiles</Link><Link to="/presentation/skills">Related Skill — {activeExample.relatedSkill}</Link></div>
             </div>
-          </section>
-
-          <section className="how-we-train-transfer" aria-label="Game Model to match transfer chain">
-            <header><span>How do we want to play? → How do we coach?</span><h2>GAME MODEL → TRAINING → TRANSFER</h2></header>
-            <ol className="how-we-train-chain">
-              <li><b>1</b><div><span>GAME MODEL PRINCIPLE</span><p>{activeExample.gameModelPrinciple.join(' · ')}</p><small>{activeExample.gameModelPrincipleEvidence}</small></div></li>
-              <li><b>2</b><div><span>POSITIONAL REQUIREMENT</span><p>{activeExample.positionalRequirement.join(' · ')}</p></div></li>
-              <li><b>3</b><div><span>TRAINING DESIGN</span><p>{activeExample.trainingDesign}</p></div></li>
-              <li className="how-we-train-chain__coaching"><b>4</b><div><span>COACHING DETAIL</span><dl>{Object.entries(activeExample.coachingDetail).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div></li>
-              <li className="how-we-train-chain__transfer"><b>5</b><div><span>MATCH TRANSFER</span><p>{activeExample.matchTransfer.map((step, index) => <span key={step}>{index > 0 && <i>→</i>}{step}</span>)}</p></div></li>
-            </ol>
-            {activeExample.decisionFramework && <div className="how-we-train-decision" aria-label="Canada Soccer player decision-making framework">{activeExample.decisionFramework.map((item) => <div key={item.phase}><strong>{item.phase}</strong><span>{item.detail}</span></div>)}</div>}
-            <div className="how-we-train-success"><span>SUCCESS INDICATOR / MATCH-TRANSFER OUTCOME</span><p>{activeExample.successIndicator}</p></div>
+            <Link className="how-we-train-continue" to={`/presentation/how-we-train-transfer?example=${activeExample.id}`}>
+              Continue to match transfer <span aria-hidden="true">→</span>
+            </Link>
           </section>
         </div>
       </main>

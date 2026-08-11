@@ -4,12 +4,19 @@ import type { AnimatorState, ScenarioAnimator } from '../renderers/pixi/animatio
 type TimelineScrubberProps = {
   animatorRef: React.RefObject<ScenarioAnimator | null>
   playState: AnimatorState
+  initialProgress?: number
   onPause?: () => void
   onProgressChange?: (progress: number) => void
 }
 
-export function TimelineScrubber({ animatorRef, playState, onPause, onProgressChange }: TimelineScrubberProps) {
-  const [progress, setProgress] = useState(0)
+export function TimelineScrubber({
+  animatorRef,
+  playState,
+  initialProgress = 0,
+  onPause,
+  onProgressChange,
+}: TimelineScrubberProps) {
+  const [progress, setProgress] = useState(initialProgress)
 
   useEffect(() => {
     let frameId: number | undefined

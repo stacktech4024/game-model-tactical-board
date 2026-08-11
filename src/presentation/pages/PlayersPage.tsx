@@ -14,8 +14,9 @@ import {
   type ProfileMomentId,
 } from '../data/positionalProfiles'
 
-const BOARD_WIDTH = 254
+const BOARD_WIDTH = 540
 const BOARD_HEIGHT = Math.round(BOARD_WIDTH * (PITCH.LENGTH / PITCH.WIDTH))
+const BOARD_TOKEN_SCALE = 1.48
 const AO_REFERENCE_FORMATION = FORMATION_POSITIONS['attacking-442']
 const BALL_OFFSET_METERS = 1.6
 const MOMENT_IDS = Object.keys(PROFILE_MOMENT_LABELS) as ProfileMomentId[]
@@ -143,7 +144,7 @@ export function PlayersPage() {
               height={BOARD_HEIGHT}
               players={pixiPlayers}
               ballPosition={ballPosition}
-              tokenScale={0.78}
+              tokenScale={BOARD_TOKEN_SCALE}
             />
             {overlaySpots.map(({ player, screen }) => {
               const isActive = selectedNumbers.has(player.number)
@@ -184,76 +185,82 @@ export function PlayersPage() {
             </div>
           </div>
 
-          {selectedProfile.roleEmphases && (
-            <div className="profile-role-emphases" aria-label="Central midfield role emphases">
-              {selectedProfile.roleEmphases.map((emphasis) => (
-                <div key={emphasis.number}>
-                  <strong>{emphasis.label}</strong>
-                  <span>{emphasis.priorities.join(' / ')}</span>
-                </div>
+          <div
+            className={selectedProfile.roleEmphases
+              ? 'positional-profile-detail__body has-role-emphases'
+              : 'positional-profile-detail__body'}
+          >
+            {selectedProfile.roleEmphases && (
+              <div className="profile-role-emphases" aria-label="Central midfield role emphases">
+                {selectedProfile.roleEmphases.map((emphasis) => (
+                  <div key={emphasis.number}>
+                    <strong>{emphasis.label}</strong>
+                    <span>{emphasis.priorities.join(' / ')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="profile-priority-grid" aria-label={`${selectedProfile.positionName} profile priorities`}>
+              {PRIORITY_CATEGORIES.map((category) => (
+                <section
+                  key={category.id}
+                  className={category.id === 'skillSet' ? 'profile-priority-card profile-priority-card--skills' : 'profile-priority-card'}
+                >
+                  <h3>{category.label}</h3>
+                  <ul>
+                    {selectedProfile[category.id].map((priority) => <li key={priority}>{priority}</li>)}
+                  </ul>
+                </section>
               ))}
             </div>
-          )}
 
-          <div className="profile-priority-grid" aria-label={`${selectedProfile.positionName} profile priorities`}>
-            {PRIORITY_CATEGORIES.map((category) => (
-              <section
-                key={category.id}
-                className={category.id === 'skillSet' ? 'profile-priority-card profile-priority-card--skills' : 'profile-priority-card'}
-              >
-                <h3>{category.label}</h3>
-                <ul>
-                  {selectedProfile[category.id].map((priority) => <li key={priority}>{priority}</li>)}
-                </ul>
-              </section>
-            ))}
-          </div>
+            <section className="profile-moments">
+              <div className="profile-moment-tabs" role="tablist" aria-label={`${selectedProfile.positionName} responsibilities by Moment`}>
+                {MOMENT_IDS.map((momentId, index) => {
+                  const moment = PROFILE_MOMENT_LABELS[momentId]
+                  const isActive = momentId === activeMomentId
 
-          <section className="profile-moments">
-            <div className="profile-moment-tabs" role="tablist" aria-label={`${selectedProfile.positionName} responsibilities by Moment`}>
-              {MOMENT_IDS.map((momentId, index) => {
-                const moment = PROFILE_MOMENT_LABELS[momentId]
-                const isActive = momentId === activeMomentId
-
-                return (
-                  <button
-                    key={momentId}
-                    id={`profile-moment-tab-${momentId}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls="profile-moment-panel"
-                    tabIndex={isActive ? 0 : -1}
-                    className={isActive ? 'profile-moment-tab is-active' : 'profile-moment-tab'}
-                    onClick={() => setActiveMomentId(momentId)}
-                    onKeyDown={(event) => handleMomentKeyDown(event, index)}
-                  >
-                    <strong>{moment.short}</strong>
-                    <span>{moment.full}</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            <div
-              id="profile-moment-panel"
-              className="profile-moment-panel"
-              role="tabpanel"
-              aria-labelledby={`profile-moment-tab-${activeMomentId}`}
-            >
-              <div>
-                <span>{PROFILE_MOMENT_LABELS[activeMomentId].full}</span>
-                <ul>
-                  {selectedProfile.moments[activeMomentId].map((responsibility) => (
-                    <li key={responsibility}>{responsibility}</li>
-                  ))}
-                </ul>
+                  return (
+                    <button
+                      key={momentId}
+                      id={`profile-moment-tab-${momentId}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls="profile-moment-panel"
+                      tabIndex={isActive ? 0 : -1}
+                      className={isActive ? 'profile-moment-tab is-active' : 'profile-moment-tab'}
+                      onClick={() => setActiveMomentId(momentId)}
+                      onKeyDown={(event) => handleMomentKeyDown(event, index)}
+                    >
+                      <strong>{moment.short}</strong>
+                      <span>{moment.full}</span>
+                    </button>
+                  )
+                })}
               </div>
-              <p className="profile-evidence">
-                <strong>Training evidence:</strong> {selectedProfile.evidence[0].session} - {selectedProfile.evidence[0].focus}
-              </p>
-            </div>
-          </section>
+
+              <div
+                id="profile-moment-panel"
+                className="profile-moment-panel"
+                role="tabpanel"
+                aria-labelledby={`profile-moment-tab-${activeMomentId}`}
+              >
+                <div>
+                  <span>{PROFILE_MOMENT_LABELS[activeMomentId].full}</span>
+                  <ul>
+                    {selectedProfile.moments[activeMomentId].map((responsibility) => (
+                      <li key={responsibility}>{responsibility}</li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="profile-evidence">
+                  <strong>Training evidence:</strong> {selectedProfile.evidence[0].session} - {selectedProfile.evidence[0].focus}
+                </p>
+              </div>
+            </section>
+          </div>
         </article>
       </section>
     </PresentationLayout>

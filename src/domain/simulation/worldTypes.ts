@@ -57,6 +57,17 @@ export type PlannedPhaseStep = {
   zoneFocus: HighlightZone[]
   channelFocus: number[]
   relatedArrows: string[]
+  playerOrientations: Array<{
+    side: TeamSide
+    playerNumber: number
+    facingAngle: number
+  }>
+  timing: {
+    startTime: number
+    endTime: number
+    startProgress: number
+    endProgress: number
+  }
 }
 
 export type AnimationIntentType = 'ball-movement' | 'player-movement'

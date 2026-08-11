@@ -14,16 +14,38 @@ type Formation = {
 }
 
 export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
-  // Back four, flat midfield four, and two forwards with a support striker.
-  //
-  // NOTE: the away (defending) shape below is an intentional packed
-  // corner-defending box - all ten outfield players sit deep around the
-  // box except #9, left forward as the lone out-ball/counter outlet. This
-  // shape is shared with 'build-through-wide-channels', which also uses
-  // 'attacking-442' for its away side; that scenario is open play, but the
-  // away team defending deep inside its own box reads as plausible there
-  // too. Do not "fix" this back to a high, spread-out shape without
-  // checking both scenarios.
+  'attacking-corner': {
+    label: 'Attacking corner',
+    home: {
+      1: { x: 34, y: 7 },
+      2: { x: 60, y: 82 },
+      3: { x: 10, y: 94 },
+      4: { x: 24, y: 84 },
+      5: { x: 30, y: 82 },
+      6: { x: 34, y: 58 },
+      7: { x: 2, y: 102 },
+      8: { x: 34, y: 76 },
+      9: { x: 34, y: 87 },
+      10: { x: 40, y: 82 },
+      11: { x: 47, y: 84 },
+    },
+    away: {
+      1: { x: 34, y: 99 },
+      2: { x: 52, y: 90 },
+      3: { x: 14, y: 90 },
+      4: { x: 24, y: 91 },
+      5: { x: 38, y: 90 },
+      6: { x: 32, y: 93 },
+      7: { x: 50, y: 86 },
+      8: { x: 54, y: 82 },
+      9: { x: 34, y: 48 },
+      10: { x: 34, y: 83 },
+      11: { x: 18, y: 86 },
+    },
+  },
+  // Open-play 1-4-4-2 against a compact but legible opponent mid/low block.
+  // The corner routine has its own attacking-corner shape so these players
+  // can retain realistic line spacing instead of occupying a set-piece crowd.
   'attacking-442': {
     label: 'Attacking 1-4-4-2',
     home: {
@@ -36,21 +58,21 @@ export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
       8: { x: 42, y: 52 },
       11: { x: 10, y: 62 },
       7: { x: 58, y: 62 },
-      10: { x: 28, y: 84 },
+      10: { x: 28, y: 78 },
       9: { x: 40, y: 84 },
     },
     away: {
       1: { x: 34, y: 99 },
-      2: { x: 54, y: 90 },
-      3: { x: 14, y: 90 },
-      4: { x: 27, y: 87 },
-      5: { x: 41, y: 87 },
-      6: { x: 34, y: 92 },
-      8: { x: 44, y: 84 },
-      11: { x: 18, y: 84 },
-      10: { x: 34, y: 80 },
-      7: { x: 50, y: 84 },
-      9: { x: 34, y: 48 },
+      2: { x: 57, y: 82 },
+      3: { x: 11, y: 82 },
+      4: { x: 27, y: 84 },
+      5: { x: 45, y: 84 },
+      6: { x: 29, y: 70 },
+      8: { x: 39, y: 70 },
+      11: { x: 15, y: 62 },
+      10: { x: 28, y: 56 },
+      7: { x: 53, y: 62 },
+      9: { x: 40, y: 56 },
     },
   },
 
@@ -66,7 +88,7 @@ export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
       6: { x: 29, y: 42 },
       8: { x: 39, y: 42 },
       11: { x: 13, y: 58 },
-      10: { x: 34, y: 60 },
+      10: { x: 26, y: 62 },
       7: { x: 55, y: 58 },
       9: { x: 34, y: 76 },
     },
@@ -78,9 +100,9 @@ export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
       5: { x: 42, y: 84 },
       6: { x: 28, y: 67 },
       8: { x: 40, y: 67 },
-      11: { x: 14, y: 56 },
+      11: { x: 8, y: 60 },
       10: { x: 34, y: 55 },
-      7: { x: 54, y: 56 },
+      7: { x: 60, y: 60 },
       9: { x: 34, y: 42 },
     },
   },
@@ -103,8 +125,8 @@ export const FORMATIONS: Record<ScenarioFormationMode, Formation> = {
     },
     away: {
       1: { x: 34, y: 99 },
-      2: { x: 58, y: 82 },
-      3: { x: 10, y: 82 },
+      2: { x: 52, y: 84 },
+      3: { x: 16, y: 84 },
       4: { x: 26, y: 84 },
       5: { x: 42, y: 84 },
       6: { x: 34, y: 69 },

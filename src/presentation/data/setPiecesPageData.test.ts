@@ -84,7 +84,7 @@ test('the attacking corner remains the established deep animated example with a 
   assert.deepEqual(corner.preview.steps, CORNER_PREVIEW_STEPS)
   assert.equal(corner.liveBoardScenarioId, 'corner-short-decoy-wide-delivery')
   assert.ok(SCENARIOS.some((scenario) => scenario.id === corner.liveBoardScenarioId))
-  assert.match(corner.organization, /#4\/#5\/#9\/#10\/#11.*#8.*#2\/#6.*hybrid/i)
+  assert.match(corner.organization, /#4\/#5\/#9\/#10\/#11.*#2.*first contact.*#8.*penalty-spot.*#6.*transition.*hybrid/i)
 })
 
 test('every restart distinguishes organization, strategy, tactics, skills, principles, and professional-game context', () => {
@@ -146,7 +146,7 @@ test('throw-in begins in a legal state with four support relationships and track
   assert.ok(getPlayer(throwIn, 'ti-home-2').x > 100, 'reset must restore the legal thrower position')
 })
 
-test('attacking corner uses a connected cluster, angled runs, contested contact, and a clear finish', () => {
+test('attacking corner keeps its connected cluster before #2 heads the far-post delivery across for #8 to finish', () => {
   const corner = getCase('attacking-corner')
   const clusterIds = ['ac-home-4', 'ac-home-5', 'ac-home-9', 'ac-home-10', 'ac-home-11']
   const cluster = clusterIds.map((id) => getPlayer(corner, id))
@@ -163,7 +163,7 @@ test('attacking corner uses a connected cluster, angled runs, contested contact,
   const manipulation = corner.preview.steps.find((step) => step.id === 'ac-manipulation')
   const delivery = corner.preview.steps.find((step) => step.id === 'ac-delivery')
   const attackingRuns = delivery?.playerMoves?.filter((move) => clusterIds.includes(move.playerId)) ?? []
-  const primaryRun = attackingRuns.find((move) => move.playerId === 'ac-home-9')
+  const backPostRun = delivery?.playerMoves?.find((move) => move.playerId === 'ac-home-2')
   const atDelivery = replayUntil(corner, 'ac-delivery')
 
   assert.ok(manipulation?.playerMoves?.some((move) => move.playerId === 'ac-home-4'))
@@ -176,26 +176,37 @@ test('attacking corner uses a connected cluster, angled runs, contested contact,
     assert.ok(start)
     assert.ok(move.to.x < start.x && move.to.y < start.y, `${move.playerId} must run diagonally in from the far side`)
   })
-  assert.deepEqual(delivery?.ballTo, primaryRun?.to, 'changed-angle delivery must target the primary #9 run')
+  assert.ok(backPostRun, '#2 must attack the far-post delivery after beginning beyond the cluster')
+  assert.deepEqual(delivery?.ballTo, backPostRun?.to, 'changed-angle delivery must reach #2 at the far post')
+  assert.ok((delivery?.ballTo?.x ?? 0) >= 70, 'delivery must travel wide beyond the central crowd')
+  const centralPin = delivery?.playerMoves?.find((move) => move.playerId === 'ac-home-9')
+  assert.ok((delivery?.ballTo?.y ?? 100) <= (centralPin?.to.y ?? 0), '#2 must receive at least as deep as #9')
 
   const deliveryIndex = corner.preview.steps.findIndex((step) => step.id === 'ac-delivery')
-  const firstContact = corner.preview.steps.find((step) => step.id === 'ac-first-contact')
+  const headerAcross = corner.preview.steps.find((step) => step.id === 'ac-header-across')
   const finish = corner.preview.steps.find((step) => step.id === 'ac-finish')
 
-  assert.deepEqual(firstContact?.ballFrom, delivery?.ballTo)
-  assert.equal(firstContact?.emphasizePlayerId, 'ac-home-9')
-  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-home-9'))
-  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-away-5'))
-  assert.ok(firstContact?.playerMoves?.some((move) => move.playerId === 'ac-home-8'))
+  assert.deepEqual(headerAcross?.ballFrom, delivery?.ballTo)
+  assert.equal(headerAcross?.emphasizePlayerId, 'ac-home-2')
+  assert.ok(headerAcross?.playerMoves?.some((move) => move.playerId === 'ac-home-2'))
+  assert.ok(headerAcross?.playerMoves?.some((move) => move.playerId === 'ac-away-2'))
+  assert.ok(headerAcross?.playerMoves?.some((move) => move.playerId === 'ac-home-8'))
+  assert.ok((headerAcross?.ballTo?.x ?? 0) >= 47 && (headerAcross?.ballTo?.x ?? 100) <= 53)
+  assert.ok((headerAcross?.ballTo?.y ?? 0) >= 9 && (headerAcross?.ballTo?.y ?? 100) <= 13)
+  assert.ok(
+    (headerAcross?.ballTo?.y ?? 0) > (headerAcross?.ballFrom?.y ?? 100),
+    '#2 header must travel back away from the goal line toward the penalty spot',
+  )
   assert.equal(finish?.emphasizePlayerId, 'ac-home-8')
-  assert.deepEqual(finish?.ballFrom, firstContact?.ballTo)
-  assert.deepEqual(finish?.ballTo, { x: 50, y: 0 })
-  assert.match(finish?.cue ?? '', /shoots.*goal/i)
-  assert.ok(finish?.playerMoves?.some((move) => move.playerId === 'ac-home-2'))
-  assert.ok(corner.preview.steps.indexOf(firstContact!) > deliveryIndex)
-  assert.ok(corner.preview.steps.indexOf(finish!) > corner.preview.steps.indexOf(firstContact!))
-  assert.ok(getPlayer(corner, 'ac-home-2').y >= 57)
+  assert.deepEqual(finish?.ballFrom, headerAcross?.ballTo)
+  assert.equal(finish?.ballTo?.y, 0)
+  assert.match(finish?.cue ?? '', /#8.*heads.*goal/i)
+  assert.ok(finish?.playerMoves?.some((move) => move.playerId === 'ac-home-8'))
+  assert.ok(corner.preview.steps.indexOf(headerAcross!) > deliveryIndex)
+  assert.ok(corner.preview.steps.indexOf(finish!) > corner.preview.steps.indexOf(headerAcross!))
+  assert.ok(getPlayer(corner, 'ac-home-2').x >= 85 && getPlayer(corner, 'ac-home-2').y < 42)
   assert.ok(getPlayer(corner, 'ac-home-6').y >= 57)
+  assert.match(corner.strategy, /#2.*head back.*penalty spot.*#8.*second header/i)
 })
 
 test('defending corner uses a hybrid block with active goalkeeper, first contact, edge cover, and outlet', () => {

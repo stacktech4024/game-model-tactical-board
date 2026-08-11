@@ -13,7 +13,10 @@ export type PresentationPageId =
   | 'players'
   | 'skills'
   | 'how-we-train'
+  | 'how-we-train-session'
+  | 'how-we-train-transfer'
   | 'microcycle'
+  | 'microcycle-detail'
   | 'methodology'
   | 'closing'
 
@@ -32,7 +35,10 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'players',
   'skills',
   'how-we-train',
+  'how-we-train-session',
+  'how-we-train-transfer',
   'microcycle',
+  'microcycle-detail',
   'methodology',
   'closing',
 ]
@@ -52,7 +58,10 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   players: 'Positional profiles',
   skills: 'Skill development',
   'how-we-train': 'How we train',
+  'how-we-train-session': 'Training session design',
+  'how-we-train-transfer': 'Session-to-match transfer',
   microcycle: 'Microcycle',
+  'microcycle-detail': 'Microcycle day detail',
   methodology: 'Training methodology',
   closing: 'Closing',
 }

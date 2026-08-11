@@ -8,6 +8,7 @@ import {
   MD_PLUS_ONE_EVIDENCE,
   MICROCYCLE_DAYS,
   PLAYER_READINESS_NOTE,
+  RPE_GUIDANCE,
   WEEKLY_CONTEXT,
   getMicrocycleDay,
   type MicrocycleLoad,
@@ -99,12 +100,43 @@ test('Match Day and Saturday communicate competition transfer and rest accuratel
   assert.equal(match.role, 'Match Day')
   assert.equal(match.physicalLoad.value, 'MATCH')
   assert.equal(match.tacticalLoad.value, 'MATCH')
+  assert.match(match.rpe.value, /9–10/)
   assert.match(match.gameModelFocus.join(' '), /full competitive pressure/i)
   assert.deepEqual(match.sessionContent, ['GAME MODEL', 'DECISION', 'EXECUTION', 'REVIEW'])
   assert.equal(saturday.role, 'Rest / Recovery')
   assert.equal(saturday.physicalLoad.value, 'REST')
+  assert.match(saturday.rpe.value, /RPE 0/)
   assert.match(saturday.sessionContent.join(' '), /No team field session normally/i)
   assert.doesNotMatch(`${saturday.role} ${saturday.sessionContent.join(' ')}`, /Match Day/i)
+})
+
+test('every day includes all six evaluator-required Microcycle fields', () => {
+  MICROCYCLE_DAYS.forEach((day) => {
+    assert.ok(day.primaryMoments.value)
+    assert.ok(day.objective.value.trim(), `${day.id}: objective`)
+    assert.ok(day.duration.value.trim(), `${day.id}: duration`)
+    assert.ok(day.rpe.value.trim(), `${day.id}: RPE`)
+    assert.ok(day.methodology.value.trim(), `${day.id}: methodology`)
+    assert.ok(day.activityTypes.value.length > 0, `${day.id}: activity types`)
+  })
+})
+
+test('activity and session types use the Canada Soccer course taxonomy across the week', () => {
+  const weeklyPlan = JSON.stringify(MICROCYCLE_DAYS)
+
+  assert.match(weeklyPlan, /Small-Sided Game \(SSG\)/)
+  assert.match(weeklyPlan, /Recovery Session \(RS\)/)
+  assert.match(weeklyPlan, /Video Analysis Session \(VA\)/)
+  assert.match(weeklyPlan, /Tactical Training \(TT\)/)
+  assert.match(weeklyPlan, /Rest Day \(RST\)/)
+  assert.match(weeklyPlan, /11v11 Match/)
+})
+
+test('RPE guidance separates planning targets from the player-reported response and basic load', () => {
+  assert.match(RPE_GUIDANCE.scale, /player-reported 1–10.*after each session/i)
+  assert.match(RPE_GUIDANCE.loadCalculation, /duration in minutes × player session RPE/i)
+  assert.match(RPE_GUIDANCE.review, /minutes.*attendance.*wellness.*coach observation/i)
+  assert.match(RPE_GUIDANCE.planningBoundary, /Planning ranges are targets.*reported by the player/i)
 })
 
 test('MD+1 evidence retains every confirmed load, format, method, and content boundary', () => {
@@ -170,7 +202,7 @@ test('every critical planning field exposes an allowed field-level evidence stat
   ])
 
   MICROCYCLE_DAYS.forEach((day) => {
-    ;[day.physicalLoad, day.rpe, day.tacticalLoad, day.primaryMoments, day.methodology].forEach((field) => {
+    ;[day.physicalLoad, day.rpe, day.tacticalLoad, day.objective, day.duration, day.primaryMoments, day.sessionType, day.methodology, day.activityTypes].forEach((field) => {
       assert.ok(allowedStatuses.has(field.status), `${day.id}: ${field.status}`)
     })
     day.sessionEvidence.forEach((evidence) => assert.ok(allowedStatuses.has(evidence.status)))
@@ -190,24 +222,29 @@ test('Microcycle uses exact Canada Soccer Moment terminology', () => {
   })
 })
 
-test('the dedicated route is ordered between How We Train and Training Methodology', () => {
+test('the overview and day-detail routes are ordered between How We Train and Training Methodology', () => {
   const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
 
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-6), [
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-9), [
     'players',
     'skills',
     'how-we-train',
+    'how-we-train-session',
+    'how-we-train-transfer',
     'microcycle',
+    'microcycle-detail',
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 17)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 20)
   assert.match(appSource, /path="\/presentation\/microcycle"/)
   assert.match(appSource, /element=\{<MicrocyclePage \/>\}/)
+  assert.match(appSource, /path="\/presentation\/microcycle-detail"/)
+  assert.match(appSource, /element=\{<MicrocycleDetailPage \/>\}/)
 })
 
-test('the page exposes accessible day tabs, focus movement, evidence labels, and non-color load text', () => {
-  const pageSource = readFileSync(new URL('../pages/MicrocyclePage.tsx', import.meta.url), 'utf8')
+test('the detail page exposes accessible day tabs, focus movement, and non-color load text', () => {
+  const pageSource = readFileSync(new URL('../pages/MicrocycleDetailPage.tsx', import.meta.url), 'utf8')
 
   assert.match(pageSource, /role="tablist"/)
   assert.match(pageSource, /role="tab"/)
@@ -220,15 +257,33 @@ test('the page exposes accessible day tabs, focus movement, evidence labels, and
   assert.match(pageSource, /event\.key === 'End'/)
   assert.match(pageSource, /tabRefs\.current\[nextIndex\]\?\.focus\(\)/)
   assert.match(pageSource, /<strong>\{field\.value\}<\/strong>/)
-  assert.match(pageSource, /microcycle-evidence-label/)
 })
 
-test('projector-first source renders one selected day and keeps individual work secondary', () => {
-  const pageSource = readFileSync(new URL('../pages/MicrocyclePage.tsx', import.meta.url), 'utf8')
+test('the weekly overview and selected-day detail split projector content across two pages', () => {
+  const overviewSource = readFileSync(new URL('../pages/MicrocyclePage.tsx', import.meta.url), 'utf8')
+  const detailSource = readFileSync(new URL('../pages/MicrocycleDetailPage.tsx', import.meta.url), 'utf8')
 
-  assert.match(pageSource, /const activeDay = getMicrocycleDay\(activeDayId\)/)
-  assert.match(pageSource, /WHY THIS SESSION, ON THIS DAY\?/)
-  assert.match(pageSource, /microcycle-support-column/)
-  assert.equal((pageSource.match(/INDIVIDUAL DEVELOPMENT/g) ?? []).length, 1)
-  assert.equal((pageSource.match(/className="microcycle-day-card"/g) ?? []).length, 1)
+  assert.match(overviewSource, /microcycle-week-grid/)
+  assert.match(overviewSource, /View day plan/)
+  assert.match(overviewSource, /Moment.*Objective.*Duration.*RPE.*Session methodology.*Activity types/s)
+  assert.match(detailSource, /const activeDay = getMicrocycleDay\(activeDayId\)/)
+  assert.match(detailSource, /WHY THIS SESSION, ON THIS DAY\?/)
+  assert.match(detailSource, /<dt>Objective<\/dt>/)
+  assert.match(detailSource, /<span>Duration<\/span>/)
+  assert.match(detailSource, /<span>RPE<\/span>/)
+  assert.match(detailSource, /<dt>Session methodology<\/dt>/)
+  assert.match(detailSource, /<dt>Activity types<\/dt>/)
+  assert.match(detailSource, /microcycle-detail-support/)
+  assert.equal((detailSource.match(/INDIVIDUAL DEVELOPMENT/g) ?? []).length, 1)
+  assert.equal((detailSource.match(/className="microcycle-day-card"/g) ?? []).length, 1)
+})
+
+test('presented Microcycle pages omit internal evidence-status labels', () => {
+  const overviewSource = readFileSync(new URL('../pages/MicrocyclePage.tsx', import.meta.url), 'utf8')
+  const detailSource = readFileSync(new URL('../pages/MicrocycleDetailPage.tsx', import.meta.url), 'utf8')
+  const presentedSource = `${overviewSource}\n${detailSource}`
+
+  assert.doesNotMatch(presentedSource, /EvidenceLabel|microcycle-evidence-label/)
+  assert.doesNotMatch(presentedSource, /DIRECT SESSION EVIDENCE/)
+  assert.doesNotMatch(presentedSource, /COACH-(?:CONFIRMED|APPROVED)/)
 })

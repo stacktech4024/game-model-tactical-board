@@ -1083,7 +1083,8 @@
 .method-detail,
 .method-check-card,
 .method-risk-card,
-.method-approach-card {
+.method-approach-card,
+.method-principles-card {
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 16px;
   background: rgba(2, 6, 23, 0.46);
@@ -1551,6 +1552,18 @@
   margin-top: 22px;
 }
 
+.method-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.method-top-grid .method-builder {
+  grid-template-columns: minmax(170px, 0.38fr) minmax(0, 0.62fr);
+  margin-top: 0;
+}
+
 .method-steps {
   display: grid;
   gap: 10px;
@@ -1583,8 +1596,73 @@
 .method-detail,
 .method-check-card,
 .method-risk-card,
-.method-approach-card {
+.method-approach-card,
+.method-principles-card {
   padding: 20px;
+}
+
+.method-principles-card__eyebrow {
+  display: block;
+  color: #cc0000;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.method-principles-card h2 {
+  font-size: 1.38rem;
+  line-height: 1.12;
+  margin: 7px 0 5px;
+}
+
+.method-principles-card__intro {
+  color: #9fb2cf;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+
+.method-principles-list {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.method-principles-list li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+}
+
+.method-principles-list li > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(248, 113, 113, 0.34);
+  border-radius: 9px;
+  background: rgba(204, 0, 0, 0.18);
+  color: #fca5a5;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.method-principles-list p {
+  color: #b9c7dc;
+  font-size: 0.76rem;
+  line-height: 1.38;
+  margin: 0;
+}
+
+.method-principles-list strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 0.8rem;
+  margin-bottom: 1px;
 }
 
 .method-approach-card {
@@ -1613,6 +1691,14 @@
   grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.8fr) minmax(240px, 0.65fr);
   gap: 16px;
   margin-top: 18px;
+}
+
+.method-lower-grid--complete {
+  grid-template-columns: minmax(250px, 0.9fr) minmax(230px, 0.72fr) minmax(430px, 1.5fr);
+}
+
+.method-lower-grid--complete .method-approach-card {
+  margin-top: 0;
 }
 
 .microcycle-timeline {
@@ -2153,6 +2239,10 @@
   min-width: 0;
   border-radius: 16px;
   padding: 14px;
+}
+
+.positional-profile-detail__body {
+  display: contents;
 }
 
 .positional-profile-detail__identity {
@@ -3000,10 +3090,15 @@
   }
 }
 
-@media (min-width: 1400px) and (min-height: 850px) {
+@media (min-width: 1280px) and (min-height: 760px) {
+  .positional-profiles-header {
+    gap: 40px;
+  }
+
   .positional-profiles-header .presentation-body {
-    max-width: 690px;
-    font-size: 1rem;
+    max-width: 760px;
+    font-size: 1.05rem;
+    line-height: 1.5;
   }
 
   .profile-selector {
@@ -3024,22 +3119,26 @@
   }
 
   .positional-profile-lab {
-    grid-template-columns: 324px minmax(0, 1fr);
-    gap: 18px;
+    grid-template-columns: clamp(430px, 29vw, 560px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: stretch;
     margin-top: 15px;
   }
 
   .profile-formation-card {
-    padding: 12px;
+    align-content: start;
+    padding: 16px;
+    background: rgba(2, 6, 23, 0.68);
   }
 
   .profile-formation-card__pitch {
-    width: min(100%, 298px);
+    width: min(100%, 520px, calc((100svh - 250px) * 68 / 105));
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
   }
 
   .profile-formation-card__spot {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
   }
 
   .profile-formation-card > p,
@@ -3050,8 +3149,35 @@
   }
 
   .positional-profile-detail {
-    gap: 12px;
-    padding: 16px;
+    gap: 14px;
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 18px;
+    background: rgba(2, 6, 23, 0.62);
+  }
+
+  .positional-profile-detail__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .positional-profile-detail__body.has-role-emphases {
+    grid-template-rows: auto auto auto;
+  }
+
+  .profile-role-emphases {
+    grid-column: 1;
+  }
+
+  .positional-profile-detail__body > .profile-priority-grid {
+    grid-column: 1;
+  }
+
+  .positional-profile-detail__body > .profile-moments {
+    grid-column: 1;
   }
 
   .positional-profile-detail__identity h2 {
@@ -3074,7 +3200,14 @@
   }
 
   .profile-priority-card {
-    padding: 11px 12px;
+    padding: 15px 16px;
+    background: rgba(6, 13, 29, 0.72);
+  }
+
+  .profile-priority-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: auto;
+    gap: 12px;
   }
 
   .profile-priority-card h3,
@@ -3084,8 +3217,8 @@
 
   .profile-priority-card li,
   .profile-moment-panel li {
-    font-size: 0.76rem;
-    line-height: 1.34;
+    font-size: 0.82rem;
+    line-height: 1.42;
   }
 
   .profile-moment-tab {
@@ -3102,40 +3235,658 @@
   }
 
   .profile-moment-panel {
-    padding: 12px 14px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
+    padding: 15px 16px;
+    background: rgba(6, 13, 29, 0.74);
+  }
+
+  .profile-moments {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .profile-moment-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .profile-moment-panel {
+    align-items: start;
   }
 }
 
 @media (min-width: 1700px) and (min-height: 950px) {
   .positional-profile-lab {
-    grid-template-columns: 408px minmax(0, 1fr);
-    gap: 22px;
+    grid-template-columns: clamp(500px, 29vw, 560px) minmax(0, 1fr);
+    gap: 28px;
   }
 
   .profile-formation-card__pitch {
-    width: min(100%, 380px);
+    width: min(100%, 520px, calc((100svh - 250px) * 68 / 105));
   }
 
   .profile-formation-card__spot {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
   }
 
   .positional-profile-detail {
     align-self: stretch;
-    align-content: space-between;
     gap: 14px;
-    padding: 18px;
+    padding: 20px;
+  }
+
+  .positional-profile-detail__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .positional-profile-detail__identity h2 {
+    font-size: 1.9rem;
+  }
+
+  .positional-profile-detail__identity p {
+    max-width: 760px;
+    font-size: 1rem;
+  }
+
+  .profile-formation-card > p {
+    font-size: 0.78rem;
+  }
+
+  .profile-priority-card {
+    padding: 17px 18px;
+  }
+
+  .profile-priority-card h3 {
+    font-size: 0.84rem;
   }
 
   .profile-priority-card li,
   .profile-moment-panel li {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    line-height: 1.46;
   }
 
   .profile-evidence,
   .profile-moment-tab span {
+    font-size: 0.8rem;
+  }
+
+  .profile-moment-tab {
+    padding: 12px 13px;
+  }
+
+  .profile-moment-tab strong {
+    font-size: 0.88rem;
+  }
+
+  .profile-moment-panel {
+    padding: 18px 20px;
+  }
+}
+
+/* How We Train desktop presentation scale — prioritize reading distance over density. */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .how-we-train-header--overview .presentation-title {
+    font-size: clamp(2.35rem, 3vw, 3.25rem);
+  }
+
+  .how-we-train-header--overview .presentation-body {
+    max-width: 900px;
+    font-size: 1rem;
+    line-height: 1.48;
+  }
+
+  .how-we-train-overview {
+    grid-template-columns: minmax(390px, 0.82fr) minmax(0, 1.18fr);
+    gap: 24px;
+  }
+
+  .how-we-train-process {
+    padding: 22px;
+  }
+
+  .how-we-train-section-heading > span {
+    font-size: 0.72rem;
+  }
+
+  .how-we-train-section-heading h2 {
+    font-size: 1.5rem;
+  }
+
+  .how-we-train-section-heading p {
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .how-we-train-process h3,
+  .how-we-train-example-grid h3 {
+    font-size: 1rem;
+  }
+
+  .how-we-train-process li p,
+  .how-we-train-example-grid article > p {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .how-we-train-example-grid article {
+    gap: 10px;
+    padding: 17px;
+  }
+
+  .how-we-train-example-grid article > header,
+  .how-we-train-example-grid dt {
+    font-size: 0.62rem;
+  }
+
+  .how-we-train-example-grid article > header b,
+  .how-we-train-example-grid a {
     font-size: 0.76rem;
+  }
+
+  .how-we-train-example-grid dd {
+    font-size: 0.74rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-realism-note {
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-detail-header .presentation-title {
+    font-size: clamp(1.9rem, 2.4vw, 2.55rem);
+  }
+
+  .how-we-train-detail-header .presentation-body {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .how-we-train-tab {
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 0.8rem;
+  }
+
+  .how-we-train-tab > span {
+    flex-basis: 25px;
+    width: 25px;
+    height: 25px;
+    font-size: 0.7rem;
+  }
+
+  .how-we-train-metadata {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+  }
+
+  .how-we-train-metadata > div {
+    min-height: 54px;
+    padding: 8px 10px;
+  }
+
+  .how-we-train-metadata span,
+  .how-we-train-metadata small {
+    font-size: 0.58rem;
+  }
+
+  .how-we-train-metadata strong {
+    font-size: 0.72rem;
+    line-height: 1.32;
+  }
+
+  .how-we-train-diagram-section,
+  .how-we-train-session-grid > .how-we-train-activity-detail {
+    padding: 15px;
+  }
+
+  .how-we-train-diagram-section > header h2,
+  .how-we-train-session-grid .how-we-train-activity-heading h2 {
+    font-size: 1.15rem;
+  }
+
+  .how-we-train-diagram-section > header p,
+  .how-we-train-session-grid .how-we-train-activity-heading > span {
+    font-size: 0.72rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-phase-card h3 {
+    font-size: 0.92rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-phase-card header p {
+    font-size: 0.74rem;
+  }
+
+  .how-we-train-session-grid .mini-pitch__cue,
+  .how-we-train-diagram-caption {
+    font-size: 0.68rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-hierarchy dt,
+  .how-we-train-session-grid .how-we-train-environment h3,
+  .how-we-train-session-grid .how-we-train-evidence-row dt {
+    font-size: 0.6rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-hierarchy dd {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row dd {
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row small,
+  .how-we-train-session-grid .how-we-train-role-chips span,
+  .how-we-train-session-grid .how-we-train-link-row a {
+    font-size: 0.55rem;
+  }
+}
+
+/* Microcycle overview and selected-day detail */
+.microcycle-week-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.microcycle-required-fields {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.microcycle-required-fields span {
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.12);
+  padding: 6px 8px;
+  color: #fecaca;
+  font-size: 0.61rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.microcycle-week-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(52px, auto) auto minmax(66px, 1fr) auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 15px;
+  background: rgba(2, 6, 23, 0.52);
+  padding: 14px;
+}
+
+.microcycle-week-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.microcycle-week-card > header span,
+.microcycle-week-card__moment span,
+.microcycle-overview-footer span {
+  color: #ef4444;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.microcycle-week-card > header strong {
+  color: #f8fafc;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+.microcycle-week-card__load {
+  height: 5px;
+  overflow: hidden;
+  margin: 10px 0 12px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.25);
+}
+
+.microcycle-week-card__load i {
+  display: block;
+  width: 28%;
+  height: 100%;
+  border-radius: inherit;
+  background: #64748b;
+}
+
+.microcycle-week-card[data-load='MODERATE'] .microcycle-week-card__load i,
+.microcycle-week-card[data-load='LOW–MODERATE'] .microcycle-week-card__load i {
+  width: 52%;
+  background: #fbbf24;
+}
+
+.microcycle-week-card[data-load='HIGH'] .microcycle-week-card__load i {
+  width: 100%;
+  background: #ef4444;
+}
+
+.microcycle-week-card[data-load='MATCH'] .microcycle-week-card__load i {
+  width: 100%;
+  background: #38bdf8;
+}
+
+.microcycle-week-card[data-load='REST'] .microcycle-week-card__load i {
+  width: 8%;
+}
+
+.microcycle-week-card h2 {
+  margin: 0 0 8px;
+  color: #f8fafc;
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.microcycle-week-card > p,
+.microcycle-week-card__moment p,
+.microcycle-overview-footer p {
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.7rem;
+  line-height: 1.42;
+}
+
+.microcycle-week-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 12px 0;
+}
+
+.microcycle-week-card dl > div {
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  padding: 7px 8px;
+}
+
+.microcycle-week-card dt {
+  color: #93a4bd;
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.microcycle-week-card dd {
+  margin: 3px 0 0;
+  color: #f8fafc;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.microcycle-week-card__moment {
+  border-left: 2px solid rgba(239, 68, 68, 0.68);
+  padding: 5px 0 5px 9px;
+}
+
+.microcycle-week-card__moment p {
+  margin-top: 4px;
+  color: #dbe7f5;
+}
+
+.microcycle-week-card > a,
+.microcycle-detail-header > a {
+  align-self: end;
+  margin-top: 12px;
+  color: #fecaca;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.microcycle-week-card > a:hover,
+.microcycle-week-card > a:focus-visible,
+.microcycle-detail-header > a:hover,
+.microcycle-detail-header > a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.microcycle-overview-footer {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1.15fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.microcycle-overview-footer > div {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 11px;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 10px 12px;
+}
+
+.microcycle-overview-footer p {
+  margin-top: 4px;
+}
+
+.microcycle-overview-principle {
+  border-left: 3px solid #fbbf24 !important;
+}
+
+.microcycle-detail-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.microcycle-detail-header .presentation-title {
+  margin-bottom: 5px;
+  font-size: clamp(1.65rem, 2.45vw, 2.3rem);
+}
+
+.microcycle-detail-header .presentation-body {
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+.microcycle-detail-header > a {
+  flex: 0 0 auto;
+  margin: 0 0 4px;
+}
+
+.microcycle-detail-panel:focus {
+  outline: none;
+}
+
+.microcycle-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.92fr) minmax(0, 1.28fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.microcycle-detail-layout .microcycle-day-card,
+.microcycle-detail-layout .microcycle-transfer-card {
+  padding: 16px;
+}
+
+.microcycle-detail-layout .microcycle-day-card > header h2,
+.microcycle-detail-layout .microcycle-transfer-card > header h2 {
+  font-size: 1.14rem;
+}
+
+.microcycle-detail-layout .microcycle-load strong,
+.microcycle-detail-layout .microcycle-rpe strong,
+.microcycle-detail-layout .microcycle-duration strong {
+  font-size: 0.76rem;
+}
+
+.microcycle-detail-layout .microcycle-day-facts dd,
+.microcycle-detail-layout .microcycle-transfer-flow li,
+.microcycle-detail-layout .microcycle-transfer-flow p,
+.microcycle-detail-layout .microcycle-readiness p,
+.microcycle-detail-layout .microcycle-why p,
+.microcycle-detail-layout .microcycle-skills p {
+  font-size: 0.72rem;
+  line-height: 1.42;
+}
+
+.microcycle-detail-layout .microcycle-day-card > header span,
+.microcycle-detail-layout .microcycle-transfer-card > header span,
+.microcycle-detail-layout .microcycle-readiness span,
+.microcycle-detail-layout .microcycle-why span,
+.microcycle-detail-layout .microcycle-skills > span,
+.microcycle-detail-layout .microcycle-transfer-flow section span,
+.microcycle-detail-layout .microcycle-day-facts dt,
+.microcycle-detail-layout .microcycle-load > span,
+.microcycle-detail-layout .microcycle-rpe > span,
+.microcycle-detail-layout .microcycle-duration > span {
+  font-size: 0.62rem;
+}
+
+.microcycle-detail-support {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.microcycle-detail-support.has-md1 {
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(240px, 0.8fr));
+}
+
+.microcycle-detail-support .microcycle-evidence-card,
+.microcycle-detail-support .microcycle-md1-card,
+.microcycle-detail-support .microcycle-individual-card {
+  padding: 13px 14px;
+}
+
+.microcycle-detail-support .microcycle-evidence-card > div {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 9px;
+}
+
+.microcycle-detail-support .microcycle-evidence-card article {
+  grid-template-columns: 1fr;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 8px;
+  padding: 9px;
+}
+
+.microcycle-detail-support .microcycle-evidence-card article strong,
+.microcycle-detail-support .microcycle-individual-card > header h2 {
+  font-size: 0.76rem;
+}
+
+.microcycle-detail-support .microcycle-evidence-card article p,
+.microcycle-detail-support .microcycle-individual-card > p,
+.microcycle-detail-support .microcycle-md1-card > p {
+  font-size: 0.65rem;
+  line-height: 1.36;
+}
+
+@media (max-width: 1040px) {
+  .microcycle-week-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .microcycle-week-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .microcycle-required-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .microcycle-overview-footer,
+  .microcycle-detail-layout,
+  .microcycle-detail-support,
+  .microcycle-detail-support.has-md1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .microcycle-detail-header {
+    display: grid;
+    align-items: start;
+  }
+
+  .microcycle-week-grid,
+  .microcycle-overview-footer,
+  .microcycle-required-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .microcycle-week-card:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1400px) and (min-height: 850px) {
+  .microcycle-week-grid {
+    gap: 15px;
+    margin-top: 22px;
+  }
+
+  .microcycle-week-card {
+    min-height: 430px;
+    padding: 18px;
+  }
+
+  .microcycle-week-card h2 {
+    font-size: 1.14rem;
+  }
+
+  .microcycle-week-card > p,
+  .microcycle-week-card__moment p,
+  .microcycle-overview-footer p {
+    font-size: 0.78rem;
+  }
+
+  .microcycle-week-card dd,
+  .microcycle-week-card > a {
+    font-size: 0.76rem;
+  }
+
+  .microcycle-detail-layout {
+    gap: 18px;
+  }
+
+  .microcycle-detail-layout .microcycle-day-card,
+  .microcycle-detail-layout .microcycle-transfer-card {
+    padding: 20px;
+  }
+
+  .microcycle-detail-layout .microcycle-day-card > header h2,
+  .microcycle-detail-layout .microcycle-transfer-card > header h2 {
+    font-size: 1.35rem;
+  }
+
+  .microcycle-detail-layout .microcycle-day-facts dd,
+  .microcycle-detail-layout .microcycle-transfer-flow li,
+  .microcycle-detail-layout .microcycle-transfer-flow p,
+  .microcycle-detail-layout .microcycle-readiness p,
+  .microcycle-detail-layout .microcycle-why p,
+  .microcycle-detail-layout .microcycle-skills p {
+    font-size: 0.8rem;
   }
 }
 
@@ -4162,7 +4913,270 @@
   font-size: 0.61rem;
 }
 
+.how-we-train-session-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(390px, 0.75fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.how-we-train-session-grid > .how-we-train-activity-detail {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.46);
+  padding: 14px;
+}
+
+.how-we-train-session-grid .how-we-train-diagrams {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.how-we-train-session-grid .how-we-train-phase-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.how-we-train-session-grid .how-we-train-phase-card > header {
+  min-height: 86px;
+}
+
+.how-we-train-session-grid .how-we-train-phase-card .how-we-train-pitch-card {
+  width: 100%;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  border-left: 0;
+}
+
+.how-we-train-session-grid .how-we-train-environment {
+  grid-template-columns: 1fr;
+}
+
+.how-we-train-continue {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 9px;
+  background: rgba(127, 29, 29, 0.18);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.how-we-train-continue:hover,
+.how-we-train-continue:focus-visible {
+  border-color: #facc15;
+  background: rgba(127, 29, 29, 0.3);
+}
+
+.how-we-train-transfer-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.how-we-train-transfer-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(145px, 1fr));
+  gap: 1px;
+  min-width: 520px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 11px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.how-we-train-transfer-summary > div {
+  display: grid;
+  gap: 4px;
+  align-content: center;
+  min-width: 0;
+  background: rgba(2, 6, 23, 0.94);
+  padding: 10px 12px;
+}
+
+.how-we-train-transfer-summary span {
+  color: #93a4bd;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.how-we-train-transfer-summary strong {
+  color: #f8fafc;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.how-we-train-transfer-page {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.how-we-train-transfer--page {
+  gap: 14px;
+  padding: 18px;
+}
+
+.how-we-train-transfer--page > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.7fr);
+  gap: 18px;
+  align-items: end;
+}
+
+.how-we-train-transfer--page > header p {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.how-we-train-chain--page {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.how-we-train-chain--page > li {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 11px;
+  min-height: 132px;
+  padding: 14px;
+}
+
+.how-we-train-chain--page > li > b {
+  width: 32px;
+  height: 32px;
+  font-size: 0.78rem;
+}
+
+.how-we-train-chain--page li span {
+  font-size: 0.65rem;
+}
+
+.how-we-train-chain--page li p {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.how-we-train-chain--page li small {
+  margin-top: 7px;
+  font-size: 0.56rem;
+}
+
+.how-we-train-chain--page .how-we-train-chain__coaching {
+  grid-column: span 2;
+}
+
+.how-we-train-chain--page .how-we-train-chain__coaching dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px 14px;
+  margin-top: 9px;
+}
+
+.how-we-train-chain--page .how-we-train-chain__coaching dl > div {
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 6px;
+}
+
+.how-we-train-chain--page .how-we-train-chain__coaching dt {
+  font-size: 0.58rem;
+}
+
+.how-we-train-chain--page .how-we-train-chain__coaching dd {
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.how-we-train-chain--page .how-we-train-chain__transfer p {
+  display: grid;
+  gap: 7px;
+}
+
+.how-we-train-chain--page .how-we-train-chain__transfer p span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px;
+  color: #fde68a;
+  font-size: 0.69rem;
+  line-height: 1.35;
+}
+
+.how-we-train-chain--page .how-we-train-chain__transfer p span:first-child {
+  grid-template-columns: 1fr;
+}
+
+.how-we-train-transfer-outcomes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.72fr);
+  gap: 12px;
+}
+
+.how-we-train-transfer-outcomes > .how-we-train-success:only-child {
+  grid-column: 1 / -1;
+}
+
+.how-we-train-transfer-outcomes .how-we-train-decision {
+  gap: 8px;
+}
+
+.how-we-train-transfer-outcomes .how-we-train-decision > div {
+  gap: 5px;
+  padding: 10px;
+}
+
+.how-we-train-transfer-outcomes .how-we-train-decision strong,
+.how-we-train-transfer-outcomes .how-we-train-success > span {
+  font-size: 0.62rem;
+}
+
+.how-we-train-transfer-outcomes .how-we-train-decision span,
+.how-we-train-transfer-outcomes .how-we-train-success p {
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.how-we-train-transfer-outcomes .how-we-train-success {
+  display: grid;
+  align-content: center;
+  padding: 12px 14px;
+}
+
+.how-we-train-transfer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.how-we-train-transfer-links a {
+  border: 1px solid rgba(147, 197, 253, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #bfdbfe;
+  font-size: 0.66rem;
+  font-weight: 850;
+  padding: 7px 10px;
+  text-decoration: none;
+}
+
+.how-we-train-transfer-links a:hover,
+.how-we-train-transfer-links a:focus-visible {
+  border-color: #facc15;
+  color: #fff;
+}
+
 @media (max-width: 1180px) {
+  .how-we-train-session-grid {
+    grid-template-columns: 1fr;
+  }
+
   .how-we-train-diagrams {
     grid-template-columns: 1fr;
   }
@@ -4184,6 +5198,26 @@
 
   .how-we-train-team-key {
     min-width: 0;
+  }
+
+  .how-we-train-transfer-summary,
+  .how-we-train-transfer--page > header,
+  .how-we-train-transfer-outcomes {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .how-we-train-transfer--page > header p {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .how-we-train-chain--page {
+    grid-template-columns: 1fr;
+  }
+
+  .how-we-train-chain--page .how-we-train-chain__coaching {
+    grid-column: auto;
   }
 }
 
@@ -4211,6 +5245,11 @@
     justify-self: center;
     border-left: 0;
     border-top: 1px solid rgba(148, 163, 184, 0.16);
+  }
+
+  .how-we-train-chain--page .how-we-train-chain__coaching dl,
+  .how-we-train-transfer-summary {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -4394,7 +5433,8 @@
 .microcycle-transfer-flow section span,
 .microcycle-day-facts dt,
 .microcycle-load > span,
-.microcycle-rpe > span {
+.microcycle-rpe > span,
+.microcycle-duration > span {
   color: #ef4444;
   font-size: 0.49rem;
   font-weight: 900;
@@ -4422,13 +5462,14 @@
 
 .microcycle-load-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 5px;
   margin-top: 7px;
 }
 
 .microcycle-load,
-.microcycle-rpe {
+.microcycle-rpe,
+.microcycle-duration {
   display: grid;
   min-width: 0;
   align-content: start;
@@ -4440,7 +5481,8 @@
 }
 
 .microcycle-load strong,
-.microcycle-rpe strong {
+.microcycle-rpe strong,
+.microcycle-duration strong {
   color: #f8fafc;
   font-size: 0.63rem;
   line-height: 1.15;
@@ -4471,28 +5513,6 @@
   background: #38bdf8;
 }
 
-.microcycle-evidence-label {
-  display: block;
-  color: #86efac;
-  font-size: 0.5rem;
-  font-weight: 850;
-  letter-spacing: 0.035em;
-  line-height: 1.15;
-  text-transform: uppercase;
-}
-
-.microcycle-evidence-label[data-status='COACH-APPROVED PLANNING VALUE'] {
-  color: #fde68a;
-}
-
-.microcycle-evidence-label[data-status='CANADA SOCCER FRAMEWORK'] {
-  color: #bfdbfe;
-}
-
-.microcycle-evidence-label[data-status='COACH CONFIRMATION NEEDED'] {
-  color: #fdba74;
-}
-
 .microcycle-day-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4505,6 +5525,38 @@
   border-left: 2px solid rgba(239, 68, 68, 0.55);
   background: rgba(15, 23, 42, 0.35);
   padding: 5px 6px;
+}
+
+.microcycle-day-facts > .is-wide {
+  grid-column: 1 / -1;
+}
+
+.microcycle-rpe-guidance {
+  margin-top: 7px;
+  border-left: 2px solid #fbbf24;
+  border-radius: 0 7px 7px 0;
+  background: rgba(251, 191, 36, 0.06);
+  padding: 6px 7px;
+}
+
+.microcycle-rpe-guidance span {
+  color: #fbbf24;
+  font-size: 0.49rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.microcycle-rpe-guidance p {
+  margin: 2px 0 0;
+  color: #aebdd1;
+  font-size: 0.52rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 1400px) {
+  .microcycle-detail-layout .microcycle-day-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .microcycle-day-facts dd {
@@ -4750,6 +5802,18 @@
 }
 
 @media (max-width: 1040px) {
+  .method-top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .method-lower-grid--complete {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .method-lower-grid--complete .method-approach-card {
+    grid-column: 1 / -1;
+  }
+
   .microcycle-header {
     grid-template-columns: 1fr;
   }
@@ -4783,8 +5847,13 @@
 
   .microcycle-panel,
   .microcycle-support-column,
-  .method-lower-grid--without-microcycle {
+  .method-lower-grid--without-microcycle,
+  .method-lower-grid--complete {
     grid-template-columns: 1fr;
+  }
+
+  .method-lower-grid--complete .method-approach-card {
+    grid-column: auto;
   }
 
   .microcycle-support-column,
@@ -6344,5 +7413,304 @@
   .moments-model-statement {
     width: min(100%, 1340px);
     font-size: 1.04rem;
+  }
+}
+
+@media (min-width: 1200px) and (max-height: 950px) {
+  .method-page__eyebrow {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+  }
+
+  .method-page__title {
+    font-size: 2.3rem;
+    margin-bottom: 8px;
+  }
+
+  .method-page__intro {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .method-top-grid {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .method-top-grid .method-builder {
+    gap: 12px;
+  }
+
+  .method-steps {
+    gap: 6px;
+  }
+
+  .method-step {
+    padding: 8px 10px;
+  }
+
+  .method-detail,
+  .method-check-card,
+  .method-risk-card,
+  .method-approach-card,
+  .method-principles-card {
+    padding: 13px;
+  }
+
+  .method-detail > span {
+    font-size: 0.68rem;
+    margin-bottom: 5px;
+  }
+
+  .method-detail h2,
+  .method-check-card h2,
+  .method-risk-card h2,
+  .method-approach-card h2 {
+    font-size: 1.15rem;
+    margin-bottom: 7px;
+  }
+
+  .method-detail p {
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .method-detail .presentation-chip-row,
+  .method-approach-card .presentation-chip-row {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .method-principles-card__eyebrow {
+    font-size: 0.64rem;
+  }
+
+  .method-principles-card h2 {
+    font-size: 1.18rem;
+    margin: 5px 0 3px;
+  }
+
+  .method-principles-card__intro {
+    font-size: 0.72rem;
+    margin-bottom: 6px;
+  }
+
+  .method-principles-list {
+    gap: 4px;
+  }
+
+  .method-principles-list li {
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .method-principles-list li > span {
+    width: 26px;
+    height: 26px;
+    font-size: 0.78rem;
+  }
+
+  .method-principles-list p {
+    font-size: 0.67rem;
+    line-height: 1.3;
+  }
+
+  .method-principles-list strong {
+    font-size: 0.72rem;
+  }
+
+  .method-lower-grid {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .method-check-card ul {
+    gap: 5px;
+  }
+
+  .method-check-card li {
+    font-size: 0.73rem;
+    line-height: 1.3;
+  }
+
+  .method-risk-card .presentation-chip-row {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .method-lower-grid--complete .presentation-chip--small {
+    font-size: 0.67rem;
+    padding: 5px 7px;
+  }
+
+  .method-approach-card .presentation-chip-row {
+    margin-bottom: 8px;
+  }
+
+  .method-approach-card p {
+    font-size: 0.72rem;
+    line-height: 1.38;
+  }
+}
+
+/* Final desktop overrides for the two-page How We Train sequence. */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .how-we-train-header--overview .presentation-title {
+    font-size: clamp(2.35rem, 3vw, 3.25rem);
+  }
+
+  .how-we-train-header--overview .presentation-body {
+    max-width: 900px;
+    font-size: 1rem;
+    line-height: 1.48;
+  }
+
+  .how-we-train-overview {
+    grid-template-columns: minmax(390px, 0.82fr) minmax(0, 1.18fr);
+    gap: 24px;
+  }
+
+  .how-we-train-section-heading > span {
+    font-size: 0.72rem;
+  }
+
+  .how-we-train-section-heading h2 {
+    font-size: 1.5rem;
+  }
+
+  .how-we-train-section-heading p {
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .how-we-train-process h3,
+  .how-we-train-example-grid h3 {
+    font-size: 1rem;
+  }
+
+  .how-we-train-process li p,
+  .how-we-train-example-grid article > p {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .how-we-train-example-grid article {
+    gap: 10px;
+    padding: 17px;
+  }
+
+  .how-we-train-example-grid article > header,
+  .how-we-train-example-grid dt {
+    font-size: 0.62rem;
+  }
+
+  .how-we-train-example-grid article > header b,
+  .how-we-train-example-grid a {
+    font-size: 0.76rem;
+  }
+
+  .how-we-train-example-grid dd {
+    font-size: 0.74rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-realism-note {
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-detail-header .presentation-title {
+    font-size: clamp(1.9rem, 2.4vw, 2.55rem);
+  }
+
+  .how-we-train-detail-header .presentation-body {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .how-we-train-tab {
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 0.8rem;
+  }
+
+  .how-we-train-tab > span {
+    flex-basis: 25px;
+    width: 25px;
+    height: 25px;
+    font-size: 0.7rem;
+  }
+
+  .how-we-train-metadata {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .how-we-train-metadata > div {
+    min-height: 54px;
+    padding: 8px 10px;
+  }
+
+  .how-we-train-metadata span,
+  .how-we-train-metadata small {
+    font-size: 0.58rem;
+  }
+
+  .how-we-train-metadata strong {
+    font-size: 0.72rem;
+    line-height: 1.32;
+  }
+
+  .how-we-train-diagram-section,
+  .how-we-train-session-grid > .how-we-train-activity-detail {
+    padding: 15px;
+  }
+
+  .how-we-train-diagram-section > header h2,
+  .how-we-train-session-grid .how-we-train-activity-heading h2 {
+    font-size: 1.15rem;
+  }
+
+  .how-we-train-diagram-section > header p,
+  .how-we-train-session-grid .how-we-train-activity-heading > span,
+  .how-we-train-session-grid .how-we-train-phase-card header p {
+    font-size: 0.72rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-phase-card h3 {
+    font-size: 0.92rem;
+  }
+
+  .how-we-train-session-grid .mini-pitch__cue,
+  .how-we-train-diagram-caption {
+    font-size: 0.68rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-hierarchy dt,
+  .how-we-train-session-grid .how-we-train-environment h3,
+  .how-we-train-session-grid .how-we-train-evidence-row dt {
+    font-size: 0.6rem;
+  }
+
+  .how-we-train-session-grid .how-we-train-hierarchy dd {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row dd {
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+
+  .how-we-train-session-grid .how-we-train-evidence-row small,
+  .how-we-train-session-grid .how-we-train-role-chips span,
+  .how-we-train-session-grid .how-we-train-link-row a {
+    font-size: 0.55rem;
   }
 }

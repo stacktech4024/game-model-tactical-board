@@ -243,28 +243,64 @@ function buildAnimationIntents(scenario: ScenarioDefinition): ScheduledAnimation
     })
 
   let currentTime = 0
-  const scheduledArrows = orderedArrows.map(({ arrow }) => {
-    const delay = arrow.delay ?? 0
-    const duration = getArrowMoveDuration(arrow) + (arrow.via ? VIA_SEGMENT_GAP : 0)
-    const startTime = currentTime + delay
-    const endTime = startTime + duration
-
-    currentTime = endTime
-
-    return {
-      arrow,
-      timing: {
-        startTime,
-        endTime,
-        duration,
-        startProgress: 0,
-        endProgress: 0,
-      },
+  const scheduledArrows: Array<{
+    arrow: AuthoredScenarioArrow
+    originalIndex: number
+    timing: {
+      startTime: number
+      endTime: number
+      duration: number
+      startProgress: number
+      endProgress: number
     }
+  }> = []
+  const arrowsByOrder = new Map<number, typeof orderedArrows>()
+
+  orderedArrows.forEach((item) => {
+    const order = item.arrow.order ?? Number.MAX_SAFE_INTEGER
+    const group = arrowsByOrder.get(order) ?? []
+
+    group.push(item)
+    arrowsByOrder.set(order, group)
+  })
+
+  // An order is a coordinated football action: the pass, supporting run,
+  // pressure, cover, and balance movements in that order start together.
+  // The next action waits for the slowest movement in the current group.
+  arrowsByOrder.forEach((group) => {
+    const groupStartTime = currentTime
+    let groupEndTime = groupStartTime
+
+    group.forEach(({ arrow, originalIndex }) => {
+      const delay = arrow.delay ?? 0
+      const duration = getArrowMoveDuration(arrow) + (arrow.via ? VIA_SEGMENT_GAP : 0)
+      const startTime = groupStartTime + delay
+      const endTime = startTime + duration
+
+      groupEndTime = Math.max(groupEndTime, endTime)
+      scheduledArrows.push({
+        arrow,
+        originalIndex,
+        timing: {
+          startTime,
+          endTime,
+          duration,
+          startProgress: 0,
+          endProgress: 0,
+        },
+      })
+    })
+
+    currentTime = groupEndTime
   })
   const totalDuration = currentTime
 
   return scheduledArrows
+    .sort((a, b) => (
+      a.timing.startTime - b.timing.startTime ||
+      a.timing.endTime - b.timing.endTime ||
+      a.originalIndex - b.originalIndex
+    ))
     .map(({ arrow, timing }, sequenceIndex) => {
       const baseIntent = {
         id: `intent-${arrow.id}`,
@@ -319,24 +355,108 @@ export function buildScenarioPlan(
   formationPositions: FormationPositions,
   awayFormationPositions?: FormationPositions,
 ): ScenarioPlan {
+  const animationIntents = buildAnimationIntents(scenario)
+  const totalDuration = animationIntents.reduce(
+    (maximum, intent) => Math.max(maximum, intent.timing.endTime),
+    0,
+  )
+  const orderStartTimes = new Map<number, number>()
+
+  animationIntents.forEach((intent) => {
+    const existing = orderStartTimes.get(intent.order)
+
+    orderStartTimes.set(
+      intent.order,
+      existing === undefined ? intent.timing.startTime : Math.min(existing, intent.timing.startTime),
+    )
+  })
+
+  const rawPhaseStarts = scenario.phaseSteps.map((phaseStep, index) => {
+    if (index === 0) {
+      return 0
+    }
+
+    if (phaseStep.startOrder !== undefined) {
+      return orderStartTimes.get(phaseStep.startOrder) ?? 0
+    }
+
+    const relatedArrowIds = new Set(phaseStep.relatedArrows ?? [])
+    const relatedStarts = animationIntents
+      .filter((intent) => relatedArrowIds.has(intent.arrowId))
+      .map((intent) => intent.timing.startTime)
+
+    return relatedStarts.length > 0 ? Math.min(...relatedStarts) : 0
+  })
+  const phaseStarts: number[] = []
+
+  rawPhaseStarts.forEach((startTime, index) => {
+    phaseStarts.push(index === 0 ? 0 : Math.max(startTime, phaseStarts[index - 1] ?? 0))
+  })
+
+  const phaseSteps = scenario.phaseSteps.map((phaseStep, index) => {
+    const startTime = phaseStarts[index] ?? 0
+    const endTime = phaseStarts[index + 1] ?? totalDuration
+
+    return {
+      id: phaseStep.id,
+      label: phaseStep.label,
+      coachingCue: phaseStep.coachingCue,
+      keyPlayers: phaseStep.keyPlayers.map((number) => ({
+        side: 'home' as const,
+        number,
+      })),
+      zoneFocus: [...phaseStep.zoneFocus],
+      channelFocus: [...phaseStep.channelFocus],
+      relatedArrows: [...(phaseStep.relatedArrows ?? [])],
+      playerOrientations: (phaseStep.playerOrientations ?? []).map((orientation) => ({
+        side: orientation.side ?? 'home',
+        playerNumber: orientation.playerNumber,
+        facingAngle: orientation.facingAngle,
+      })),
+      timing: {
+        startTime,
+        endTime,
+        startProgress: totalDuration > 0 ? startTime / totalDuration : 0,
+        endProgress: totalDuration > 0 ? endTime / totalDuration : 1,
+      },
+    }
+  })
+
   return {
     scenarioId: scenario.id,
     title: scenario.title,
     moment: scenario.moment,
     initialPlayers: buildInitialPlayers(formationPositions, awayFormationPositions),
     initialBall: buildInitialBall(scenario),
-    animationIntents: buildAnimationIntents(scenario),
-    phaseSteps: scenario.phaseSteps.map((phaseStep) => ({
-      id: phaseStep.id,
-      label: phaseStep.label,
-      coachingCue: phaseStep.coachingCue,
-      keyPlayers: phaseStep.keyPlayers.map((number) => ({
-        side: 'home',
-        number,
-      })),
-      zoneFocus: [...phaseStep.zoneFocus],
-      channelFocus: [...phaseStep.channelFocus],
-      relatedArrows: [...(phaseStep.relatedArrows ?? [])],
-    })),
+    animationIntents,
+    phaseSteps,
   }
+}
+
+export function getScenarioPlanTotalDuration(plan: ScenarioPlan): number {
+  return plan.animationIntents.reduce(
+    (maximum, intent) => Math.max(maximum, intent.timing.endTime),
+    0,
+  )
+}
+
+export function getPhaseStepIndexAtProgress(plan: ScenarioPlan, progress: number): number {
+  if (plan.phaseSteps.length === 0) {
+    return 0
+  }
+
+  const clampedProgress = Math.min(1, Math.max(0, progress))
+  // GSAP can report a value a few floating-point units below the progress
+  // supplied to timeline.progress(). Treat that value as the authored phase
+  // boundary so explicit Previous/Next navigation cannot remain one step behind.
+  const boundaryProgress = clampedProgress + 0.000001
+  let activeIndex = 0
+
+  plan.phaseSteps.forEach((phaseStep, index) => {
+    if (boundaryProgress >= phaseStep.timing.startProgress) {
+      activeIndex = index
+    }
+  })
+
+  return activeIndex
 }

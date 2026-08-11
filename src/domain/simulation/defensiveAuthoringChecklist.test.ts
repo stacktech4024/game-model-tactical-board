@@ -46,7 +46,7 @@ const MAIN_SCENARIO_OFF_BALL_CHECKLIST = [
     expectedMoment: 'Attacking Organization',
     movements: [
       { arrowId: 'wide-build-away-eleven-press', type: 'press', side: 'away', playerNumber: 11, labelTerms: ['press'] },
-      { arrowId: 'wide-build-away-eight-screen', type: 'recovery', side: 'away', playerNumber: 8, labelTerms: ['screen'] },
+      { arrowId: 'wide-build-away-six-shift', type: 'recovery', side: 'away', playerNumber: 6, labelTerms: ['screen'] },
       { arrowId: 'wide-build-away-five-track-nine', type: 'recovery', side: 'away', playerNumber: 5, labelTerms: ['track'] },
       { arrowId: 'wide-build-away-two-tuck', type: 'recovery', side: 'away', playerNumber: 2, labelTerms: ['tuck'] },
     ],

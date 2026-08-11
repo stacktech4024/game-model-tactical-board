@@ -15,7 +15,9 @@ import { PlayersPage } from './presentation/pages/PlayersPage'
 import { SkillsPage } from './presentation/pages/SkillsPage'
 import { HowWeTrainPage } from './presentation/pages/HowWeTrainPage'
 import { HowWeTrainExamplesPage } from './presentation/pages/HowWeTrainExamplesPage'
+import { HowWeTrainTransferPage } from './presentation/pages/HowWeTrainTransferPage'
 import { MicrocyclePage } from './presentation/pages/MicrocyclePage'
+import { MicrocycleDetailPage } from './presentation/pages/MicrocycleDetailPage'
 import { MethodologyPage } from './presentation/pages/MethodologyPage'
 import { ClosingPage } from './presentation/pages/ClosingPage'
 
@@ -38,8 +40,11 @@ function App() {
       <Route path="/presentation/players" element={<PlayersPage />} />
       <Route path="/presentation/skills" element={<SkillsPage />} />
       <Route path="/presentation/how-we-train" element={<HowWeTrainPage />} />
+      <Route path="/presentation/how-we-train-session" element={<HowWeTrainExamplesPage />} />
+      <Route path="/presentation/how-we-train-transfer" element={<HowWeTrainTransferPage />} />
       <Route path="/presentation/how-we-train/examples" element={<HowWeTrainExamplesPage />} />
       <Route path="/presentation/microcycle" element={<MicrocyclePage />} />
+      <Route path="/presentation/microcycle-detail" element={<MicrocycleDetailPage />} />
       <Route path="/presentation/methodology" element={<MethodologyPage />} />
       <Route path="/presentation/closing" element={<ClosingPage />} />
       <Route path="*" element={<Navigate to="/presentation/cover" replace />} />

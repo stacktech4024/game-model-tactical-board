@@ -8,6 +8,14 @@ const TRAINING_STEPS = [
     title: 'Show the game problem',
     detail: 'Players experience the wide-channel build-up moment in context before coaching interrupts the picture.',
     chips: ['Zone 1 start', 'Wide channel target', 'Find #9 centrally'],
+    checkTitle: 'Can they see the problem?',
+    checks: [
+      'Did players recognize the wide-channel problem before I coached it?',
+      'Did the fullback recognize the overlap cue?',
+      'Did the winger create width or drive inside at the right time?',
+      'Did #6 support underneath the ball?',
+      'Did #9 remain available as the central option?',
+    ],
   },
   {
     id: 'part',
@@ -15,6 +23,14 @@ const TRAINING_STEPS = [
     title: 'Isolate the relationship',
     detail: 'Fullback, winger, and #6 repeat the timing, support angle, scanning, and crossing/reset decision.',
     chips: ['FB + winger', '#6 underneath', 'Timing cue', 'Decision point'],
+    checkTitle: 'Is the relationship improving?',
+    checks: [
+      'Did the fullback and winger repeat the same timing cue?',
+      'Did the receiving player scan before the ball arrived?',
+      'Was #6 underneath at a useful support angle?',
+      'Did the winger read the defender before choosing width or an inside drive?',
+      'Did players select cross or reset instead of forcing the action?',
+    ],
   },
   {
     id: 'whole-return',
@@ -22,15 +38,15 @@ const TRAINING_STEPS = [
     title: 'Return to match pressure',
     detail: 'Add opposition pressure, realistic scoring, restarts, and second-ball support from #8/#10.',
     chips: ['Phase of play', 'Real restarts', 'Opposition pressure', '#8/#10 support'],
+    checkTitle: 'Did it transfer?',
+    checks: [
+      'Did the relationship hold under live opposition pressure?',
+      'Did players solve varied restarts without relying on a scripted pattern?',
+      'Did #8/#10 arrive to support the second ball?',
+      'Did the decisions survive transition and realistic scoring?',
+      'Did the behaviour appear in the next match?',
+    ],
   },
-]
-
-const TRANSFER_CHECKS = [
-  'Did the fullback recognize the overlap cue?',
-  'Did the winger create width or drive inside at the right time?',
-  'Did #6 support underneath?',
-  'Did #9 stay available centrally?',
-  'Did the behaviour appear in the next match?',
 ]
 
 const RISK_ITEMS = [
@@ -46,55 +62,109 @@ const COACHING_TOOLS = [
   'Engage – Explain – Exit – Enter – Educate – Ensure',
 ]
 
+const TRAINING_DESIGN_PRINCIPLES = [
+  {
+    letter: 'S',
+    title: 'Soccer Problem',
+    rationale:
+      'Design the wide-channel build-up problem; let players read the free player, support, and central option instead of prescribing one solution.',
+  },
+  {
+    letter: 'C',
+    title: 'Challenge',
+    rationale:
+      'Use competition, directional scoring, and adjustable space or numbers so the task stretches this group without overwhelming it.',
+  },
+  {
+    letter: 'O',
+    title: 'Opposition',
+    rationale:
+      'Keep defenders active and vary restarts so the target relationship repeats without the same picture repeating.',
+  },
+  {
+    letter: 'R',
+    title: 'Realism',
+    rationale:
+      'Preserve direction, transitions, player relationships, match pressure, and scoring so the decisions can transfer to the game.',
+  },
+  {
+    letter: 'E',
+    title: 'Enjoyment',
+    rationale:
+      'Give both teams a way to score and win, creating the motivation, ownership, and intensity needed for learning.',
+  },
+]
+
 export function MethodologyPage() {
   const [activeStepId, setActiveStepId] = useState(TRAINING_STEPS[0].id)
   const activeStep = TRAINING_STEPS.find((step) => step.id === activeStepId) ?? TRAINING_STEPS[0]
 
   return (
     <PresentationLayout pageId="methodology" noPadding>
-      <p className="presentation-eyebrow">Section 4 — the reasoning</p>
-      <h1 className="presentation-title">Training methodology</h1>
-      <p className="presentation-body">
+      <p className="presentation-eyebrow method-page__eyebrow">Section 4 — the reasoning</p>
+      <h1 className="presentation-title method-page__title">Training methodology</h1>
+      <p className="presentation-body method-page__intro">
         Whole-Part-Whole: present the game problem in context, isolate the key relationship, then
         return to match pressure with real opposition and scoring.
       </p>
 
-      <section className="method-builder">
-        <div className="method-steps" role="tablist" aria-label="Whole part whole training design">
-          {TRAINING_STEPS.map((step, index) => (
-            <button
-              key={step.id}
-              type="button"
-              role="tab"
-              aria-selected={step.id === activeStepId}
-              className={step.id === activeStepId ? 'method-step is-active' : 'method-step'}
-              onClick={() => setActiveStepId(step.id)}
-            >
-              <span>{index + 1}</span>
-              <strong>{step.label}</strong>
-            </button>
-          ))}
-        </div>
-
-        <section className="method-detail" aria-live="polite">
-          <span>{activeStep.label}</span>
-          <h2>{activeStep.title}</h2>
-          <p>{activeStep.detail}</p>
-          <div className="presentation-chip-row">
-            {activeStep.chips.map((chip) => (
-              <span key={chip} className="presentation-chip presentation-chip--small">
-                {chip}
-              </span>
+      <section className="method-top-grid">
+        <section className="method-builder" aria-label="Whole-Part-Whole session methodology">
+          <div className="method-steps" role="tablist" aria-label="Whole part whole training design">
+            {TRAINING_STEPS.map((step, index) => (
+              <button
+                key={step.id}
+                type="button"
+                role="tab"
+                aria-selected={step.id === activeStepId}
+                className={step.id === activeStepId ? 'method-step is-active' : 'method-step'}
+                onClick={() => setActiveStepId(step.id)}
+              >
+                <span>{index + 1}</span>
+                <strong>{step.label}</strong>
+              </button>
             ))}
           </div>
+
+          <section className="method-detail" aria-live="polite">
+            <span>{activeStep.label}</span>
+            <h2>{activeStep.title}</h2>
+            <p>{activeStep.detail}</p>
+            <div className="presentation-chip-row">
+              {activeStep.chips.map((chip) => (
+                <span key={chip} className="presentation-chip presentation-chip--small">
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </section>
+        </section>
+
+        <section className="method-principles-card" aria-labelledby="training-design-principles-title">
+          <span className="method-principles-card__eyebrow">Module 2 — environment design</span>
+          <h2 id="training-design-principles-title">My training design principles — SCORE</h2>
+          <p className="method-principles-card__intro">
+            I use these principles to design and evaluate every Whole-Part-Whole session.
+          </p>
+          <ol className="method-principles-list">
+            {TRAINING_DESIGN_PRINCIPLES.map((principle) => (
+              <li key={principle.letter}>
+                <span aria-hidden="true">{principle.letter}</span>
+                <p>
+                  <strong>{principle.title}</strong>
+                  {principle.rationale}
+                </p>
+              </li>
+            ))}
+          </ol>
         </section>
       </section>
 
-      <section className="method-lower-grid method-lower-grid--without-microcycle">
-        <div className="method-check-card">
-          <h2>Did it transfer?</h2>
+      <section className="method-lower-grid method-lower-grid--complete">
+        <div className="method-check-card" aria-live="polite">
+          <h2>{activeStep.checkTitle}</h2>
           <ul>
-            {TRANSFER_CHECKS.map((check) => (
+            {activeStep.checks.map((check) => (
               <li key={check}>{check}</li>
             ))}
           </ul>
@@ -110,28 +180,28 @@ export function MethodologyPage() {
             ))}
           </div>
         </div>
-      </section>
 
-      <section className="method-approach-card">
-        <h2>Preferred coaching approaches</h2>
-        <div className="presentation-chip-row">
-          {COACHING_TOOLS.map((tool) => (
-            <span key={tool} className="presentation-chip presentation-chip--small">
-              {tool}
-            </span>
-          ))}
-        </div>
-        <p>
-          I lean on Natural Stoppages and Freeze &amp; Recreate as my primary coaching tools - pausing
-          live play to re-create a moment, discuss 1-2 options with the players, then rehearse it at
-          game speed before going live again. I follow the Engage-Explain-Exit-Enter-Educate-Ensure
-          process: setting clear expectations before the session (Engage/Explain), observing without
-          over-intervening once play starts (Exit/Enter), and making sure players get a chance to
-          rehearse a corrected action rather than just hearing about it (Educate/Ensure). My preference
-          is Whole-Part-Whole for higher-ability groups who can grasp the picture quickly, and
-          Progressive Method when I need to build a skill in pieces before testing it in the full game -
-          this ties back to the considerations from Module 3 on player skill level and maturity.
-        </p>
+        <section className="method-approach-card">
+          <h2>Preferred coaching approaches</h2>
+          <div className="presentation-chip-row">
+            {COACHING_TOOLS.map((tool) => (
+              <span key={tool} className="presentation-chip presentation-chip--small">
+                {tool}
+              </span>
+            ))}
+          </div>
+          <p>
+            I lean on Natural Stoppages and Freeze &amp; Recreate as my primary coaching tools - pausing
+            live play to re-create a moment, discuss 1-2 options with the players, then rehearse it at
+            game speed before going live again. I follow the Engage-Explain-Exit-Enter-Educate-Ensure
+            process: setting clear expectations before the session (Engage/Explain), observing without
+            over-intervening once play starts (Exit/Enter), and making sure players get a chance to
+            rehearse a corrected action rather than just hearing about it (Educate/Ensure). My preference
+            is Whole-Part-Whole for higher-ability groups who can grasp the picture quickly, and
+            Progressive Method when I need to build a skill in pieces before testing it in the full game -
+            this ties back to the considerations from Module 3 on player skill level and maturity.
+          </p>
+        </section>
       </section>
     </PresentationLayout>
   )

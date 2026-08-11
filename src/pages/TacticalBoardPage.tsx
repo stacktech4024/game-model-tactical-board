@@ -2,19 +2,32 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { TimelineScrubber } from '../editor/TimelineScrubber'
 import { VideoReferencePanel } from '../editor/VideoReferencePanel'
-import { FORMATION_LABELS } from '../data/formations'
+import { FORMATION_LABELS, FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../data/formations'
 import { SCENARIOS } from '../data/scenarios'
 import type { ScenarioFormationMode } from '../domain/scenarios/scenarioTypes'
+import { buildScenarioPlan, getPhaseStepIndexAtProgress } from '../domain/simulation/scenarioPlan'
 import type { AnimatorState, ScenarioAnimator } from '../renderers/pixi/animation/scenarioAnimator'
 import { PixiCanvas } from '../renderers/pixi/PixiCanvas'
 import './TacticalBoardPage.css'
 
 const FORMATION_OPTIONS: ScenarioFormationMode[] = [
   'attacking-442',
+  'attacking-corner',
   'defensive-4231',
   'attacking-433',
   'defensive-532',
   'attacking-352',
+]
+
+const ROUTE_LEGEND = [
+  { label: 'Pass', className: 'is-pass' },
+  { label: 'Run', className: 'is-run' },
+  { label: 'Dribble', className: 'is-dribble' },
+  { label: 'Press', className: 'is-press' },
+  { label: 'Recovery', className: 'is-recovery' },
+  { label: 'Shot', className: 'is-shot' },
+  { label: 'Cross', className: 'is-cross' },
+  { label: 'Header', className: 'is-header' },
 ]
 
 type TacticalBoardPageProps = {
@@ -35,17 +48,18 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
   const [selectedFormation, setSelectedFormation] = useState<ScenarioFormationMode>(initialScenario.formationMode)
   const [debugMode, setDebugMode] = useState(false)
   const [showAnnotations, setShowAnnotations] = useState(true)
-  const [showArrows, setShowArrows] = useState(true)
-  const [showMarkers, setShowMarkers] = useState(true)
+  const [showArrows, setShowArrows] = useState(false)
+  const showAllRoutes = false
+  const [showMarkers, setShowMarkers] = useState(false)
   const [showOpposition, setShowOpposition] = useState(true)
   const [showBall, setShowBall] = useState(true)
   const [playState, setPlayState] = useState<AnimatorState>('idle')
   const [activePhaseStepIndex, setActivePhaseStepIndex] = useState(initialStepIndex)
+  const [scrubberRevision, setScrubberRevision] = useState(0)
   const [selectedScenarioId, setSelectedScenarioId] = useState(initialScenario.id)
   const pitchHostRef = useRef<HTMLDivElement | null>(null)
   const animatorRef = useRef<ScenarioAnimator | null>(null)
   const activePhaseStepIndexRef = useRef(activePhaseStepIndex)
-  const selectedScenarioRef = useRef(initialScenario)
   const playStateRef = useRef(playState)
 
   const selectedScenario = useMemo(() => {
@@ -54,10 +68,14 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
   const activePhaseStep =
     selectedScenario.phaseSteps[activePhaseStepIndex] ?? selectedScenario.phaseSteps[0]
+  const scenarioPlan = useMemo(() => buildScenarioPlan(
+    selectedScenario,
+    FORMATION_POSITIONS[selectedFormation],
+    OPPOSITION_POSITIONS[selectedFormation],
+  ), [selectedFormation, selectedScenario])
 
   useEffect(() => {
     activePhaseStepIndexRef.current = activePhaseStepIndex
-    selectedScenarioRef.current = selectedScenario
     playStateRef.current = playState
   }, [activePhaseStepIndex, playState, selectedScenario])
 
@@ -106,9 +124,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
   const handleAnimatorReady = useCallback((animator: ScenarioAnimator) => {
     animatorRef.current = animator
-    const phaseCount = selectedScenarioRef.current.phaseSteps.length
-    const progress =
-      phaseCount > 1 ? activePhaseStepIndexRef.current / (phaseCount - 1) : 0
+    const progress = scenarioPlan.phaseSteps[activePhaseStepIndexRef.current]?.timing.startProgress ?? 0
 
     animator.setProgress(progress)
 
@@ -118,7 +134,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
     }
 
     setPlayState(progress === 0 ? 'idle' : 'paused')
-  }, [])
+  }, [scenarioPlan.phaseSteps])
 
   const handleAnimatorStateChange = useCallback((state: AnimatorState) => {
     setPlayState(state)
@@ -130,15 +146,9 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
 
   const getPhaseIndexForProgress = useCallback(
     (progress: number) => {
-      const phaseCount = selectedScenario.phaseSteps.length
-
-      if (phaseCount <= 1) {
-        return 0
-      }
-
-      return Math.min(phaseCount - 1, Math.max(0, Math.round(progress * (phaseCount - 1))))
+      return getPhaseStepIndexAtProgress(scenarioPlan, progress)
     },
-    [selectedScenario.phaseSteps.length],
+    [scenarioPlan],
   )
 
   const handleTimelineProgressChange = useCallback(
@@ -161,6 +171,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
   const handleReset = () => {
     animatorRef.current?.reset()
     setActivePhaseStepIndex(0)
+    setScrubberRevision((revision) => revision + 1)
     setPlayState('idle')
   }
 
@@ -169,12 +180,10 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
       Math.max(nextIndex, 0),
       Math.max(selectedScenario.phaseSteps.length - 1, 0),
     )
-    const progress =
-      selectedScenario.phaseSteps.length > 1
-        ? clampedIndex / (selectedScenario.phaseSteps.length - 1)
-        : 0
+    const progress = scenarioPlan.phaseSteps[clampedIndex]?.timing.startProgress ?? 0
 
     setActivePhaseStepIndex(clampedIndex)
+    setScrubberRevision((revision) => revision + 1)
     animatorRef.current?.pause()
     animatorRef.current?.setProgress(progress)
     setPlayState(clampedIndex === 0 ? 'idle' : 'paused')
@@ -282,8 +291,21 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
       <section className="app-grid">
         {embedded && (
           <div className="embedded-board-controls">
+            <label className="scenario-select-control">
+              <span>Scenario</span>
+              <select
+                value={selectedScenario.id}
+                onChange={(event) => handleScenarioSelect(event.target.value)}
+              >
+                {SCENARIOS.map((scenario) => (
+                  <option key={scenario.id} value={scenario.id}>
+                    {scenario.title}
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="playback-controls" role="group" aria-label="Playback controls">
-              <span className="playback-controls__label">Playback: {playState}</span>
+              <span className="playback-controls__label">{playState}</span>
               <button
                 type="button"
                 className="control-button"
@@ -304,55 +326,75 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
                 Reset
               </button>
             </div>
+            <div className="phase-controls phase-controls--primary" role="group" aria-label="Phase step controls">
+              <button
+                type="button"
+                className="control-button"
+                disabled={activePhaseStepIndex === 0}
+                onClick={() => handlePhaseStepChange(activePhaseStepIndex - 1)}
+              >
+                ← Previous
+              </button>
+              <span>{activePhaseStepIndex + 1}/{selectedScenario.phaseSteps.length}</span>
+              <button
+                type="button"
+                className="control-button"
+                disabled={activePhaseStepIndex >= selectedScenario.phaseSteps.length - 1}
+                onClick={() => handlePhaseStepChange(activePhaseStepIndex + 1)}
+              >
+                Next →
+              </button>
+            </div>
+            <div className="display-controls" role="group" aria-label="Display controls">
+              <label className="layer-toggle">
+                <input
+                  type="checkbox"
+                  checked={showArrows}
+                  onChange={(event) => setShowArrows(event.target.checked)}
+                />
+                <span>Show movement routes</span>
+              </label>
+              <label className="layer-toggle">
+                <input
+                  type="checkbox"
+                  checked={showMarkers}
+                  onChange={(event) => setShowMarkers(event.target.checked)}
+                />
+                <span>Show markers</span>
+              </label>
+            </div>
           </div>
         )}
         <aside className="scenario-panel">
-          <h2>Scenarios</h2>
-          <div className="scenario-list">
-            {SCENARIOS.map((scenario) => (
-              <button
-                key={scenario.id}
-                type="button"
-                className={scenario.id === selectedScenario.id ? 'scenario-card is-active' : 'scenario-card'}
-                onClick={() => handleScenarioSelect(scenario.id)}
-              >
-                <span className="scenario-card__title">{scenario.title}</span>
-                <span className="scenario-card__meta">{scenario.momentOfGame}</span>
-              </button>
-            ))}
-          </div>
+          {!embedded && (
+            <>
+              <h2>Scenarios</h2>
+              <div className="scenario-list">
+                {SCENARIOS.map((scenario) => (
+                  <button
+                    key={scenario.id}
+                    type="button"
+                    aria-pressed={scenario.id === selectedScenario.id}
+                    className={scenario.id === selectedScenario.id ? 'scenario-card is-active' : 'scenario-card'}
+                    onClick={() => handleScenarioSelect(scenario.id)}
+                  >
+                    <span className="scenario-card__title">{scenario.title}</span>
+                    <span className="scenario-card__meta">{scenario.momentOfGame}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="info-panel">
+            <p className="info-panel__eyebrow">What to notice</p>
             <h2>{selectedScenario.title}</h2>
-            <p className="info-panel__meta">Moment of the Game: {selectedScenario.momentOfGame}</p>
-            <p className="info-panel__meta">System: {selectedScenario.system.shape}</p>
-            <p className="info-panel__meta">
-              Field Geography: {selectedScenario.fieldGeography.description}
-            </p>
-            {selectedScenario.setPieceType && (
-              <p className="info-panel__meta">Set piece type: {selectedScenario.setPieceType}</p>
-            )}
-            <p className="info-panel__description">{selectedScenario.description}</p>
-            <div className="info-panel__section">
-              <h3>Strategy</h3>
-              <p className="info-panel__description">{selectedScenario.strategy}</p>
+            <div className="scenario-facts">
+              <span>{selectedScenario.momentOfGame}</span>
+              <span>{selectedScenario.system.shape}</span>
+              {selectedScenario.setPieceType && <span>{selectedScenario.setPieceType}</span>}
             </div>
-            <div className="info-panel__section">
-              <h3>Tactics</h3>
-              <div className="info-chip-list">
-                {selectedScenario.tactics.map((tactic) => (
-                  <span key={tactic}>{tactic}</span>
-                ))}
-              </div>
-            </div>
-            <div className="info-panel__section">
-              <h3>Skill Set</h3>
-              <div className="info-chip-list">
-                {selectedScenario.skillSet.map((skill) => (
-                  <span key={skill}>{skill}</span>
-                ))}
-              </div>
-            </div>
+            <p className="info-panel__objective">{selectedScenario.strategy}</p>
             {activePhaseStep && (
               <div className="phase-panel">
                 <div className="phase-panel__header">
@@ -369,7 +411,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
                 <p className="info-panel__meta">
                   Zone {activePhaseStep.zoneFocus.join('/')} · Channel {activePhaseStep.channelFocus.join('/')}
                 </p>
-                <div className="phase-controls" role="group" aria-label="Phase step controls">
+                {!embedded && <div className="phase-controls" role="group" aria-label="Phase step controls">
                   <button
                     type="button"
                     className="control-button"
@@ -386,10 +428,23 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
                   >
                     Next step
                   </button>
-                </div>
+                </div>}
               </div>
             )}
-            <p className="info-panel__meta">Current formation: {currentFormationLabel}</p>
+            {showArrows && <div className="route-legend" aria-label="Movement route legend">
+              {ROUTE_LEGEND.map((item) => (
+                <span key={item.label}>
+                  <i className={item.className} aria-hidden="true" />
+                  {item.label}
+                </span>
+              ))}
+            </div>}
+            <details className="scenario-context">
+              <summary>Scenario context</summary>
+              <p>{selectedScenario.description}</p>
+              <p>{selectedScenario.fieldGeography.description}</p>
+              <p>Formation: {currentFormationLabel}</p>
+            </details>
           </div>
 
           {!embedded && <VideoReferencePanel />}
@@ -410,6 +465,7 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
               activePhaseStep={activePhaseStep}
               showAnnotations={showAnnotations}
               showArrows={showArrows}
+              showAllRoutes={showAllRoutes}
               showMarkers={showMarkers}
               showOpposition={showOpposition}
               showBall={showBall}
@@ -418,9 +474,10 @@ function TacticalBoardPage({ initialScenarioId, embedded = false }: TacticalBoar
             />
           </div>
           <TimelineScrubber
-            key={selectedScenario.id}
+            key={`${selectedScenario.id}:${scrubberRevision}`}
             animatorRef={animatorRef}
             playState={playState}
+            initialProgress={scenarioPlan.phaseSteps[activePhaseStepIndex]?.timing.startProgress ?? 0}
             onPause={handleScrubberPause}
             onProgressChange={handleTimelineProgressChange}
           />

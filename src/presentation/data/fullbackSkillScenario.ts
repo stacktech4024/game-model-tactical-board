@@ -127,7 +127,7 @@ const WIDE_RELEASE_OVERLAP: FullbackSkillScenarioData = {
     'This is the Fullback action required to execute our Attacking Organization tactic shown in Game Analysis.',
   relatedTraining: {
     label: 'Central → Wide',
-    href: '/presentation/how-we-train/examples?example=central-wide',
+    href: '/presentation/how-we-train-session?example=central-wide',
     note: 'This is worked on in my Central → Wide session, where the players recognize when the middle is closed and release into the wide channel.',
   },
   animationDescription:
@@ -333,7 +333,7 @@ const DEFEND_WIDE_ONE_V_ONE: FullbackSkillScenarioData = {
   transferStatement: 'The Fullback helps turn wide pressure into a connected unit action.',
   relatedTraining: {
     label: 'Wide Pressure',
-    href: '/presentation/how-we-train/examples?example=wide-pressure',
+    href: '/presentation/how-we-train-session?example=wide-pressure',
     note: 'In Practice Session 8, the players work on the approach angle, body position, cover and forcing the opponent one way.',
   },
   animationDescription:
@@ -464,7 +464,7 @@ const RECOVER_INSIDE_AFTER_LOSS: FullbackSkillScenarioData = {
   transferStatement: 'The recovery protects the centre first, then restores the Fullback’s wide role.',
   relatedTraining: {
     label: 'Line Break + React',
-    href: '/presentation/how-we-train/examples?example=line-break-react',
+    href: '/presentation/how-we-train-session?example=line-break-react',
     note: 'The reason we train the reaction is so the nearest pressure and covering runs happen together when the ball turns over.',
   },
   animationDescription:

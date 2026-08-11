@@ -145,31 +145,38 @@ test('the Canada Soccer decision framework appears only for Press to Regain', ()
   assert.doesNotMatch(JSON.stringify(getExample('press-regain').decisionFramework), /CONCEIVE|DECEIVE/i)
 })
 
-test('How We Train is routed before Microcycle and Training Methodology', () => {
+test('How We Train uses a three-page sequence before Microcycle and Training Methodology', () => {
   const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
 
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-6), [
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-9), [
     'players',
     'skills',
     'how-we-train',
+    'how-we-train-session',
+    'how-we-train-transfer',
     'microcycle',
+    'microcycle-detail',
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 17)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 20)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
-  assert.match(appSource, /path="\/presentation\/how-we-train\/examples"/)
+  assert.match(appSource, /path="\/presentation\/how-we-train-session"/)
   assert.match(appSource, /element=\{<HowWeTrainExamplesPage \/>\}/)
+  assert.match(appSource, /path="\/presentation\/how-we-train-transfer"/)
+  assert.match(appSource, /element=\{<HowWeTrainTransferPage \/>\}/)
 })
 
-test('the overview reduces density and the supporting page preserves accessible example navigation', () => {
+test('the overview, session design and transfer pages preserve concise accessible navigation', () => {
   const overviewSource = readFileSync(new URL('../pages/HowWeTrainPage.tsx', import.meta.url), 'utf8')
   const pageSource = readFileSync(new URL('../pages/HowWeTrainExamplesPage.tsx', import.meta.url), 'utf8')
+  const transferSource = readFileSync(new URL('../pages/HowWeTrainTransferPage.tsx', import.meta.url), 'utf8')
+  const layoutSource = readFileSync(new URL('../PresentationLayout.tsx', import.meta.url), 'utf8')
 
   assert.match(overviewSource, /OUR TRAINING PROCESS/)
   assert.match(overviewSource, /Choose one practice to explore/)
-  assert.match(overviewSource, /how-we-train\/examples\?example=/)
+  assert.match(overviewSource, /how-we-train-session\?example=/)
   assert.doesNotMatch(overviewSource, /<PixiPitchPreview/)
   assert.match(pageSource, /role="tablist"/)
   assert.match(pageSource, /role="tab"/)
@@ -191,7 +198,17 @@ test('the overview reduces density and the supporting page preserves accessible 
   assert.match(pageSource, /Cyan #1 — opposition GK/)
   assert.match(pageSource, /to="\/presentation\/players"/)
   assert.match(pageSource, /to="\/presentation\/skills"/)
-  assert.match(pageSource, /<PresentationLayout pageId="how-we-train"/)
+  assert.match(pageSource, /<PresentationLayout pageId="how-we-train-session"/)
+  assert.match(pageSource, /Continue to match transfer/)
+  assert.doesNotMatch(pageSource, /GAME MODEL → TRAINING → TRANSFER/)
+  assert.match(transferSource, /<PresentationLayout pageId="how-we-train-transfer"/)
+  assert.match(transferSource, /GAME MODEL → TRAINING → TRANSFER/)
+  assert.match(transferSource, /SESSION TO MATCH TRANSFER/i)
+  assert.match(transferSource, /role="tablist"/)
+  assert.match(transferSource, /role="tabpanel"/)
+  assert.match(transferSource, /Review the session design/)
+  assert.match(layoutSource, /preserveHowWeTrainExample/)
+  assert.match(layoutSource, /location\.search/)
 })
 
 test('all player tokens use realistic role numbers with no N or A placeholders', () => {

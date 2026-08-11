@@ -79,8 +79,8 @@ export function HowWeTrainPage() {
                   <div><dt>System</dt><dd>{example.system}</dd></div>
                   <div><dt>Principles</dt><dd>{example.principles.join(' · ')}</dd></div>
                 </dl>
-                <Link to={`/presentation/how-we-train/examples?example=${example.id}`}>
-                  Open training example <span aria-hidden="true">→</span>
+                <Link to={`/presentation/how-we-train-session?example=${example.id}`}>
+                  Open session design <span aria-hidden="true">→</span>
                 </Link>
               </article>
             ))}
@@ -93,7 +93,7 @@ export function HowWeTrainPage() {
           <div><i className="how-we-train-team-dot is-yellow" />Yellow #1 — coached GK</div>
           <div><i className="how-we-train-team-dot is-cyan" />Cyan #1 — opposition GK</div>
           <p>Red attacks toward Zone 4 and defends toward Zone 1. Goalkeepers anchor both ends; token direction shows each player’s body orientation as the action changes.</p>
-          <Link to={`/presentation/how-we-train/examples?example=${HOW_WE_TRAIN_EXAMPLES[0].id}`}>View the animated examples</Link>
+          <Link to={`/presentation/how-we-train-session?example=${HOW_WE_TRAIN_EXAMPLES[0].id}`}>View the animated session designs</Link>
         </aside>
       </main>
     </PresentationLayout>

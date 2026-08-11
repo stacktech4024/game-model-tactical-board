@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useCallback, useEffect } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { PRESENTATION_PAGE_ORDER, PRESENTATION_PAGE_LABELS } from './data/pageOrder'
 import type { PresentationPageId } from './data/pageOrder'
@@ -13,11 +13,19 @@ type PresentationLayoutProps = {
 
 export function PresentationLayout({ pageId, children, noPadding = false }: PresentationLayoutProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
   const currentIndex = PRESENTATION_PAGE_ORDER.indexOf(pageId)
   const prevPage = currentIndex > 0 ? PRESENTATION_PAGE_ORDER[currentIndex - 1] : null
   const nextPage =
     currentIndex < PRESENTATION_PAGE_ORDER.length - 1 ? PRESENTATION_PAGE_ORDER[currentIndex + 1] : null
+  const getPagePath = useCallback((targetPage: PresentationPageId) => {
+    const preserveHowWeTrainExample =
+      (pageId === 'how-we-train-session' && targetPage === 'how-we-train-transfer')
+      || (pageId === 'how-we-train-transfer' && targetPage === 'how-we-train-session')
+
+    return `/presentation/${targetPage}${preserveHowWeTrainExample ? location.search : ''}`
+  }, [location.search, pageId])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -31,16 +39,16 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
       }
 
       if (event.key === 'ArrowRight' && nextPage) {
-        navigate(`/presentation/${nextPage}`)
+        navigate(getPagePath(nextPage))
       }
       if (event.key === 'ArrowLeft' && prevPage) {
-        navigate(`/presentation/${prevPage}`)
+        navigate(getPagePath(prevPage))
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [navigate, nextPage, prevPage])
+  }, [getPagePath, navigate, nextPage, prevPage])
 
   // params is intentionally unused beyond confirming route match; kept for future deep-linking needs
   void params
@@ -53,7 +61,7 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
             key={id}
             type="button"
             className={index === currentIndex ? 'presentation-dot is-active' : 'presentation-dot'}
-            onClick={() => navigate(`/presentation/${id}`)}
+            onClick={() => navigate(getPagePath(id))}
             aria-label={PRESENTATION_PAGE_LABELS[id]}
             aria-current={index === currentIndex ? 'page' : undefined}
           />
@@ -69,7 +77,7 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
           type="button"
           className="presentation-nav__button"
           disabled={!prevPage}
-          onClick={() => prevPage && navigate(`/presentation/${prevPage}`)}
+          onClick={() => prevPage && navigate(getPagePath(prevPage))}
         >
           ← Back
         </button>
@@ -80,7 +88,7 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
           type="button"
           className="presentation-nav__button"
           disabled={!nextPage}
-          onClick={() => nextPage && navigate(`/presentation/${nextPage}`)}
+          onClick={() => nextPage && navigate(getPagePath(nextPage))}
         >
           Next →
         </button>

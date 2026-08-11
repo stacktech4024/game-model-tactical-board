@@ -166,16 +166,48 @@ function getLooseBallReleases(): LooseBallRelease[] {
   })
 }
 
-test('build-through-wide-channels keeps #4 at the forward-pass release space and preserves the goal outcome', () => {
+test('build-through-wide-channels connects every release from #1 through #9 and preserves the goal outcome', () => {
   const scenario = getScenario('build-through-wide-channels')
   const plan = buildPlanForScenario(scenario)
 
-  assertPhaseLabels(scenario, ['Secure build-up', 'Release wide', 'Attack Zone 4', 'Finish'])
-  assertPlayerArrives(plan, 'wide-build-four-step-to-release', 'home', 4)
+  assertPhaseLabels(scenario, [
+    'Start with the goalkeeper',
+    'Find the left fullback',
+    'Connect the winger',
+    'Connect the third player',
+    'Play through and finish',
+  ])
+  assertPlayerArrives(plan, 'wide-build-three-advance', 'home', 3)
+  assertPlayerArrives(plan, 'wide-build-six-support', 'home', 6)
   assertReleasePlayerAtBall(plan, {
-    arrowId: 'wide-build-four-to-ten',
+    arrowId: 'wide-build-gk-to-four',
+    side: 'home',
+    playerNumber: 1,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'wide-build-four-to-three',
     side: 'home',
     playerNumber: 4,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'wide-build-three-to-eleven',
+    side: 'home',
+    playerNumber: 3,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'wide-build-eleven-to-six',
+    side: 'home',
+    playerNumber: 11,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'wide-build-six-to-ten',
+    side: 'home',
+    playerNumber: 6,
+  })
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'wide-build-ten-to-nine',
+    side: 'home',
+    playerNumber: 10,
   })
   assertReleasePlayerAtBall(plan, {
     arrowId: 'wide-build-shot-goal',
@@ -183,7 +215,7 @@ test('build-through-wide-channels keeps #4 at the forward-pass release space and
     playerNumber: 9,
   })
 
-  const finalPass = getIntent(plan, 'wide-build-finish-nine')
+  const finalPass = getIntent(plan, 'wide-build-ten-to-nine')
   const releaseSnapshot = getWorldSnapshotAtProgress(plan, finalPass.timing.startProgress)
   const numberNine = releaseSnapshot.players.find(
     (player) => player.side === 'home' && player.number === 9,
@@ -267,32 +299,43 @@ test('every ball movement intent declares a release kind and follows its release
   })
 })
 
-test('corner-short-decoy-wide-delivery starts with #7 and the ball at the corner before the delivery and goal', () => {
+test('corner-short-decoy-wide-delivery moves from #7 to #3, then #2 heads across for #8 to score', () => {
   const scenario = getScenario('corner-short-decoy-wide-delivery')
   const plan = buildPlanForScenario(scenario)
   const initialSnapshot = getWorldSnapshotAtProgress(plan, 0)
 
-  assertPhaseLabels(scenario, ['Show short', 'Deliver corridor', 'Finish corridor'])
+  assertPhaseLabels(scenario, ['Show short', 'Organize the box', 'Deliver far post', 'Head back across', 'Finish second header'])
   assertPointClose(initialSnapshot.ball?.position, { x: 2, y: 102 }, `${scenario.id}: ball starts at corner`)
   assertPointClose(
     initialSnapshot.players.find((item) => item.side === 'home' && item.number === 7)?.position,
     { x: 2, y: 102 },
     `${scenario.id}: #7 starts at corner`,
   )
-  assertPlayerArrives(plan, 'corner-short-decoy', 'home', 7)
+  assertPlayerArrives(plan, 'corner-three-show-short', 'home', 3)
   assertReleasePlayerAtBall(plan, {
-    arrowId: 'corner-wide-delivery',
+    arrowId: 'corner-short-pass',
     side: 'home',
     playerNumber: 7,
   })
-  assertPlayerArrives(plan, 'corner-nine-attack-corridor', 'home', 9)
   assertReleasePlayerAtBall(plan, {
-    arrowId: 'corner-shot-goal',
+    arrowId: 'corner-wide-delivery',
     side: 'home',
-    playerNumber: 9,
+    playerNumber: 3,
   })
-  assertMarkerAtIntentTarget(scenario, plan, 'corner-goal-marker', 'corner-shot-goal')
-  assertFinalBallAtIntentTarget(plan, 'corner-shot-goal')
+  assertPlayerArrives(plan, 'corner-two-attack-back-post', 'home', 2)
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'corner-two-header-across',
+    side: 'home',
+    playerNumber: 2,
+  })
+  assertPlayerArrives(plan, 'corner-eight-late-arrival', 'home', 8)
+  assertReleasePlayerAtBall(plan, {
+    arrowId: 'corner-eight-header-goal',
+    side: 'home',
+    playerNumber: 8,
+  })
+  assertMarkerAtIntentTarget(scenario, plan, 'corner-goal-marker', 'corner-eight-header-goal')
+  assertFinalBallAtIntentTarget(plan, 'corner-eight-header-goal')
 })
 
 test('counter-quickly-on-turnover has #6 secure and release before #9 finishes into goal', () => {
@@ -322,7 +365,7 @@ test('main attacking scenarios include believable away off-ball defensive moveme
       scenarioId: 'build-through-wide-channels',
       arrowIds: [
         'wide-build-away-eleven-press',
-        'wide-build-away-eight-screen',
+        'wide-build-away-six-shift',
         'wide-build-away-five-track-nine',
         'wide-build-away-two-tuck',
       ],

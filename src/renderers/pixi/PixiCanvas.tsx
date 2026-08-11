@@ -24,6 +24,7 @@ import {
   getPlayerTokenRadius,
 } from './layers/PlayerLayer'
 import { drawZones } from './layers/ZoneLayer'
+import { facingAngleToSpriteRotation } from './animation/playerFacing'
 import { FORMATION_POSITIONS, OPPOSITION_POSITIONS } from '../../data/formations'
 import { OPPOSITION_SQUAD } from '../../data/opponents'
 import { PICKERING_SQUAD } from '../../data/squad'
@@ -64,7 +65,7 @@ type PlayerPhaseVisual = {
 
 // Away tokens stay slightly transparent at all times (no focus state applies
 // to them), matching PlayerLayer's fixed away-side alpha at initial draw.
-const AWAY_BASE_ALPHA = 0.58
+const AWAY_BASE_ALPHA = 0.42
 
 // Read-only evidence-gathering toggle (Checkpoint 2.4B): when true, periodically
 // diffs live Pixi/GSAP token screen positions against the Phase 2 domain
@@ -80,6 +81,7 @@ type PhaseVisualRefs = {
   awayPlayerVisuals: Map<number, PlayerPhaseVisual>
   selectedArrows?: ScenarioArrow[]
   showArrows: boolean
+  showAllRoutes: boolean
   width: number
   height: number
   pitchPadding: number
@@ -109,6 +111,7 @@ type PixiCanvasProps = {
   activePhaseStep?: ScenarioPhaseStep
   showAnnotations?: boolean
   showArrows?: boolean
+  showAllRoutes?: boolean
   showMarkers?: boolean
   showOpposition?: boolean
   showBall?: boolean
@@ -129,6 +132,7 @@ export function PixiCanvas({
   activePhaseStep,
   showAnnotations = true,
   showArrows = true,
+  showAllRoutes = false,
   showMarkers = true,
   showOpposition = true,
   showBall = true,
@@ -174,8 +178,8 @@ export function PixiCanvas({
       const isOutOfActiveZone = hasActiveZones && !activeZones.has(visual.zoneNumber)
       const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
 
-      visual.tokenVisual.alpha = (hasActiveFocus && !isFocused ? 0.48 : 1) * zoneDimFactor
-      visual.numberText.alpha = (hasActiveFocus && !isFocused ? 0.55 : 1) * zoneDimFactor
+      visual.tokenVisual.alpha = (hasActiveFocus && !isFocused ? 0.36 : 1) * zoneDimFactor
+      visual.numberText.alpha = (hasActiveFocus && !isFocused ? 0.44 : 1) * zoneDimFactor
       visual.focusGlow.visible = isFocused
       visual.focusRing.visible = isFocused
     })
@@ -187,7 +191,16 @@ export function PixiCanvas({
       const zoneDimFactor = isOutOfActiveZone ? 0.45 : 1
 
       visual.tokenVisual.alpha = AWAY_BASE_ALPHA * zoneDimFactor
-      visual.numberText.alpha = zoneDimFactor
+      visual.numberText.alpha = 0.5 * zoneDimFactor
+    })
+
+    activePhaseStep?.playerOrientations?.forEach((orientation) => {
+      const visuals = orientation.side === 'away' ? refs.awayPlayerVisuals : refs.playerVisuals
+      const visual = visuals.get(orientation.playerNumber)
+
+      if (visual?.tokenVisual instanceof Sprite) {
+        visual.tokenVisual.rotation = facingAngleToSpriteRotation(orientation.facingAngle)
+      }
     })
 
     drawPhaseHighlights(
@@ -203,7 +216,7 @@ export function PixiCanvas({
       refs.width,
       refs.height,
       refs.pitchPadding,
-      activeArrowIds,
+      refs.showAllRoutes ? undefined : activeArrowIds,
     )
   }, [activePhaseStep, phaseVisualVersion])
 
@@ -533,6 +546,7 @@ export function PixiCanvas({
         awayPlayerVisuals,
         selectedArrows,
         showArrows,
+        showAllRoutes,
         width,
         height,
         pitchPadding,
@@ -708,6 +722,7 @@ export function PixiCanvas({
     onStateChange,
     showAnnotations,
     showArrows,
+    showAllRoutes,
     showBall,
     showMarkers,
     showOpposition,

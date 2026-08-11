@@ -40,8 +40,13 @@ export function drawScenarioArrows(
     const color = ARROW_COLORS[arrow.type]
     const hasActiveFilter = Boolean(activeArrowIds?.size)
     const isActive = activeArrowIds?.has(arrow.id) ?? false
-    const alpha = hasActiveFilter ? (isActive ? 1 : 0.28) : ARROW_ALPHA
-    const width = hasActiveFilter ? (isActive ? ARROW_WIDTH + 1.5 : ARROW_WIDTH) : ARROW_WIDTH
+
+    if (hasActiveFilter && !isActive) {
+      return
+    }
+
+    const alpha = hasActiveFilter ? 1 : ARROW_ALPHA
+    const width = hasActiveFilter ? ARROW_WIDTH + 1.5 : ARROW_WIDTH
     const angle = Math.atan2(end.sy - arrowheadStart.sy, end.sx - arrowheadStart.sx)
     const leftHeadAngle = angle - Math.PI + ARROWHEAD_ANGLE
     const rightHeadAngle = angle - Math.PI - ARROWHEAD_ANGLE

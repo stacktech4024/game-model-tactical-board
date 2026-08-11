@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import { PICKERING_SQUAD } from '../../data/squad.ts'
+import { FORMATION_POSITIONS } from '../../data/formations.ts'
 import {
   PLAYER_POSITION_TO_PROFILE_ID,
   POSITIONAL_PROFILES,
@@ -39,6 +40,23 @@ test('every profile satisfies the Canada Soccer category and four-Moment structu
     assert.ok(profile.moments.defensiveTransition.length >= 2, `${profile.id}: DT`)
     assert.ok(profile.evidence.length >= 1, `${profile.id}: evidence reference`)
   })
+})
+
+test('positional evidence is distributed across the strongest completed practice plans', () => {
+  const evidenceByProfile = Object.fromEntries(
+    POSITIONAL_PROFILES.map((profile) => [profile.id, profile.evidence[0].session]),
+  )
+
+  assert.deepEqual(evidenceByProfile, {
+    goalkeeper: 'Practice Session 3',
+    'centre-backs': 'Practice Session 3',
+    fullbacks: 'Practice Session 10',
+    'central-midfield': 'Practice Session 6',
+    'attacking-midfielder': 'Practice Session 9',
+    'wide-players': 'Practice Session 1',
+    striker: 'Practice Session 9',
+  })
+  assert.ok(new Set(Object.values(evidenceByProfile)).size >= 5)
 })
 
 test('profiles show the correct current Pickering squad occupants', () => {
@@ -100,7 +118,27 @@ test('the profile pitch uses the approved AO 1-4-4-2 reference instead of the ol
   const source = readFileSync(new URL('../pages/PlayersPage.tsx', import.meta.url), 'utf8')
 
   assert.match(source, /FORMATION_POSITIONS\['attacking-442'\]/)
+  assert.match(source, /const BOARD_WIDTH = 540/)
+  assert.match(source, /positional-profile-detail__body/)
   assert.doesNotMatch(source, /FORMATION_POSITIONS\['attacking-433'\]/)
+})
+
+test('#10 sits underneath #9 as the attacking midfielder or secondary striker in the AO 1-4-4-2', () => {
+  const formation = FORMATION_POSITIONS['attacking-442']
+
+  assert.ok(formation[10].y < formation[9].y, '#10 must be slightly deeper than the striker')
+  assert.ok(formation[10].y > formation[7].y, '#10 must remain above the midfield line')
+  assert.ok(formation[9].y - formation[10].y <= 8, '#10 must remain connected as a secondary striker')
+})
+
+test('desktop positional profiles prioritize a larger pitch and full-width readable information bands', () => {
+  const styles = readFileSync(new URL('../PresentationLayout.css', import.meta.url), 'utf8')
+  const desktopStyles = styles.slice(styles.indexOf('@media (min-width: 1280px) and (min-height: 760px)'))
+
+  assert.match(desktopStyles, /profile-formation-card__pitch[\s\S]*?520px/)
+  assert.match(desktopStyles, /profile-priority-grid[\s\S]*?repeat\(4, minmax\(0, 1fr\)\)/)
+  assert.match(desktopStyles, /profile-moment-tabs[\s\S]*?repeat\(4, minmax\(0, 1fr\)\)/)
+  assert.match(desktopStyles, /profile-priority-card li,[\s\S]*?font-size: 0\.82rem/)
 })
 
 test('fullback defensive language protects inside and directs play to Channel 1', () => {

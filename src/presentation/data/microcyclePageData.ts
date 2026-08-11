@@ -33,12 +33,16 @@ export type MicrocycleDay = {
   physicalLoad: EvidenceValue<MicrocycleLoad>
   rpe: EvidenceValue<string>
   tacticalLoad: EvidenceValue<MicrocycleLoad>
+  objective: EvidenceValue<string>
+  duration: EvidenceValue<string>
   primaryMoments: EvidenceValue<TrainingMoment[]>
   secondaryMoments: TrainingMoment[]
   gameModelFocus: string[]
   primaryUnits: string[]
   secondaryUnits: string[]
+  sessionType: EvidenceValue<string>
   methodology: EvidenceValue<string>
+  activityTypes: EvidenceValue<string[]>
   sessionContent: string[]
   sessionEvidence: MicrocycleSessionEvidence[]
   whyThisDay: string
@@ -65,6 +69,13 @@ const framework = <T>(value: T): EvidenceValue<T> => ({
 
 export const PLAYER_READINESS_NOTE =
   'Training load is modified for players returning from injury or carrying a knock, within the club’s appropriate medical/performance process.'
+
+export const RPE_GUIDANCE = {
+  scale: 'Session RPE uses the player-reported 1–10 scale after each session.',
+  loadCalculation: 'Basic session load = duration in minutes × player session RPE.',
+  review: 'Review trends alongside minutes, attendance, wellness check-ins, and coach observation.',
+  planningBoundary: 'Planning ranges are targets; the recorded response is reported by the player.',
+} as const
 
 export const WEEKLY_CONTEXT = {
   teamTrainingDays: ['Sunday', 'Monday', 'Wednesday'],
@@ -112,6 +123,8 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     physicalLoad: confirmed('MODERATE'),
     rpe: planning('Planning RPE 4–5'),
     tacticalLoad: confirmed('MODERATE'),
+    objective: planning('Restore football rhythm and reinforce Attacking Organization through central-to-wide decisions at a controlled load.'),
+    duration: planning('60–90 minutes by player pathway'),
     primaryMoments: framework(['Attacking Organization']),
     secondaryMoments: ['Defensive Transition'],
     gameModelFocus: [
@@ -121,7 +134,13 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     ],
     primaryUnits: ['#4/#5', '#6/#8/#10', 'Fullbacks', 'Wide Players'],
     secondaryUnits: ['#9 / finishing support'],
+    sessionType: planning('Recovery Session (RS) + Skill Set Session (SS)'),
     methodology: planning('Whole / game-related environment'),
+    activityTypes: planning([
+      'Recovery / light technical for high-minute players',
+      'Technical rondos',
+      'Small-Sided Game (SSG) for the development group',
+    ]),
     sessionContent: [
       'Reintroduce football rhythm',
       'Correct and reinforce Game Model behaviours',
@@ -158,6 +177,8 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     physicalLoad: confirmed('HIGH'),
     rpe: planning('Planning RPE 6–8'),
     tacticalLoad: confirmed('HIGH'),
+    objective: planning('Solve the week’s highest-demand defensive organization and transition problems under opposition and scoring.'),
+    duration: planning('90 minutes'),
     primaryMoments: framework([
       'Defensive Organization',
       'Attacking Transition',
@@ -171,7 +192,13 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     ],
     primaryUnits: ['#7/#9/#11', '#6/#8/#10', 'Fullbacks'],
     secondaryUnits: ['Covering Centre Back', 'Goalkeeper'],
-    methodology: planning('Whole / opposed game-related practice'),
+    sessionType: planning('Tactical Training (TT)'),
+    methodology: planning('Whole-Part-Whole / opposed game-related practice'),
+    activityTypes: planning([
+      'Small-Sided Game (SSG)',
+      'Phase of Play',
+      'Expanded Play (9v9 / 11v11)',
+    ]),
     sessionContent: [
       'Most demanding collective and unit work of the week',
       'Real opposition, direction, transition, and scoring problems',
@@ -215,6 +242,8 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     physicalLoad: confirmed('LOW–MODERATE'),
     rpe: planning('Planning RPE 3–4'),
     tacticalLoad: confirmed('HIGH'),
+    objective: planning('Clarify match-plan roles, team shape, set pieces, and selected transition cues without accumulating fatigue.'),
+    duration: planning('60–75 minutes (MD-1) / up to 90 minutes (MD-2)'),
     primaryMoments: framework(['Attacking Organization', 'Defensive Organization']),
     secondaryMoments: ['Attacking Transition', 'Defensive Transition'],
     gameModelFocus: [
@@ -224,8 +253,16 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     ],
     primaryUnits: ['Starting unit', 'Unit relationships', 'Set-piece groups'],
     secondaryUnits: ['Finishers', 'Rest defence', 'Goalkeepers'],
-    methodology: planning('Tactical rehearsal / phase of play / activation'),
+    sessionType: planning('Tactical Training (TT) + Video Analysis Session (VA)'),
+    methodology: planning('Whole-Part-Whole / phase of play / activation'),
+    activityTypes: planning([
+      'Video analysis / tactical board',
+      'Phase of Play',
+      'Set Pieces',
+      'Rondos / light finishing',
+    ]),
     sessionContent: [
+      'Brief video / tactical-board review',
       'Short, sharp activation',
       'Tactical rehearsal and team shape',
       'Set pieces and match-specific preparation',
@@ -251,8 +288,10 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     role: 'Match Day',
     calendarRelationship: 'One competitive match per week; no double-match structure is presented as the default.',
     physicalLoad: confirmed('MATCH'),
-    rpe: confirmed('No planning RPE prescribed'),
+    rpe: framework('Expected RPE 9–10; collect post-match rating'),
     tacticalLoad: confirmed('MATCH'),
+    objective: planning('Execute and evaluate the weekly Game Model under full competitive pressure.'),
+    duration: framework('90 minutes + warm-up'),
     primaryMoments: framework([
       'Attacking Organization',
       'Defensive Organization',
@@ -267,7 +306,9 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     ],
     primaryUnits: ['Starting eleven', 'All positional units'],
     secondaryUnits: ['Substitutes / finishers'],
+    sessionType: confirmed('Competition / Match'),
     methodology: confirmed('Competition / Match'),
+    activityTypes: framework(['11v11 Match']),
     sessionContent: ['GAME MODEL', 'DECISION', 'EXECUTION', 'REVIEW'],
     sessionEvidence: [
       {
@@ -290,14 +331,18 @@ export const MICROCYCLE_DAYS: MicrocycleDay[] = [
     role: 'Rest / Recovery',
     calendarRelationship: 'Usually rest after the Thursday or Friday match.',
     physicalLoad: confirmed('REST'),
-    rpe: confirmed('No team-session RPE'),
+    rpe: confirmed('RPE 0 — no team session'),
     tacticalLoad: confirmed('REST'),
+    objective: planning('Protect physical and mental freshness before the next weekly cycle.'),
+    duration: confirmed('No team session'),
     primaryMoments: framework([]),
     secondaryMoments: [],
     gameModelFocus: ['Recovery', 'Readiness', 'Personal responsibilities as appropriate'],
     primaryUnits: ['No team field session normally'],
     secondaryUnits: [],
+    sessionType: confirmed('Rest Day (RST)'),
     methodology: confirmed('Rest / individual recovery'),
+    activityTypes: confirmed(['Rest Day (RST)', 'Optional individual recovery only when appropriate']),
     sessionContent: ['No team field session normally', 'Recovery and readiness', 'Personal responsibilities as appropriate'],
     sessionEvidence: [
       {

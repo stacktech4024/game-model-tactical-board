@@ -18,7 +18,8 @@ import {
 
 const SHOT_IMPACT_SCALE = 1.25
 const SHOT_IMPACT_DURATION = 0.12
-const DEFAULT_ARROW_DELAY = 0
+const PASS_TOUCH_SCALE = 1.12
+const PASS_TOUCH_DURATION = 0.08
 
 export type AnimatorState = 'idle' | 'playing' | 'paused' | 'complete'
 
@@ -116,7 +117,10 @@ export function buildScenarioAnimator({
   const initialRotations = new Map<Sprite, number>()
   const plan = buildScenarioPlan(scenario, formationPositions, awayFormationPositions)
   const intentByArrowId = new Map(plan.animationIntents.map((intent) => [intent.arrowId, intent]))
-  const totalDuration = plan.animationIntents.at(-1)?.timing.endTime ?? 0
+  const totalDuration = plan.animationIntents.reduce(
+    (maximum, intent) => Math.max(maximum, intent.timing.endTime),
+    0,
+  )
   const timeline = gsap.timeline({
     paused: true,
     onComplete: () => {
@@ -152,8 +156,8 @@ export function buildScenarioAnimator({
       return
     }
 
-    const delay = arrow.delay ?? DEFAULT_ARROW_DELAY
     const start = pointToPosition(arrow.from, canvasW, canvasH, padding)
+    const startAt = intent.timing.startTime
     const hasVia = Boolean(arrow.via)
     // scenarioPlan.ts bakes VIA_SEGMENT_GAP into timing.duration for via arrows
     // (duration = moveDuration + VIA_SEGMENT_GAP), so subtract it back out
@@ -183,15 +187,15 @@ export function buildScenarioAnimator({
       }
 
       rememberInitialPosition(ballToken)
-      timeline.set(ballToken.position, start, `+=${delay}`)
+      timeline.set(ballToken.position, start, startAt)
 
       if (isAerial) {
         resetBallAerialLift(ballToken)
       }
 
-      // A shot (or a header, which strikes the ball just as decisively)
-      // needs a visible "this player struck it" cue, or the ball just
-      // appears to glide there on its own.
+      // Every player release needs a visible touch cue. Without it, an
+      // accurately authored pass can still look as though the ball begins
+      // moving by itself; shots and headers retain the stronger impact cue.
       //
       // releasedBy (when present) is the domain-verified player actually
       // standing at the ball's release point - it can differ from the
@@ -204,20 +208,20 @@ export function buildScenarioAnimator({
       const strikerSide = intent.releasedBy?.side ?? arrow.side
       const strikerPlayerNumber = intent.releasedBy?.playerNumber ?? arrow.playerNumber
 
-      if (hasStrikeImpactCue && strikerPlayerNumber) {
+      if (intent.releaseKind === 'player' && strikerPlayerNumber) {
         const strikerTokens = strikerSide === 'away' ? awayPlayerTokens : homePlayerTokens
         const strikerToken = strikerTokens?.get(strikerPlayerNumber)
 
         if (strikerToken) {
           rememberInitialPosition(strikerToken)
           timeline.to(strikerToken.scale, {
-            x: SHOT_IMPACT_SCALE,
-            y: SHOT_IMPACT_SCALE,
-            duration: SHOT_IMPACT_DURATION,
+            x: hasStrikeImpactCue ? SHOT_IMPACT_SCALE : PASS_TOUCH_SCALE,
+            y: hasStrikeImpactCue ? SHOT_IMPACT_SCALE : PASS_TOUCH_SCALE,
+            duration: hasStrikeImpactCue ? SHOT_IMPACT_DURATION : PASS_TOUCH_DURATION,
             ease: 'power1.out',
             yoyo: true,
             repeat: 1,
-          }, '<')
+          }, startAt)
         }
       }
 
@@ -266,7 +270,7 @@ export function buildScenarioAnimator({
                 applyBallAerialLift(ballToken, getAerialLiftAtProgress(localFlightProgress))
               }
             : undefined,
-        })
+        }, startAt)
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
@@ -277,7 +281,7 @@ export function buildScenarioAnimator({
                 applyBallAerialLift(ballToken, getAerialLiftAtProgress(localFlightProgress))
               }
             : undefined,
-        }, `+=${VIA_SEGMENT_GAP}`)
+        }, startAt + segmentDuration + VIA_SEGMENT_GAP)
       } else {
         timeline.to(ballToken.position, {
           ...playbackTweenToPosition(endTween),
@@ -288,7 +292,7 @@ export function buildScenarioAnimator({
                 applyBallAerialLift(ballToken, getAerialLiftAtProgress(this.progress()))
               }
             : undefined,
-        })
+        }, startAt)
       }
 
       return
@@ -310,7 +314,7 @@ export function buildScenarioAnimator({
       const playerSprite = playerSprites?.get(arrow.playerNumber)
 
       rememberInitialPosition(playerToken)
-      timeline.set(playerToken.position, start, `+=${delay}`)
+      timeline.set(playerToken.position, start, startAt)
 
       if (playerSprite) {
         rememberInitialRotation(playerSprite)
@@ -366,7 +370,7 @@ export function buildScenarioAnimator({
           ...playbackTweenToPosition(viaTween),
           duration: viaTween.durationSeconds,
           ease: viaTween.ease,
-        })
+        }, startAt)
 
         if (playerSprite) {
           const viaRotation = getRotationFromPitchVector(arrow.from, arrow.via as PitchPoint)
@@ -376,7 +380,7 @@ export function buildScenarioAnimator({
               rotation: viaRotation,
               duration: viaTween.durationSeconds,
               ease: viaTween.ease,
-            }, '<')
+            }, startAt)
           }
         }
 
@@ -384,7 +388,7 @@ export function buildScenarioAnimator({
           ...playbackTweenToPosition(finalTween),
           duration: finalTween.durationSeconds,
           ease: finalTween.ease,
-        }, `+=${VIA_SEGMENT_GAP}`)
+        }, startAt + segmentDuration + VIA_SEGMENT_GAP)
 
         if (playerSprite) {
           const finalRotation = getRotationFromPitchVector(arrow.via as PitchPoint, arrow.to)
@@ -394,7 +398,7 @@ export function buildScenarioAnimator({
               rotation: finalRotation,
               duration: finalTween.durationSeconds,
               ease: finalTween.ease,
-            }, '<')
+            }, startAt + segmentDuration + VIA_SEGMENT_GAP)
           }
         }
       } else {
@@ -402,7 +406,7 @@ export function buildScenarioAnimator({
           ...playbackTweenToPosition(endTween),
           duration: endTween.durationSeconds,
           ease: endTween.ease,
-        })
+        }, startAt)
 
         if (playerSprite) {
           const rotation = getRotationFromPitchVector(arrow.from, arrow.to)
@@ -412,7 +416,7 @@ export function buildScenarioAnimator({
               rotation,
               duration: endTween.durationSeconds,
               ease: endTween.ease,
-            }, '<')
+            }, startAt)
           }
         }
       }

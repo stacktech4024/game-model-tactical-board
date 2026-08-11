@@ -46,7 +46,7 @@ test('Wide Release and Overlap carries the complete assessor-facing Game Model c
     'CROSS / CUTBACK / RESET',
   ])
   assert.equal(skill.relatedTraining.label, 'Central → Wide')
-  assert.equal(skill.relatedTraining.href, '/presentation/how-we-train/examples?example=central-wide')
+  assert.equal(skill.relatedTraining.href, '/presentation/how-we-train-session?example=central-wide')
 })
 
 test('all Fullback skills include concise coaching detail, success and transfer', () => {
@@ -58,7 +58,7 @@ test('all Fullback skills include concise coaching detail, success and transfer'
     assert.ok(skill.observableSuccess.length <= 5, `${id}: concise observable success`)
     assert.ok(skill.matchTransfer.length >= 4, `${id}: match transfer`)
     assert.ok(skill.transferStatement.length > 0, `${id}: transfer statement`)
-    assert.ok(skill.relatedTraining.href.startsWith('/presentation/how-we-train/'), `${id}: How We Train link`)
+    assert.ok(skill.relatedTraining.href.startsWith('/presentation/how-we-train-session'), `${id}: How We Train link`)
     assert.ok(skill.animationDescription.length > 0, `${id}: accessible animation description`)
   })
 })

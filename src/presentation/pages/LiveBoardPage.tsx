@@ -7,8 +7,8 @@ export function LiveBoardPage() {
       <p className="presentation-eyebrow">Section 2 — explore live</p>
       <h1 className="presentation-title">Interactive tactical board</h1>
       <p className="presentation-body">
-        Select a scenario on the left, then step through each movement phase or press Play to watch
-        the full sequence. Use Previous / Next to inspect each phase cue in detail.
+        Choose a scenario, then inspect one coordinated movement phase at a time or press Play to
+        watch the full sequence. Each phase identifies the trigger, key players, and intended outcome.
       </p>
       <TacticalBoardPage initialScenarioId="build-through-wide-channels" embedded />
     </PresentationLayout>

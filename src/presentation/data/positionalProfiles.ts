@@ -100,7 +100,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Scan immediately after the regain', 'Release #9 or a wide outlet when advantage exists', 'Secure possession when the counter is unavailable'],
       defensiveTransition: ['Protect goal first', 'Adjust depth and angle', 'Communicate danger early', 'Reset the back line'],
     },
-    evidence: [{ session: 'MD+1', focus: 'Keeper-started possession and central-to-wide recognition' }],
+    evidence: [{ session: 'Practice Session 3', focus: 'Keeper-started build, calm circulation and finding the #6 pivot' }],
   },
   {
     id: 'centre-backs',
@@ -119,7 +119,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Play forward when the regain is clean', 'Stabilize possession when it is not', 'Reopen the field to both sides'],
       defensiveTransition: ['Protect central depth', 'Manage forward runners', 'Reconnect with goalkeeper and midfield'],
     },
-    evidence: [{ session: 'MD+1', focus: 'Scanning, line-breaking and switching from the first line' }],
+    evidence: [{ session: 'Practice Session 3', focus: 'Centre-back circulation, line-breaking and switching the point of attack' }],
   },
   {
     id: 'fullbacks',
@@ -138,7 +138,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Advance as the wide outlet when space exists', 'Support underneath when the regain must be secured'],
       defensiveTransition: ['Delay when nearest', 'Otherwise recover inside first', 'Reconnect with the centre back', 'Restore wide protection'],
     },
-    evidence: [{ session: 'Practice Session 8', focus: 'Wide pressure, force one direction and secondary cover' }],
+    evidence: [{ session: 'Practice Session 10', focus: 'Build wide, time the overlap and deliver into the box' }],
   },
   {
     id: 'central-midfield',
@@ -161,7 +161,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       { number: 6, label: '#6 - Protect & balance', priorities: ['Protection', 'Circulation', 'Balance', 'Screening'] },
       { number: 8, label: '#8 - Connect & progress', priorities: ['Progression', 'Connection', 'Carrying and combining', 'Forward support'] },
     ],
-    evidence: [{ session: 'MD+1 + Practice Session 5', focus: 'Scanning, line-breaking, switching and third-player support' }],
+    evidence: [{ session: 'Practice Session 6', focus: 'Scan to receive, turn forward and connect short-short-long progression' }],
   },
   {
     id: 'attacking-midfielder',
@@ -180,7 +180,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Receive and turn', 'Release #9 or wide runners', 'Support underneath when the direct counter is unavailable'],
       defensiveTransition: ['Pressure the first outlet when close', 'Otherwise recover centrally into a separate covering lane'],
     },
-    evidence: [{ session: 'Practice Session 5', focus: 'Off-ball movement, line-breaking and transition decisions' }],
+    evidence: [{ session: 'Practice Session 9', focus: 'Occupy half-spaces and time forward runs from midfield' }],
   },
   {
     id: 'wide-players',
@@ -199,7 +199,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Become the immediate outlet', 'Attack open space', 'Find #9 or the opposite runner'],
       defensiveTransition: ['Counter-press or delay when nearest', 'Otherwise recover inside', 'Support the fullback'],
     },
-    evidence: [{ session: 'Practice Session 8', focus: 'Press, regain, support outlet and counter or retain' }],
+    evidence: [{ session: 'Practice Session 1', focus: 'Hold width, combine in wide areas and attack the box from service' }],
   },
   {
     id: 'striker',
@@ -218,7 +218,7 @@ export const POSITIONAL_PROFILES: PositionalProfile[] = [
       attackingTransition: ['Become the first forward target or depth runner', 'Secure the ball when the direct counter is unavailable'],
       defensiveTransition: ['Attack the first escape during the counter-press', 'Screen the next pass', 'Remain the counter outlet when the team drops'],
     },
-    evidence: [{ session: 'Practice Session 8', focus: 'Lead pressure, regain and counter or retain' }],
+    evidence: [{ session: 'Practice Session 9', focus: 'Hold up play, link the transition and time front-three box runs' }],
   },
 ]
 
