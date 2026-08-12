@@ -17,10 +17,10 @@ All 12 feedback work items are addressed in the application. The complete writte
 | 6 | Complete the written Training Model | Complete | Whole-Part-Whole, SCORE, session examples, coaching interventions, load logic, player learning, and match transfer are present. |
 | 7 | Align the evaluator presentation to the capping focus | Complete | `/evaluator` contains only the 12 AO-relevant pages; unrelated Moments and training examples are excluded from the capping sequence but preserved in the full written model. |
 | 8 | Final AO diagram audit | Complete | The AO team picture and two connected training pictures identify both teams, attacking direction, Zones, channels, numbered roles, opponent reactions, ball continuity, and player body orientation. |
-| 9 | Large-screen / projector polish | Complete | All 12 evaluator pages were rendered and measured at 1920×1080. Each finished at 1920×1080 document size with no main-content overflow. |
+| 9 | Large-screen / projector polish | Complete | All 22 full-presentation pages and all 12 evaluator pages were rendered and measured at 1920×1080. Every page finished at exactly 1920×1080 with the full main content and navigation visible and no horizontal or vertical overflow. |
 | 10 | Prepare the final 20-minute spoken script | Complete | `/evaluator` provides the exact run of show, full script, interactions, transitions, and planned time for every page. Total planned time is exactly **20:00**. |
 | 11 | Complete a timed rehearsal run | Complete | The guide starts a persistent visible timer; the start flow was exercised in the rendered app and the 12-step sequence was verified. Automated tests enforce the exact 1,200-second plan and page order. |
-| 12 | Final pre-submission audit | Complete | Production build, lint, 275 automated tests, diff check, and the 1920×1080 projector sweep pass. The direct kick, indirect kick, and default Zone 3 DT frames were re-audited for spacing, orientation, ball ownership, opponent movement, speed, and visual overlap. |
+| 12 | Final pre-submission audit | Complete | Production build, lint, 275 automated tests, diff check, and a clean 22-page sweep of the deployed Vercel presentation at 1920×1080 pass. The direct kick, indirect kick, and default Zone 3 DT frames were re-audited for spacing, orientation, ball ownership, opponent movement, speed, and visual overlap. |
 
 ## Approved closing additions
 
