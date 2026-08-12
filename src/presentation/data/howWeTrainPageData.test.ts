@@ -64,8 +64,12 @@ test('How We Train exposes four approved examples with Central to Wide as the de
   )
 })
 
-test('every example carries the complete Game Model to match-transfer chain and sourced session detail', () => {
+test('every example carries the exact evaluator Game Problem to Match Transfer chain and sourced session detail', () => {
   HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
+    assert.ok(example.gameProblem.length > 0, `${example.id}: Game Problem`)
+    assert.deepEqual(Object.keys(example.gameModelResponse), ['principle', 'strategy', 'tactic'])
+    assert.ok(example.trainingActivity.length > 0, `${example.id}: Training Activity`)
+    assert.ok(example.playerBehaviour.length >= 4, `${example.id}: Player Behaviour`)
     assert.ok(example.gameModelPrinciple.length > 0, `${example.id}: Game Model Principle`)
     assert.ok(example.positionalRequirement.length > 0, `${example.id}: Positional Requirement`)
     assert.ok(example.trainingDesign.length > 0, `${example.id}: Training Design`)
@@ -179,7 +183,7 @@ test('How We Train uses a four-page sequence before Microcycle and Training Meth
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 21)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 22)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train-session"/)
@@ -232,7 +236,9 @@ test('the overview, session design, game pictures and transfer pages preserve co
   assert.match(picturesSource, /Cyan #1 — opposition GK/)
   assert.match(picturesSource, /Continue to match transfer/)
   assert.match(transferSource, /<PresentationLayout pageId="how-we-train-transfer"/)
-  assert.match(transferSource, /GAME MODEL → TRAINING → TRANSFER/)
+  assert.match(transferSource, /GAME PROBLEM → GAME MODEL → TRAINING → BEHAVIOUR → MATCH TRANSFER/)
+  assert.match(transferSource, /PRINCIPLE → STRATEGY → TACTIC/)
+  assert.match(transferSource, /PLAYER BEHAVIOUR/)
   assert.match(transferSource, /SESSION TO MATCH TRANSFER/i)
   assert.match(transferSource, /role="tablist"/)
   assert.match(transferSource, /role="tabpanel"/)

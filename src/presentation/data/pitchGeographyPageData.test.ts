@@ -20,7 +20,7 @@ test('Pitch Geography remains page 4 between Our Identity and Moments of the Gam
     'moments',
     'game-analysis',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 21)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 22)
   assert.equal(PRESENTATION_PAGE_LABELS['pitch-geography'], 'Pitch Geography')
 })
 

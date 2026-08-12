@@ -65,13 +65,15 @@ function distanceInMetres(
   return Math.hypot(xMetres, yMetres)
 }
 
-test('Set Pieces exposes the four required restart examples in presentation order', () => {
+test('Set Pieces exposes the complete restart menu in presentation order', () => {
   assert.deepEqual(
     SET_PIECES_PAGE_CASES.map((item) => [item.id, item.tabLabel]),
     [
       ['attacking-corner', 'Attacking Corner'],
       ['defending-corner', 'Defending Corner'],
       ['wide-free-kick', 'Wide Free Kick'],
+      ['direct-free-kick', 'Direct Free Kick'],
+      ['indirect-free-kick', 'Indirect Free Kick'],
       ['throw-in', 'Throw-In'],
     ],
   )
@@ -99,7 +101,122 @@ test('every restart distinguishes organization, strategy, tactics, skills, princ
 
   assert.match(getCase('defending-corner').strategy, /first contact.*second ball.*transition/i)
   assert.match(getCase('wide-free-kick').strategy, /crossing angle.*#11.*hybrid defence/i)
+  assert.match(getCase('direct-free-kick').strategy, /Fernandes-to-Mount.*roll.*strike/i)
+  assert.match(getCase('indirect-free-kick').strategy, /Solano-to-Shearer.*fake.*shift/i)
   assert.match(getCase('throw-in').strategy, /free receiving option.*secure reset/i)
+})
+
+test('direct free kick legally changes the angle before #10 strikes and preserves rest defence', () => {
+  const direct = getCase('direct-free-kick')
+  const roll = direct.preview.steps.find((step) => step.id === 'df-roll')
+  const strike = direct.preview.steps.find((step) => step.id === 'df-strike')
+  const atRoll = replayUntil(direct, 'df-roll')
+  const atStrike = replayUntil(direct, 'df-strike')
+  const wall = ['df-away-4', 'df-away-5', 'df-away-6', 'df-away-8'].map((id) => getPlayer(direct, id))
+
+  assert.deepEqual(roll?.ballFrom, direct.preview.ballPosition)
+  assert.deepEqual(strike?.ballFrom, roll?.ballTo)
+  assert.equal(strike?.ballTo?.y, 0.5)
+  assert.equal(strike?.emphasizePlayerId, 'df-home-10')
+  assert.ok(distanceInMetres(atRoll.positions.get('df-home-7')!, roll!.ballFrom!) <= 2)
+  assert.ok(distanceInMetres(atStrike.positions.get('df-home-10')!, strike!.ballFrom!) <= 2.1)
+  wall.forEach((defender) => {
+    assert.ok(distanceInMetres(defender, direct.preview.ballPosition) >= 9.15, `${defender.id}: wall distance`)
+  })
+  ;['df-home-2', 'df-home-3', 'df-home-6'].forEach((id) => {
+    assert.ok(strike?.playerMoves?.some((move) => move.playerId === id), `${id}: rest-defence adjustment`)
+  })
+  assert.match(direct.realityReference, /Manchester United.*Bruno Fernandes.*Mason Mount/i)
+})
+
+test('indirect free kick uses a legal screen, mandatory first touch, active wall, and second-player finish', () => {
+  const indirect = getCase('indirect-free-kick')
+  const dummies = indirect.preview.steps.find((step) => step.id === 'if-dummies')
+  const release = indirect.preview.steps.find((step) => step.id === 'if-screen-release')
+  const roll = indirect.preview.steps.find((step) => step.id === 'if-roll')
+  const strike = indirect.preview.steps.find((step) => step.id === 'if-strike')
+  const atRoll = replayUntil(indirect, 'if-roll')
+  const atStrike = replayUntil(indirect, 'if-strike')
+  const wallIds = ['if-away-2', 'if-away-3', 'if-away-4', 'if-away-5', 'if-away-6', 'if-away-8']
+
+  assert.ok(dummies?.playerMoves?.some((move) => move.playerId === 'if-home-7'))
+  assert.ok(release?.playerMoves?.some((move) => move.playerId === 'if-home-9'))
+  assert.ok(release?.playerMoves?.some((move) => move.playerId === 'if-home-11'))
+  wallIds.forEach((wallId) => {
+    const defender = getPlayer(indirect, wallId)
+
+    ;['if-home-9', 'if-home-11'].forEach((screenId) => {
+      assert.ok(
+        distanceInMetres(defender, getPlayer(indirect, screenId)) >= 1,
+        `${screenId} must remain at least one metre from ${wallId}`,
+      )
+    })
+    assert.ok(roll?.playerMoves?.some((move) => move.playerId === wallId), `${wallId}: reacts after first touch`)
+  })
+  assert.deepEqual(roll?.ballFrom, indirect.preview.ballPosition)
+  assert.deepEqual(strike?.ballFrom, roll?.ballTo)
+  assert.equal(strike?.ballTo?.y, 0.4)
+  assert.ok(distanceInMetres(atRoll.positions.get('if-home-10')!, roll!.ballFrom!) <= 3)
+  assert.ok(distanceInMetres(atStrike.positions.get('if-home-7')!, strike!.ballFrom!) <= 1.5)
+  assert.match(indirect.realityReference, /Alan Shearer.*second touch.*one metre/i)
+})
+
+test('new free-kick ball actions use believable elite-match distances and speeds', () => {
+  const direct = getCase('direct-free-kick')
+  const indirect = getCase('indirect-free-kick')
+  const directRoll = direct.preview.steps.find((step) => step.id === 'df-roll')!
+  const directStrike = direct.preview.steps.find((step) => step.id === 'df-strike')!
+  const indirectRoll = indirect.preview.steps.find((step) => step.id === 'if-roll')!
+  const indirectStrike = indirect.preview.steps.find((step) => step.id === 'if-strike')!
+
+  const speed = (step: typeof directRoll) =>
+    distanceInMetres(step.ballFrom!, step.ballTo!) / step.duration
+
+  assert.ok(distanceInMetres(directRoll.ballFrom!, directRoll.ballTo!) >= 1.5)
+  assert.ok(distanceInMetres(directRoll.ballFrom!, directRoll.ballTo!) <= 3)
+  assert.ok(speed(directRoll) >= 3 && speed(directRoll) <= 10)
+  assert.ok(speed(indirectRoll) >= 4 && speed(indirectRoll) <= 12)
+  assert.ok(speed(directStrike) >= 25 && speed(directStrike) <= 50)
+  assert.ok(speed(indirectStrike) >= 20 && speed(indirectStrike) <= 45)
+})
+
+test('new free-kick routines author body orientation for every player and movement', () => {
+  ;['direct-free-kick', 'indirect-free-kick'].forEach((caseId) => {
+    const freeKick = getCase(caseId as SetPiecePageCase['id'])
+
+    freeKick.preview.players.forEach((player) => {
+      assert.ok(Number.isFinite(player.facingAngle), `${caseId}/${player.id}: initial facing`)
+    })
+    freeKick.preview.steps.forEach((step) => {
+      if (step.playerId && step.playerTo) {
+        assert.ok(Number.isFinite(step.facingAngle), `${caseId}/${step.id}: primary facing`)
+      }
+      step.playerMoves?.forEach((move) => {
+        assert.ok(Number.isFinite(move.facingAngle), `${caseId}/${step.id}/${move.playerId}: movement facing`)
+      })
+    })
+  })
+})
+
+test('new free-kick routines keep every player token separated through every authored frame', () => {
+  ;['direct-free-kick', 'indirect-free-kick'].forEach((caseId) => {
+    const freeKick = getCase(caseId as SetPiecePageCase['id'])
+
+    for (let stopIndex = 0; stopIndex <= freeKick.preview.steps.length; stopIndex += 1) {
+      const stopId = freeKick.preview.steps[stopIndex]?.id
+      const frame = replayUntil(freeKick, stopId)
+      const positions = [...frame.positions.entries()]
+
+      positions.forEach(([firstId, first], firstIndex) => {
+        positions.slice(firstIndex + 1).forEach(([secondId, second]) => {
+          assert.ok(
+            distanceInMetres(first, second) >= 0.65,
+            `${caseId}/${stopId ?? 'final'}: ${firstId} and ${secondId} must not overlap`,
+          )
+        })
+      })
+    }
+  })
 })
 
 test('throw-in begins in a legal state with four support relationships and tracked opposition', () => {
@@ -383,6 +500,9 @@ test('short restart sequences keep ball continuity, trackable players, and phase
 
 test('the page provides an accessible selector and remounts the preview to prevent stale animation state', () => {
   const pageSource = readFileSync(new URL('../pages/SetPiecesPage.tsx', import.meta.url), 'utf8')
+  const freeKickPageSource = readFileSync(new URL('../pages/FreeKicksPage.tsx', import.meta.url), 'utf8')
+  const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
+  const layoutStyles = readFileSync(new URL('../PresentationLayout.css', import.meta.url), 'utf8')
 
   assert.match(pageSource, /role="tablist"/)
   assert.match(pageSource, /role="tab"/)
@@ -392,4 +512,10 @@ test('the page provides an accessible selector and remounts the preview to preve
   assert.match(pageSource, /System \/ Organization/)
   assert.doesNotMatch(pageSource, /Not authored yet/)
   assert.doesNotMatch(pageSource, /realityReference/)
+  assert.match(pageSource, /item\.id !== 'direct-free-kick'.*item\.id !== 'indirect-free-kick'/s)
+  assert.match(freeKickPageSource, /item\.id === 'direct-free-kick'.*item\.id === 'indirect-free-kick'/s)
+  assert.match(freeKickPageSource, /pageId="free-kicks"/)
+  assert.match(appSource, /path="\/presentation\/free-kicks"/)
+  assert.match(layoutStyles, /\.set-pieces-lab\s*\{[^}]*minmax\(620px, 0\.9fr\)/s)
+  assert.match(layoutStyles, /\.set-pieces-panel\s*\{[^}]*grid-template-columns: repeat\(2/s)
 })

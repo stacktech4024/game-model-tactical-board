@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { HOW_WE_TRAIN_EXAMPLES } from './howWeTrainPageData.ts'
 import {
+  AO_MICROCYCLE_FOCUS,
   DEFAULT_MICROCYCLE_DAY_ID,
   INDIVIDUAL_DEVELOPMENT,
   MD_PLUS_ONE_EVIDENCE,
@@ -70,10 +70,11 @@ test('Monday is the highest physical-load team-training day', () => {
 test('Sunday is a moderate re-entry and development session with readiness-based adjustment', () => {
   const sunday = getMicrocycleDay('sunday')
 
-  assert.equal(sunday.role, 'Re-entry / Development')
+  assert.equal(sunday.role, 'AO Re-entry / Recognition')
   assert.equal(sunday.physicalLoad.value, 'MODERATE')
   assert.equal(sunday.rpe.value, 'Planning RPE 4–5')
-  assert.match(sunday.whyThisDay, /without using the highest weekly physical load/i)
+  assert.match(sunday.objective.value, /Attacking Organization.*Zones 2–3.*release the free wide player/i)
+  assert.match(sunday.whyThisDay, /Monday.*opposition pressure/i)
   assert.equal(sunday.readinessNote, PLAYER_READINESS_NOTE)
 })
 
@@ -89,7 +90,8 @@ test('Wednesday is physically below Monday but explicitly tactically sharp', () 
   assert.match(content, /activation/i)
   assert.match(content, /tactical rehearsal/i)
   assert.match(content, /team shape/i)
-  assert.match(content, /set pieces/i)
+  assert.match(content, /wide release.*overlap.*box occupation/i)
+  assert.doesNotMatch(content, /set pieces|Defensive Organization|transition/i)
   assert.doesNotMatch(content, /long-volume|conditioning/i)
 })
 
@@ -97,12 +99,12 @@ test('Match Day and Saturday communicate competition transfer and rest accuratel
   const match = getMicrocycleDay('match')
   const saturday = getMicrocycleDay('saturday')
 
-  assert.equal(match.role, 'Match Day')
+  assert.match(match.role, /^Match Day/)
   assert.equal(match.physicalLoad.value, 'MATCH')
   assert.equal(match.tacticalLoad.value, 'MATCH')
   assert.match(match.rpe.value, /9–10/)
   assert.match(match.gameModelFocus.join(' '), /full competitive pressure/i)
-  assert.deepEqual(match.sessionContent, ['GAME MODEL', 'DECISION', 'EXECUTION', 'REVIEW'])
+  assert.deepEqual(match.sessionContent, ['AO GAME PROBLEM', 'RECOGNIZE', 'DECIDE', 'EXECUTE', 'REVIEW'])
   assert.equal(saturday.role, 'Rest / Recovery')
   assert.equal(saturday.physicalLoad.value, 'REST')
   assert.match(saturday.rpe.value, /RPE 0/)
@@ -150,23 +152,32 @@ test('MD+1 evidence retains every confirmed load, format, method, and content bo
   assert.equal(MD_PLUS_ONE_EVIDENCE.status, 'DIRECT SESSION EVIDENCE')
 })
 
-test('Practice Sessions 8 and 5 remain evidence-backed and map to Monday main-load work', () => {
+test('the evaluator Microcycle uses the confirmed Module 26 AO evidence and approved main-load progression', () => {
+  const sundayEvidence = getMicrocycleDay('sunday').sessionEvidence
   const mondayEvidence = getMicrocycleDay('monday').sessionEvidence
-  const practiceEight = mondayEvidence.filter((item) => /Practice Sessions? 8/.test(item.source))
-  const practiceFive = mondayEvidence.filter((item) => /Practice Sessions?.*5/.test(item.source))
 
-  assert.ok(practiceEight.length >= 2)
-  assert.ok(practiceFive.length >= 2)
-  ;[...practiceEight, ...practiceFive].forEach((item) => assert.equal(item.status, 'DIRECT SESSION EVIDENCE'))
+  assert.ok(sundayEvidence.some((item) => /Module 26/.test(item.source) && item.status === 'DIRECT SESSION EVIDENCE'))
+  assert.ok(mondayEvidence.some((item) => item.exampleId === 'central-wide' && item.status === 'COACH-APPROVED PLANNING VALUE'))
+  assert.doesNotMatch(JSON.stringify(MICROCYCLE_DAYS), /Practice Session 5|Practice Session 8|wide-pressure|press-regain|line-break-react/i)
 })
 
-test('all four How We Train examples have valid compact Microcycle references', () => {
-  const approvedExampleIds = new Set(HOW_WE_TRAIN_EXAMPLES.map((example) => example.id))
+test('the evaluator Microcycle references only the AO Central to Wide training example', () => {
   const referencedIds = new Set(
     MICROCYCLE_DAYS.flatMap((day) => day.sessionEvidence.flatMap((item) => item.exampleId ? [item.exampleId] : [])),
   )
 
-  assert.deepEqual(referencedIds, approvedExampleIds)
+  assert.deepEqual(referencedIds, new Set(['central-wide']))
+})
+
+test('every field-session day advances one AO Zones 2–3 into Zone 4 problem', () => {
+  assert.equal(AO_MICROCYCLE_FOCUS.moment, 'Attacking Organization')
+  assert.match(AO_MICROCYCLE_FOCUS.geography, /Zones 2–3 into Zone 4/)
+
+  MICROCYCLE_DAYS.filter((day) => day.isTeamFieldSession).forEach((day) => {
+    assert.deepEqual(day.primaryMoments.value, ['Attacking Organization'], day.id)
+    assert.deepEqual(day.secondaryMoments, [], day.id)
+    assert.match(`${day.objective.value} ${day.gameModelFocus.join(' ')}`, /central|wide|Zone 4|Attacking Organization/i, day.id)
+  })
 })
 
 test('individual development remains outside team sessions and readiness-aware', () => {
@@ -237,7 +248,7 @@ test('the overview and day-detail routes are ordered between How We Train and Tr
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 21)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 22)
   assert.match(appSource, /path="\/presentation\/microcycle"/)
   assert.match(appSource, /element=\{<MicrocyclePage \/>\}/)
   assert.match(appSource, /path="\/presentation\/microcycle-detail"/)

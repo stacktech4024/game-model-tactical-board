@@ -469,6 +469,41 @@ test('Defensive Transition keeps four loss tabs with Zone 3 as the default', () 
   assert.equal(DEFENSIVE_TRANSITION_PAGE_DEFAULT_CASE_ID, 'zone-3')
 })
 
+test('default Zone 3 visibly demonstrates CONTROL & RESTRAINT against a live opponent escape', () => {
+  const zone3 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-3')
+
+  assert.ok(zone3)
+  assert.ok(zone3.principles.includes('CONTROL & RESTRAINT'))
+  assert.match(zone3.caption, /curves.*decelerates.*half-turned.*CONTROL & RESTRAINT/i)
+  assert.match(zone3.coachingPoints.join(' '), /shorten the final steps.*hips half-open.*no lunge/i)
+
+  const press = zone3.steps.find((step) => step.id === 'zone-3-press')
+  const cover = zone3.steps.find((step) => step.id === 'zone-3-cover')
+  const pressingTarget = previewPointToPitchPercent(press!.playerTo!)
+  const firstCarrierTarget = previewPointToPitchPercent(press!.ballTo!)
+  const controllingMove = cover?.playerMoves?.find((move) => move.playerId === 'home-7')
+  const carrierMove = cover?.playerMoves?.find((move) => move.playerId === 'away-2')
+
+  assert.equal(press?.ballFromPlayerId, 'away-2')
+  assert.equal(press?.ballToPlayerId, 'away-2')
+  assert.ok(press?.playerMoves?.some((move) => move.playerId === 'away-7'))
+  assert.ok(press?.playerMoves?.some((move) => move.playerId === 'away-8'))
+  assert.ok(Number.isFinite(press?.facingAngle))
+  assert.ok(pointDistance(pressingTarget, firstCarrierTarget) >= 5, 'first defender must not collide with the carrier')
+  assert.ok(pointDistance(pressingTarget, firstCarrierTarget) <= 10, 'first defender must apply usable pressure')
+
+  assert.ok(controllingMove && carrierMove)
+  assert.ok(Number.isFinite(controllingMove.facingAngle))
+  assert.ok(Number.isFinite(carrierMove.facingAngle))
+  const controlledTarget = previewPointToPitchPercent(controllingMove.to)
+  const finalCarrierTarget = previewPointToPitchPercent(cover!.ballTo!)
+  const controlledDistance = pointDistance(controlledTarget, finalCarrierTarget)
+
+  assert.ok(controlledDistance >= 4 && controlledDistance <= 7.5, 'half-turned defender must delay without tackling through the carrier')
+  assert.ok(zone3.routes.some((route) => route.id === 'zone-3-control-restraint'))
+  assert.ok(zone3.routes.some((route) => route.id === 'zone-3-carrier-directed-wide'))
+})
+
 test('Zone 4 builds from the goalkeeper through #4, #6, and #8 before the final-third entry', () => {
   const zone4 = DEFENSIVE_TRANSITION_PAGE_CASES.find((testCase) => testCase.id === 'zone-4')
 

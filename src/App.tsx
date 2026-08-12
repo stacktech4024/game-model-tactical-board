@@ -10,6 +10,7 @@ import { AttackingTransitionPage } from './presentation/pages/AttackingTransitio
 import { DefensiveTransitionPage } from './presentation/pages/DefensiveTransitionPage'
 import { DefensiveOrganizationPage } from './presentation/pages/DefensiveOrganizationPage'
 import { SetPiecesPage } from './presentation/pages/SetPiecesPage'
+import { FreeKicksPage } from './presentation/pages/FreeKicksPage'
 import { LiveBoardPage } from './presentation/pages/LiveBoardPage'
 import { PlayersPage } from './presentation/pages/PlayersPage'
 import { SkillsPage } from './presentation/pages/SkillsPage'
@@ -21,12 +22,14 @@ import { MicrocyclePage } from './presentation/pages/MicrocyclePage'
 import { MicrocycleDetailPage } from './presentation/pages/MicrocycleDetailPage'
 import { MethodologyPage } from './presentation/pages/MethodologyPage'
 import { ClosingPage } from './presentation/pages/ClosingPage'
+import { EvaluatorGuidePage } from './presentation/pages/EvaluatorGuidePage'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/presentation/cover" replace />} />
       <Route path="/board" element={<TacticalBoardPage />} />
+      <Route path="/evaluator" element={<EvaluatorGuidePage />} />
       <Route path="/presentation/cover" element={<CoverPage />} />
       <Route path="/presentation/intro" element={<IntroPage />} />
       <Route path="/presentation/philosophy" element={<PhilosophyPage />} />
@@ -37,6 +40,7 @@ function App() {
       <Route path="/presentation/defensive-transition" element={<DefensiveTransitionPage />} />
       <Route path="/presentation/defensive-organization" element={<DefensiveOrganizationPage />} />
       <Route path="/presentation/set-pieces" element={<SetPiecesPage />} />
+      <Route path="/presentation/free-kicks" element={<FreeKicksPage />} />
       <Route path="/presentation/live-board" element={<LiveBoardPage />} />
       <Route path="/presentation/players" element={<PlayersPage />} />
       <Route path="/presentation/skills" element={<SkillsPage />} />

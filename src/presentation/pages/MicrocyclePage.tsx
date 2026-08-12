@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { PresentationLayout } from '../PresentationLayout'
 import {
+  AO_MICROCYCLE_FOCUS,
   INDIVIDUAL_DEVELOPMENT,
   MICROCYCLE_DAYS,
   PLAYER_READINESS_NOTE,
@@ -14,13 +15,13 @@ export function MicrocyclePage() {
           <p className="presentation-eyebrow">When and why do we train?</p>
           <h1 className="presentation-title">EVIDENCE-BASED MICROCYCLE</h1>
           <p className="presentation-body">
-            See the rhythm of the week first. Open any day for all six required planning fields.
+            One weekly theme: Attacking Organization from Zones 2–3 into Zone 4. Open any day for all six required planning fields and its place in the progression.
           </p>
         </div>
         <div className="microcycle-story" aria-label="Microcycle planning logic">
-          <span><b>GAME MODEL</b> determines <strong>SESSION OBJECTIVE</strong></span>
-          <span><b>MATCH SCHEDULE</b> influences <strong>LOAD</strong></span>
-          <span><b>TRAINING</b> prepares <strong>MATCH BEHAVIOUR</strong></span>
+          <span><b>MOMENT</b><strong>{AO_MICROCYCLE_FOCUS.moment}</strong></span>
+          <span><b>GEOGRAPHY</b><strong>{AO_MICROCYCLE_FOCUS.geography}</strong></span>
+          <span><b>MATCH OUTCOME</b><strong>Release wide → enter Zone 4</strong></span>
         </div>
       </header>
 
@@ -63,8 +64,8 @@ export function MicrocyclePage() {
         <div className="microcycle-overview-principle">
           <span>WEEKLY RHYTHM</span>
           <p>
-            Re-enter and develop on Sunday, place the highest team-training load on Monday,
-            sharpen tactically on Wednesday, compete, then recover.
+            Recognize the AO picture on Sunday, solve it under the highest load on Monday,
+            rehearse it at game speed on Wednesday, transfer it to competition, then review and recover.
           </p>
         </div>
         <div>

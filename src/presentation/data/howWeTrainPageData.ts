@@ -45,6 +45,14 @@ export type HowWeTrainExample = {
   secondaryPlayers: string[]
   sessionSource: string
   methodology: string
+  gameProblem: string
+  gameModelResponse: {
+    principle: string
+    strategy: string
+    tactic: string
+  }
+  trainingActivity: string
+  playerBehaviour: string[]
   gameModelPrinciple: string[]
   positionalRequirement: string[]
   trainingDesign: string
@@ -693,6 +701,19 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     secondaryPlayers: ['#9', '#8/#10 box-edge support'],
     sessionSource: 'MD+1 · 6v6+2',
     methodology: 'Whole',
+    gameProblem: 'When central pressure closes Zones 2–3, we can keep forcing the middle instead of releasing the free wide player.',
+    gameModelResponse: {
+      principle: 'DISPERSAL · SUPPORT · MOBILITY · PENETRATION',
+      strategy: 'Circulate centrally to draw the opponent narrow, then switch diagonally and progress through the free wide channel.',
+      tactic: '#7/#11 fixes the wide defender; #2/#3 overlaps after the release cue; #9 attacks the central lane while the far-side winger and #8/#10 complete the box.',
+    },
+    trainingActivity: '50m × 35m Whole 6v6+2. Start with the goalkeeper; a direct finish is 1 point and a finish after a wide-player combination is 2. Rotate keeper restarts.',
+    playerBehaviour: [
+      'Central players scan, receive open, circulate, and recognize when the middle is closed.',
+      '#7/#11 holds or fixes the wide defender while #2/#3 supports underneath and times the overlap.',
+      '#9 attacks the central finishing lane; the far-side winger and #8/#10 complete the box occupation.',
+      'The wide player reads the live picture and chooses cross, cutback, combination, or reset.',
+    ],
     gameModelPrinciple: ['Calm possession', 'Create or become the free player', 'Reset when forward play is closed', 'Switch diagonally and progress wide'],
     positionalRequirement: ['#1/#4/#5 circulate patiently', '#6/#8/#10 occupy different lines', '#2/#3 overlap the wide receiver', '#7/#9/#11 attack the box while #8/#10 support underneath'],
     trainingDesign: 'A 50m × 35m Whole 6v6+2 game that begins with the goalkeeper, rewards the central-to-wide solution, and preserves touch, rhythm, and decision making at a low MD+1 load.',
@@ -744,6 +765,19 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     secondaryPlayers: ['#6/#8', 'Covering CB'],
     sessionSource: 'Practice Session 8 · progressive sequence',
     methodology: 'Progressive',
+    gameProblem: 'The opponent can receive wide, face forward, and connect inside because the first pressure and covering unit are not coordinated.',
+    gameModelResponse: {
+      principle: 'DENY · DELAY · DIRECT · BALANCE · CONTROL & RESTRAINT',
+      strategy: 'Protect the centre, direct the opponent toward Channel 1, and make the next action predictable.',
+      tactic: 'The nearest player presses inside-out while #6/#8 and the back line cover the inside lane, depth, and far side.',
+    },
+    trainingActivity: 'Progress from a 15m × 10m 1v1 to a 30m × 15m unit game, a 40m × 16m transition game, and 52m × 68m open play.',
+    playerBehaviour: [
+      'Nearest defender accelerates to close space, then decelerates into a low, side-on stance.',
+      'Pressure protects inside and shows the carrier toward the touchline.',
+      'Covering players track the ball, protect depth, and move as the press changes.',
+      'The unit contains, regains, or forces a predictable backward action.',
+    ],
     gameModelPrinciple: ['Protect inside first', 'Deny Channels 2–3', 'Direct play toward Channel 1 and the touchline'],
     positionalRequirement: ['Closest player closes on the receiver', 'Show one direction with a low side-on stance', '#6/#8 protect the inside gap', 'Back line squeezes to prevent a line break'],
     trainingDesign: 'A progressive 90-minute half-field session moving from a 15m × 10m duel into 30m × 15m and 40m × 16m unit games, then 52m × 68m open play.',
@@ -794,6 +828,19 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     secondaryPlayers: ['#6', '#8', '#10'],
     sessionSource: 'Practice Session 8 · 40m × 16m unit game',
     methodology: 'Progressive',
+    gameProblem: 'We can regain the ball without a connected first action, forcing a counter when the advantage has already disappeared.',
+    gameModelResponse: {
+      principle: 'DENY · DIRECT · SUPPORT · PENETRATION · IMPROVISATION',
+      strategy: 'Press together, regain with support, then counter only when a real advantage exists.',
+      tactic: 'The front three coordinate pressure; midfield protects underneath; the first receiver scans forward and uses the secure outlet when the counter is closed.',
+    },
+    trainingActivity: '40m × 16m unit game. Blue attacks; Green presses to regain, finds the open teammate, then counters or completes three secure passes before switching.',
+    playerBehaviour: [
+      'Front three initiate pressure together rather than as isolated runners.',
+      'The supporting midfield protects underneath and stays available after the regain.',
+      'The first receiver scans before contact and recognizes counter versus retain.',
+      'The next action preserves the advantage instead of forcing play.',
+    ],
     gameModelPrinciple: ['Coordinate pressure', 'Regain with support', 'Counter when advantage exists', 'Retain when the counter is unavailable'],
     positionalRequirement: ['Front three initiate together', 'Midfield protects and supports', 'Scan immediately after regain', 'Identify first-forward and secure outlets'],
     trainingDesign: 'A 40m × 16m unit game: Blue attacks; Green presses to regain, finds the open teammate, then counters quickly or connects three simple passes before switching.',
@@ -850,6 +897,19 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     secondaryPlayers: ['Nearest supporting unit after loss'],
     sessionSource: 'Practice Session 5 · progressive line-break sequence',
     methodology: 'Progressive',
+    gameProblem: 'The receiver can be hidden or closed when the pass arrives, and the nearest unit can disconnect if the next action is lost.',
+    gameModelResponse: {
+      principle: 'SUPPORT · MOBILITY · PENETRATION · DENY · DELAY',
+      strategy: 'Move before the pass to create a forward lane, break the line, and remain connected for the next Moment.',
+      tactic: 'The receiver opens beyond pressure; the passer uses the correct weight; the nearest player pressures immediately if possession turns over while support provides cover.',
+    },
+    trainingActivity: 'Progress from 40m × 20m 3v3 line-breaking to 35m × 35m 4v4v4 possession, a 65m × 30m phase, and a 65m × 45m game.',
+    playerBehaviour: [
+      'Supporting players move early to create a visible forward lane.',
+      'The receiver scans, opens the body, and prepares the next action before the ball arrives.',
+      'The passer selects the correct timing and weight to break the line.',
+      'On loss, the nearest player pressures while the next player covers and the unit reconnects.',
+    ],
     gameModelPrinciple: ['Circulate to create the lane', 'Break opposition lines', 'Remain connected', 'React immediately after loss'],
     positionalRequirement: ['Move before the pass', 'Receive with forward body shape', 'Use correct pass weight', 'Apply immediate pressure and cover after turnover'],
     trainingDesign: 'A 90-minute progression from 40m × 20m 3v3 line-breaking to 35m × 35m 4v4v4 possession, then 65m × 30m phase of play and a 65m × 45m game.',

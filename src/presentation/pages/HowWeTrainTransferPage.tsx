@@ -80,14 +80,14 @@ export function HowWeTrainTransferPage() {
         <section className="how-we-train-transfer how-we-train-transfer--page" aria-label="Game Model to match transfer chain">
           <header>
             <span>How do we want to play? → How do we coach?</span>
-            <h2>GAME MODEL → TRAINING → TRANSFER</h2>
-            <p>Each stage answers one question. Read left to right, then use the match outcome as the test.</p>
+            <h2>GAME PROBLEM → GAME MODEL → TRAINING → BEHAVIOUR → MATCH TRANSFER</h2>
+            <p>One evaluator-ready chain. Read left to right, then use the match outcome as the test.</p>
           </header>
           <ol className="how-we-train-chain how-we-train-chain--page">
-            <li><b>1</b><div><span>GAME MODEL PRINCIPLE</span><p>{activeExample.gameModelPrinciple.join(' · ')}</p></div></li>
-            <li><b>2</b><div><span>POSITIONAL REQUIREMENT</span><p>{activeExample.positionalRequirement.join(' · ')}</p></div></li>
-            <li><b>3</b><div><span>TRAINING DESIGN</span><p>{activeExample.trainingDesign}</p></div></li>
-            <li className="how-we-train-chain__coaching"><b>4</b><div><span>COACHING DETAIL</span><dl>{Object.entries(activeExample.coachingDetail).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div></li>
+            <li><b>1</b><div><span>GAME PROBLEM</span><p>{activeExample.gameProblem}</p></div></li>
+            <li className="how-we-train-chain__model"><b>2</b><div><span>PRINCIPLE → STRATEGY → TACTIC</span><dl>{Object.entries(activeExample.gameModelResponse).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div></li>
+            <li><b>3</b><div><span>TRAINING ACTIVITY</span><p>{activeExample.trainingActivity}</p></div></li>
+            <li className="how-we-train-chain__behaviour"><b>4</b><div><span>PLAYER BEHAVIOUR</span><ul>{activeExample.playerBehaviour.map((behaviour) => <li key={behaviour}>{behaviour}</li>)}</ul></div></li>
             <li className="how-we-train-chain__transfer"><b>5</b><div><span>MATCH TRANSFER</span><p>{activeExample.matchTransfer.map((step, index) => <span key={step}>{index > 0 && <i>→</i>}{step}</span>)}</p></div></li>
           </ol>
 

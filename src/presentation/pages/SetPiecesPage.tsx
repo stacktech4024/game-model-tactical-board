@@ -4,31 +4,56 @@ import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import { PresentationLayout } from '../PresentationLayout'
 import {
   SET_PIECES_PAGE_CASES,
+  type SetPiecePageCase,
   type SetPieceCaseId,
 } from '../data/setPiecesPageData'
+import type { PresentationPageId } from '../data/pageOrder'
 
-export function SetPiecesPage() {
-  const [activeCaseId, setActiveCaseId] = useState<SetPieceCaseId>('attacking-corner')
-  const activeCase = SET_PIECES_PAGE_CASES.find((item) => item.id === activeCaseId) ?? SET_PIECES_PAGE_CASES[0]
+const GENERAL_SET_PIECE_CASES = SET_PIECES_PAGE_CASES.filter((item) => (
+  item.id !== 'direct-free-kick' && item.id !== 'indirect-free-kick'
+))
+
+type SetPieceRegimePageProps = {
+  pageId: PresentationPageId
+  eyebrow: string
+  title: string
+  intro: string
+  cases: SetPiecePageCase[]
+  panelLabel: string
+  tabListLabel: string
+  labClassName?: string
+}
+
+export function SetPieceRegimePage({
+  pageId,
+  eyebrow,
+  title,
+  intro,
+  cases,
+  panelLabel,
+  tabListLabel,
+  labClassName = '',
+}: SetPieceRegimePageProps) {
+  const [activeCaseId, setActiveCaseId] = useState<SetPieceCaseId>(cases[0].id)
+  const activeCase = cases.find((item) => item.id === activeCaseId) ?? cases[0]
   const [cue, setCue] = useState(activeCase.preview.steps[0]?.cue ?? '')
 
   const selectCase = (caseId: SetPieceCaseId) => {
-    const nextCase = SET_PIECES_PAGE_CASES.find((item) => item.id === caseId) ?? SET_PIECES_PAGE_CASES[0]
+    const nextCase = cases.find((item) => item.id === caseId) ?? cases[0]
 
     setActiveCaseId(nextCase.id)
     setCue(nextCase.preview.steps[0]?.cue ?? '')
   }
 
   return (
-    <PresentationLayout pageId="set-pieces" noPadding>
-      <p className="presentation-eyebrow">Dedicated page - set pieces</p>
-      <h1 className="presentation-title">Set Pieces</h1>
+    <PresentationLayout pageId={pageId} noPadding>
+      <p className="presentation-eyebrow">{eyebrow}</p>
+      <h1 className="presentation-title">{title}</h1>
       <p className="presentation-body set-pieces-intro">
-        Planned restarts use clear roles, organization, and responsibilities connected to the same
-        Game Model principles used in open play.
+        {intro}
       </p>
 
-      <section className="analysis-lab set-pieces-lab">
+      <section className={`analysis-lab set-pieces-lab ${labClassName}`.trim()}>
         <div className="analysis-pitch-card set-pieces-pitch-card">
           <PixiPitchPreview
             key={activeCase.id}
@@ -42,6 +67,7 @@ export function SetPiecesPage() {
             repeatDelay={activeCase.repeatDelay}
             fadeRouteHistory
             onCueChange={setCue}
+            accessibleLabel={`${activeCase.setPieceType}. ${activeCase.caption}`}
           />
           <div className="mini-pitch__cue" aria-live="polite">{cue}</div>
           <div className="mini-pitch__caption">{activeCase.caption}</div>
@@ -52,8 +78,8 @@ export function SetPiecesPage() {
         </div>
 
         <aside className="analysis-tabs">
-          <div className="analysis-tab-list set-pieces-tab-list" role="tablist" aria-label="Set-piece restart">
-            {SET_PIECES_PAGE_CASES.map((item) => (
+          <div className="analysis-tab-list set-pieces-tab-list" role="tablist" aria-label={tabListLabel}>
+            {cases.map((item) => (
               <button
                 key={item.id}
                 type="button"
@@ -69,7 +95,7 @@ export function SetPiecesPage() {
 
           <section className="analysis-detail set-pieces-panel" aria-live="polite">
             <div className="set-pieces-panel__heading">
-              <span>Set Pieces · {activeCase.implementation}</span>
+              <span>{panelLabel} · {activeCase.implementation}</span>
               <h2>{activeCase.setPieceType}</h2>
             </div>
 
@@ -120,5 +146,19 @@ export function SetPiecesPage() {
         </aside>
       </section>
     </PresentationLayout>
+  )
+}
+
+export function SetPiecesPage() {
+  return (
+    <SetPieceRegimePage
+      pageId="set-pieces"
+      eyebrow="Dedicated page - set pieces"
+      title="Set Pieces"
+      intro="Planned corners, wide restarts, and throw-ins use clear roles and responsibilities connected to the same Game Model principles used in open play."
+      cases={GENERAL_SET_PIECE_CASES}
+      panelLabel="Set Pieces"
+      tabListLabel="Corner, wide free-kick, and throw-in restart"
+    />
   )
 }
