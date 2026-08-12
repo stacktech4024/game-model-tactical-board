@@ -225,18 +225,19 @@ test('Microcycle uses exact Canada Soccer Moment terminology', () => {
 test('the overview and day-detail routes are ordered between How We Train and Training Methodology', () => {
   const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
 
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-9), [
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-10), [
     'players',
     'skills',
     'how-we-train',
     'how-we-train-session',
+    'how-we-train-pictures',
     'how-we-train-transfer',
     'microcycle',
     'microcycle-detail',
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 20)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 21)
   assert.match(appSource, /path="\/presentation\/microcycle"/)
   assert.match(appSource, /element=\{<MicrocyclePage \/>\}/)
   assert.match(appSource, /path="\/presentation\/microcycle-detail"/)

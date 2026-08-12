@@ -20,9 +20,13 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
   const nextPage =
     currentIndex < PRESENTATION_PAGE_ORDER.length - 1 ? PRESENTATION_PAGE_ORDER[currentIndex + 1] : null
   const getPagePath = useCallback((targetPage: PresentationPageId) => {
-    const preserveHowWeTrainExample =
-      (pageId === 'how-we-train-session' && targetPage === 'how-we-train-transfer')
-      || (pageId === 'how-we-train-transfer' && targetPage === 'how-we-train-session')
+    const howWeTrainDetailPages: PresentationPageId[] = [
+      'how-we-train-session',
+      'how-we-train-pictures',
+      'how-we-train-transfer',
+    ]
+    const preserveHowWeTrainExample = howWeTrainDetailPages.includes(pageId)
+      && howWeTrainDetailPages.includes(targetPage)
 
     return `/presentation/${targetPage}${preserveHowWeTrainExample ? location.search : ''}`
   }, [location.search, pageId])

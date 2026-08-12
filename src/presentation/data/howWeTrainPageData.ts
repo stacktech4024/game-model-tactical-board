@@ -17,18 +17,8 @@ export type TrainingMoment =
   | 'Attacking Transition'
   | 'Defensive Transition'
 
-export type EvidenceClassification =
-  | 'DIRECT SESSION EVIDENCE'
-  | 'GAME MODEL REQUIREMENT'
-  | 'COACH CONFIRMATION NEEDED'
-
-export type MethodologyStatus =
-  | 'CONFIRMED'
-  | 'RECOMMENDATION — COACH CONFIRMATION NEEDED'
-
-export type EvidenceDetail = {
+export type SessionDetail = {
   value: string
-  status: EvidenceClassification
 }
 
 export type HowWeTrainVisualScenario = {
@@ -55,9 +45,6 @@ export type HowWeTrainExample = {
   secondaryPlayers: string[]
   sessionSource: string
   methodology: string
-  methodologyStatus: MethodologyStatus
-  evidenceStrength: EvidenceClassification
-  gameModelPrincipleEvidence: EvidenceClassification
   gameModelPrinciple: string[]
   positionalRequirement: string[]
   trainingDesign: string
@@ -71,16 +58,16 @@ export type HowWeTrainExample = {
   }
   matchTransfer: string[]
   design: {
-    pitch: EvidenceDetail
-    parameters: EvidenceDetail
-    players: EvidenceDetail
-    learningIntention: EvidenceDetail
-    organization: EvidenceDetail
+    pitch: SessionDetail
+    parameters: SessionDetail
+    players: SessionDetail
+    learningIntention: SessionDetail
+    organization: SessionDetail
   }
   demands: {
-    reward: EvidenceDetail
-    relate: EvidenceDetail
-    restrict: EvidenceDetail
+    reward: SessionDetail
+    relate: SessionDetail
+    restrict: SessionDetail
   }
   successIndicator: string
   profileReferences: { profileId: PositionalProfileId; label: string }[]
@@ -270,14 +257,8 @@ function addGoalkeeperDirectionAnchors(
   }
 }
 
-const direct = (value: string): EvidenceDetail => ({
+const direct = (value: string): SessionDetail => ({
   value,
-  status: 'DIRECT SESSION EVIDENCE',
-})
-
-const confirmationNeeded = (value = 'Coach confirmation needed'): EvidenceDetail => ({
-  value,
-  status: 'COACH CONFIRMATION NEEDED',
 })
 
 const centralWideVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('central-wide', orientRedTowardZoneFour({
@@ -404,7 +385,7 @@ const centralWideVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchor
     { id: 'cw-switch', from: { x: 62, y: 55 }, to: { x: 92, y: 64 }, type: 'pass', revealOnStepId: 'cw-wide-release' },
     { id: 'cw-wide-combination', from: { x: 92, y: 64 }, to: { x: 91, y: 83 }, type: 'pass', revealOnStepId: 'cw-penetrate' },
   ],
-  caption: 'Confirmed MD+1 6v6+2 problem: central circulation, third-player support, wide release, and Zone 4 progression.',
+  caption: 'MD+1 6v6+2 problem: central circulation, third-player support, wide release, and Zone 4 progression.',
 }))
 
 const widePressureVisual: HowWeTrainVisualScenario = addGoalkeeperDirectionAnchors('wide-pressure', orientRedTowardZoneFour({
@@ -700,44 +681,41 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     id: 'central-wide',
     tabLabel: 'Central → Wide',
     title: 'Central → Wide Progression',
-    shortPurpose: 'Move the opponent centrally, then release the free wide player without increasing the MD+1 load.',
+    shortPurpose: 'Use central circulation to draw the opponent, release the free wide player, and arrive in the box without turning MD+1 into a pressing session.',
     moments: ['Attacking Organization'],
-    geography: ['Zone 2 — Unbalance', 'Zone 3 — Supply', 'toward Zone 4 — Penetrate', 'Channel 1 — Wide'],
+    geography: ['Zones 2–3 — circulate centrally', 'Channels 1–2 — release wide', 'Zone 4 — cross and finish'],
     system: '1-4-4-2',
-    strategy: 'Circulate calmly, recognize closed central access, switch the point of attack, and progress through the wide channel.',
-    tactics: ['Circulate to draw pressure', 'Use third-player support', 'Release wide when the centre closes', 'Combine toward Zone 4'],
-    skillSet: ['Scanning', 'Body shape', 'First touch', 'One/two-touch play', 'Line-breaking pass', 'Wide combination'],
+    strategy: 'Start with the goalkeeper, circulate through #4/#5 and #6/#8/#10, draw the 1-4-4-2 centrally, then switch diagonally to #2/#3 or #7/#11 for the overlap and delivery.',
+    tactics: ['Build left to attack right, or right to attack left', 'Use the central third player as the release link', 'Overlap when the winger receives', 'Send #7/#9/#11 into the box with #8/#10 arriving at the edge'],
+    skillSet: ['Scan before receiving', 'Receive forward', 'One/two-touch circulation', 'Passing weight and accuracy', 'Third-player release', 'Crossing and box positioning'],
     principles: ['DISPERSAL', 'SUPPORT', 'MOBILITY', 'PENETRATION'],
-    primaryPlayers: ['GK', 'CBs', '#6/#8/#10', 'Fullbacks', 'Wide Players'],
-    secondaryPlayers: ['#9 / finishing support'],
-    sessionSource: 'MD+1',
+    primaryPlayers: ['#1', '#4/#5', '#6/#8/#10', '#2/#3', '#7/#11'],
+    secondaryPlayers: ['#9', '#8/#10 box-edge support'],
+    sessionSource: 'MD+1 · 6v6+2',
     methodology: 'Whole',
-    methodologyStatus: 'CONFIRMED',
-    evidenceStrength: 'DIRECT SESSION EVIDENCE',
-    gameModelPrincipleEvidence: 'GAME MODEL REQUIREMENT',
-    gameModelPrinciple: ['Calm possession', 'Recognize closed central access', 'Switch the point of attack', 'Progress wide toward Zone 4'],
-    positionalRequirement: ['Scan before receiving', 'Receive open', 'Provide third-player support', 'Release and combine in Channel 1'],
-    trainingDesign: 'Recovery plus a Whole 6v6+2 environment that preserves perception and decision making through high-touch, low-load technical/tactical reinforcement.',
+    gameModelPrinciple: ['Calm possession', 'Create or become the free player', 'Reset when forward play is closed', 'Switch diagonally and progress wide'],
+    positionalRequirement: ['#1/#4/#5 circulate patiently', '#6/#8/#10 occupy different lines', '#2/#3 overlap the wide receiver', '#7/#9/#11 attack the box while #8/#10 support underneath'],
+    trainingDesign: 'A 50m × 35m Whole 6v6+2 game that begins with the goalkeeper, rewards the central-to-wide solution, and preserves touch, rhythm, and decision making at a low MD+1 load.',
     coachingDetail: {
-      who: 'Ball carrier, third player, wide receiver, supporting unit',
-      what: 'Scan, receive open, circulate, break or switch',
-      when: 'Central lane closes or pressure commits',
-      where: 'Zones 2/3 into Channel 1 toward Zone 4',
-      why: 'Move the opponent and open progression',
-      how: 'One/two-touch play, third-player support, wide release',
+      who: '#1, #4/#5, central midfield triangle, fullback, winger, and box runners',
+      what: 'Circulate centrally, draw the first move, switch diagonally, overlap, cross, and finish',
+      when: 'The two central defenders converge or one side becomes overloaded',
+      where: 'Central Zones 2–3 into wide Channels 1–2 and Zone 4',
+      why: 'Unbalance the opponent and free the wide player without forcing a central pass',
+      how: 'One/two touches centrally, third-player support, accurate switch, timed overlap, and coordinated box arrival',
     },
     matchTransfer: ['CIRCULATE', 'DRAW PRESSURE', 'SWITCH', 'COMBINE WIDE', 'PENETRATE'],
     design: {
-      pitch: confirmationNeeded('Central-to-wide game-related area; exact dimensions — Coach confirmation needed'),
-      parameters: direct('60–75 minutes · RPE 2–3 · low physical load · high touch volume · no tackling/heavy interceptions'),
-      players: direct('6v6+2'),
-      learningIntention: direct('Scanning, body shape, first touch, line-breaking, third-player release, and central-to-wide recognition'),
-      organization: direct('Whole 6v6+2 with wide combination / finishing incentives'),
+      pitch: direct('50m × 35m · 2 goals · central and wide progression routes'),
+      parameters: direct('60–75 minutes · MD+1 light recovery/technical focus · low physical load · high touch volume'),
+      players: direct('6v6+2 active · rotate remaining available players through recovery and technical roles'),
+      learningIntention: direct('Recognize when central pressure creates the diagonal switch; release wide, overlap, and coordinate the finish'),
+      organization: direct('Start and restart with a goalkeeper · central finish = 1 point · combine with a wide player and finish = 2 points · alternate keeper restarts'),
     },
     demands: {
-      reward: direct('Wide combination / finishing incentives'),
-      relate: direct('Recognize when central pressure opens the wide progression route'),
-      restrict: direct('One/two-touch play; no tackling / heavy interceptions'),
+      reward: direct('1 point for the direct finish; 2 points when the finish follows a wide-player combination'),
+      relate: direct('The central defenders’ movement is the cue to release the third player; the wide pass triggers the overlap and box runs'),
+      restrict: direct('Use one/two touches centrally; defending pressure guides circulation without turning the activity into a pressing drill'),
     },
     successIndicator: 'Players circulate, draw pressure, recognize the switch, and arrive wide with connected support.',
     profileReferences: [
@@ -754,24 +732,21 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     id: 'wide-pressure',
     tabLabel: 'Wide Pressure',
     title: 'Wide Pressure / Force Outside',
-    shortPurpose: 'Protect the inside first, then turn wide pressure into a connected team action.',
+    shortPurpose: 'Develop the closest defender’s approach, then connect pressure, cover, and the unit’s movement from isolated duels into open play.',
     moments: ['Defensive Organization'],
     geography: ['Channel 1 — Wide', 'deny Channel 2 — Half Space', 'deny Channel 3 — Central'],
     system: '1-4-2-3-1',
-    strategy: 'Protect the inside first, deny Channels 2–3, and direct the opponent toward Channel 1/touchline.',
-    tactics: ['Press inside-out', 'Protect the next inside lane', 'Provide secondary cover', 'Shift as a compact unit'],
-    skillSet: ['Approach angle', 'Low body position', 'Side shuffle', 'Controlled pressure', 'Cover', 'Communication'],
+    strategy: 'Stay compact centrally, send the closest player to close time and space, and force the carrier toward the touchline or a teammate’s interception lane.',
+    tactics: ['Closest player applies pressure', 'Approach inside-out', '#6/#8 cover the vacated central gap', 'Progress from 1v1 to unit and open-play defending'],
+    skillSet: ['Approach angle', 'Low body position', 'Side shuffle', 'React on the toes', 'Poke tackle', 'Cover and communication'],
     principles: ['DENY', 'DELAY', 'DIRECT', 'BALANCE', 'CONTROL & RESTRAINT'],
     primaryPlayers: ['#7/#11', 'Fullbacks'],
     secondaryPlayers: ['#6/#8', 'Covering CB'],
-    sessionSource: 'Practice Session 8',
+    sessionSource: 'Practice Session 8 · progressive sequence',
     methodology: 'Progressive',
-    methodologyStatus: 'RECOMMENDATION — COACH CONFIRMATION NEEDED',
-    evidenceStrength: 'DIRECT SESSION EVIDENCE',
-    gameModelPrincipleEvidence: 'GAME MODEL REQUIREMENT',
     gameModelPrinciple: ['Protect inside first', 'Deny Channels 2–3', 'Direct play toward Channel 1 and the touchline'],
-    positionalRequirement: ['Control the approach angle', 'Use a low body position and side shuffle', 'Provide secondary cover', 'Shift as a compact unit'],
-    trainingDesign: 'Progress from the individual pressure angle to support/cover and then connected unit defending. Formal methodology requires coach confirmation.',
+    positionalRequirement: ['Closest player closes on the receiver', 'Show one direction with a low side-on stance', '#6/#8 protect the inside gap', 'Back line squeezes to prevent a line break'],
+    trainingDesign: 'A progressive 90-minute half-field session moving from a 15m × 10m duel into 30m × 15m and 40m × 16m unit games, then 52m × 68m open play.',
     coachingDetail: {
       who: 'Nearest wide player, fullback, pivot, covering CB',
       what: 'Press inside-out and protect the next inside lane',
@@ -782,16 +757,16 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     },
     matchTransfer: ['PRESS', 'PROTECT INSIDE', 'DIRECT WIDE', 'CONTAIN / REGAIN'],
     design: {
-      pitch: confirmationNeeded(),
-      parameters: confirmationNeeded(),
-      players: confirmationNeeded('Role relationships identified; exact formal player count — Coach confirmation needed'),
+      pitch: direct('15m × 10m 1v1 → 30m × 15m unit game → 40m × 16m transition game → 52m × 68m open play'),
+      parameters: direct('90 minutes · half-field progression · 2 large goals · 2 small goals · 10 balls · assistant coach'),
+      players: direct('14 players · primary #7/#9/#11 · secondary #6/#8/#10'),
       learningIntention: direct('Pressure the ball carrier, reduce time/space, force one direction, cover, and deny line-breaking passes'),
-      organization: confirmationNeeded('Progressive individual → support/cover → connected unit recommendation — Coach confirmation needed'),
+      organization: direct('Blue begins each duel in possession · Green protects the small goal · after the ball leaves the grid a new pair enters · progress into connected unit and open play'),
     },
     demands: {
-      reward: confirmationNeeded(),
-      relate: confirmationNeeded(),
-      restrict: confirmationNeeded(),
+      reward: direct('Blue earns 1 for scoring; Green earns 2 for regaining and scoring in the transition goal'),
+      relate: direct('Force the carrier toward the covering teammate’s interception lane while the unit protects the central gap'),
+      restrict: direct('The duel is contained by the 15m × 10m grid; expand space and numbers only after the pressure action is stable'),
     },
     successIndicator: 'The nearest player presses under control while the unit protects inside access and contains or regains wide.',
     profileReferences: [
@@ -809,42 +784,39 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     title: 'Press → Regain → Counter or Retain',
     shortPurpose: 'Coordinate the regain, then exploit advantage without forcing a low-quality transition.',
     moments: ['Defensive Organization', 'Attacking Transition'],
-    geography: ['Selected pressure area', 'Exact Zone — Coach confirmation needed'],
-    system: 'Coach confirmation needed',
+    geography: ['40m × 16m pressing area', 'Zone 3–4 regain and transition picture'],
+    system: 'DO 1-3-1 vs AO 1-3',
     strategy: 'Press together, regain with connected support, then counter when advantage exists or retain and switch when it does not.',
     tactics: ['Front three press together', 'Midfield protects underneath', 'Scan immediately after regain', 'Counter or secure based on advantage'],
     skillSet: ['Pressure angle', 'Compact support', 'Regain action', 'Early scan', 'First-forward pass', 'Secure pass'],
     principles: ['DENY', 'DIRECT', 'SUPPORT', 'PENETRATION', 'IMPROVISATION'],
     primaryPlayers: ['#7', '#9', '#11'],
     secondaryPlayers: ['#6', '#8', '#10'],
-    sessionSource: 'Practice Session 8 · supported by Practice Session 5',
-    methodology: 'Whole-Part-Whole',
-    methodologyStatus: 'RECOMMENDATION — COACH CONFIRMATION NEEDED',
-    evidenceStrength: 'DIRECT SESSION EVIDENCE',
-    gameModelPrincipleEvidence: 'GAME MODEL REQUIREMENT',
+    sessionSource: 'Practice Session 8 · 40m × 16m unit game',
+    methodology: 'Progressive',
     gameModelPrinciple: ['Coordinate pressure', 'Regain with support', 'Counter when advantage exists', 'Retain when the counter is unavailable'],
     positionalRequirement: ['Front three initiate together', 'Midfield protects and supports', 'Scan immediately after regain', 'Identify first-forward and secure outlets'],
-    trainingDesign: 'Game-related pressing and regain problem with a live first decision: counter into advantage or secure possession before switching.',
+    trainingDesign: 'A 40m × 16m unit game: Blue attacks; Green presses to regain, finds the open teammate, then counters quickly or connects three simple passes before switching.',
     coachingDetail: {
       who: 'Front three initiate; midfield protects and supports',
       what: 'Press together, regain, then counter or retain',
       when: 'Recognized press cue and immediately after regain',
-      where: 'Selected pressure area; exact Zone unconfirmed',
+      where: 'Selected pressure area and zone',
       why: 'Exploit disorder without forcing poor transition',
       how: 'Coordinated angles, compact support, early scan after regain',
     },
     matchTransfer: ['PRESS TOGETHER', 'REGAIN', 'ADVANTAGE?', 'YES — COUNTER QUICKLY', 'NO — SECURE / SWITCH'],
     design: {
-      pitch: confirmationNeeded('Selected pressure area; exact Zone and dimensions — Coach confirmation needed'),
-      parameters: confirmationNeeded(),
-      players: confirmationNeeded('Role relationships identified; exact formal player count — Coach confirmation needed'),
+      pitch: direct('40m × 16m transition area within the Practice Session 8 half-field progression'),
+      parameters: direct('90-minute session context · quick restarts · competitive unit work before full open play'),
+      players: direct('DO 1-3-1 vs AO 1-3 · primary #7/#9/#11 · secondary #6/#8/#10'),
       learningIntention: direct('Coordinate pressure, regain, identify the first-forward option and support outlet, then counter or retain'),
-      organization: confirmationNeeded('Whole-Part-Whole recommendation — Coach confirmation needed'),
+      organization: direct('Blue attacks · Green presses high to regain and find the open teammate · counter when the advantage is clear; otherwise complete 3 simple passes and switch'),
     },
     demands: {
-      reward: confirmationNeeded(),
-      relate: confirmationNeeded(),
-      restrict: confirmationNeeded(),
+      reward: direct('Regain plus a successful connection to the open teammate starts the counter; three secure passes unlock the switch'),
+      relate: direct('Front three initiate together, midfield protects beneath the ball, and the first support outlet determines counter or retain'),
+      restrict: direct('Stay compact enough to prevent the line break; after regain, do not force the forward action when the advantage is absent'),
     },
     successIndicator: 'The unit regains together and the first action preserves the available advantage instead of forcing play.',
     profileReferences: [
@@ -868,22 +840,19 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     title: 'Line-Breaking + Immediate Reaction',
     shortPurpose: 'Progress through a prepared receiver while keeping the nearest response connected if possession turns over.',
     moments: ['Attacking Organization', 'Defensive Transition'],
-    geography: ['Between / beyond opposition lines', 'Exact Zone — Coach confirmation needed'],
-    system: 'Coach confirmation needed',
+    geography: ['40m × 20m line-break start', '35m × 35m three-team possession', '65m × 30m phase of play'],
+    system: 'AO 1-4-3 vs DO 1-2-3',
     strategy: 'Create the lane with off-ball movement, break the line with the correct pass, and react immediately if the next action is lost.',
     tactics: ['Move before the pass', 'Prepare the receiver to play forward', 'Break the line with correct weight', 'Pressure and cover immediately after loss'],
     skillSet: ['Scanning', 'Off-ball movement', 'Body shape', 'Pass weight', 'Line-breaking pass', 'Immediate pressure'],
     principles: ['SUPPORT', 'MOBILITY', 'PENETRATION', 'DENY', 'DELAY'],
     primaryPlayers: ['Midfield', 'Wide Players', '#9/#10'],
     secondaryPlayers: ['Nearest supporting unit after loss'],
-    sessionSource: 'Practice Session 5',
-    methodology: 'Whole-Part-Whole',
-    methodologyStatus: 'RECOMMENDATION — COACH CONFIRMATION NEEDED',
-    evidenceStrength: 'DIRECT SESSION EVIDENCE',
-    gameModelPrincipleEvidence: 'GAME MODEL REQUIREMENT',
+    sessionSource: 'Practice Session 5 · progressive line-break sequence',
+    methodology: 'Progressive',
     gameModelPrinciple: ['Circulate to create the lane', 'Break opposition lines', 'Remain connected', 'React immediately after loss'],
     positionalRequirement: ['Move before the pass', 'Receive with forward body shape', 'Use correct pass weight', 'Apply immediate pressure and cover after turnover'],
-    trainingDesign: 'Game-related line-breaking problem that preserves the turnover and immediate regain response instead of ending at the forward pass.',
+    trainingDesign: 'A 90-minute progression from 40m × 20m 3v3 line-breaking to 35m × 35m 4v4v4 possession, then 65m × 30m phase of play and a 65m × 45m game.',
     coachingDetail: {
       who: 'Passer, receiver, support players, nearest player after loss',
       what: 'Create the lane, break the line, immediately react on loss',
@@ -894,16 +863,16 @@ export const HOW_WE_TRAIN_EXAMPLES: HowWeTrainExample[] = [
     },
     matchTransfer: ['CREATE LANE', 'BREAK LINE', 'LOSS?', 'IMMEDIATE PRESSURE / RECOVERY'],
     design: {
-      pitch: confirmationNeeded(),
-      parameters: confirmationNeeded(),
-      players: confirmationNeeded('Role relationships identified; exact formal player count — Coach confirmation needed'),
+      pitch: direct('40m × 20m → 35m × 35m → 65m × 30m → 65m × 45m'),
+      parameters: direct('90 minutes · half-field · 2 large goals · 2 small goals · 9 balls · assistant coach manages the attacking side'),
+      players: direct('14 players · primary #7/#9/#11 · secondary #6/#8/#10'),
       learningIntention: direct('Circulation, off-ball movement, body shape, pass weight, line-breaking, and immediate regain reaction'),
-      organization: confirmationNeeded('Whole-Part-Whole recommendation — Coach confirmation needed'),
+      organization: direct('Complete 4 passes, break the central line, and connect to the far team · if defenders regain, they play across and the team that lost possession presses'),
     },
     demands: {
-      reward: confirmationNeeded(),
-      relate: confirmationNeeded(),
-      restrict: confirmationNeeded(),
+      reward: direct('Possession team scores by completing 4 passes and breaking the central line; pressing team scores by regaining and connecting across'),
+      relate: direct('Move off the ball to become visible behind the defender; receive with forward body shape and use the correct pass weight'),
+      restrict: direct('In the 3v3 start, break the defensive line before attacking the goal; possession loss immediately changes the pressing team'),
     },
     successIndicator: 'The receiver can play forward and the nearest unit applies immediate pressure and cover when the next action is lost.',
     profileReferences: [

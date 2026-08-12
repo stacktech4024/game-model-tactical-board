@@ -1,97 +1,33 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { PITCH } from '../../domain/pitch/pitchConstants'
-import { PixiPitchPreview } from '../../renderers/pixi/PixiPitchPreview'
 import { PresentationLayout } from '../PresentationLayout'
 import {
   HOW_WE_TRAIN_DEFAULT_EXAMPLE_ID,
   HOW_WE_TRAIN_EXAMPLES,
-  splitHowWeTrainVisualScenario,
-  type EvidenceDetail,
   type HowWeTrainExampleId,
-  type HowWeTrainVisualScenario,
+  type SessionDetail,
 } from '../data/howWeTrainPageData'
 
-const PREVIEW_WIDTH = 360
-const PREVIEW_HEIGHT = Math.round(PREVIEW_WIDTH * (PITCH.LENGTH / PITCH.WIDTH))
-
 const DESIGN_LABELS: { key: keyof (typeof HOW_WE_TRAIN_EXAMPLES)[number]['design']; label: string }[] = [
-  { key: 'pitch', label: 'Pitch' },
-  { key: 'parameters', label: 'Parameters' },
-  { key: 'players', label: 'Players' },
-  { key: 'learningIntention', label: 'Learning intention' },
-  { key: 'organization', label: 'Organization' },
+  { key: 'pitch', label: 'Area' },
+  { key: 'parameters', label: 'Time & load' },
+  { key: 'players', label: 'Format' },
+  { key: 'learningIntention', label: 'Objective' },
+  { key: 'organization', label: 'Restarts & scoring' },
 ]
 
 const DEMAND_LABELS: { key: keyof (typeof HOW_WE_TRAIN_EXAMPLES)[number]['demands']; label: string }[] = [
   { key: 'reward', label: 'Reward' },
-  { key: 'relate', label: 'Relate' },
-  { key: 'restrict', label: 'Restrict' },
+  { key: 'relate', label: 'Game cue' },
+  { key: 'restrict', label: 'Constraint' },
 ]
 
-const PHASE_COPY: Record<HowWeTrainExampleId, [{ title: string; detail: string }, { title: string; detail: string }]> = {
-  'central-wide': [
-    { title: 'Build central pressure', detail: 'Circulate, scan, and draw the opposition midfield toward the ball.' },
-    { title: 'Release and defend wide', detail: 'Attack Channel 1 as grey defenders recover, cover inside, and protect depth.' },
-  ],
-  'wide-pressure': [
-    { title: 'Set the pressing picture', detail: 'Identify the wide trigger and connect the first, second, and third defenders.' },
-    { title: 'Force and contain', detail: 'Remove the inside pass, direct play outside, and defend the next action together.' },
-  ],
-  'press-regain': [
-    { title: 'Coordinate the press', detail: 'The front line closes with midfield protection while grey players seek an exit.' },
-    { title: 'Regain and transition', detail: 'Red selects counter or retain while grey immediately counterpresses and recovers.' },
-  ],
-  'line-break-react': [
-    { title: 'Create and break the line', detail: 'Red movement creates the lane while grey screens, tracks, and protects depth.' },
-    { title: 'Turnover and react', detail: 'Possession changes: red presses and covers while grey opens to escape pressure.' },
-  ],
-}
-
-function EvidenceRow({ label, detail }: { label: string; detail: EvidenceDetail }) {
+function DetailRow({ label, detail }: { label: string; detail: SessionDetail }) {
   return (
-    <div className="how-we-train-evidence-row" data-status={detail.status}>
-      <dt>{label}</dt><dd>{detail.value}</dd><small>{detail.status}</small>
+    <div className="how-we-train-detail-row">
+      <dt>{label}</dt><dd>{detail.value}</dd>
     </div>
-  )
-}
-
-function TrainingPhaseCard({
-  exampleId,
-  index,
-  phase,
-}: {
-  exampleId: HowWeTrainExampleId
-  index: 0 | 1
-  phase: HowWeTrainVisualScenario
-}) {
-  const [activeCue, setActiveCue] = useState(phase.steps[0]?.cue ?? '')
-  const copy = PHASE_COPY[exampleId][index]
-
-  return (
-    <article className="how-we-train-phase-card">
-      <header><b>DIAGRAM {index + 1}</b><h3>{copy.title}</h3><p>{copy.detail}</p></header>
-      <div className="how-we-train-pitch-card">
-        <div className="how-we-train-pitch-direction" aria-label="Red attacks toward Zone 4 and defends toward Zone 1">
-          <span><b aria-hidden="true">↑</b> Red attacks · Zone 4</span>
-          <span>Red defends · Zone 1 <b aria-hidden="true">↓</b></span>
-        </div>
-        <PixiPitchPreview
-          width={PREVIEW_WIDTH}
-          height={PREVIEW_HEIGHT}
-          players={phase.players}
-          ballPosition={phase.ballPosition}
-          steps={phase.steps}
-          routes={phase.routes}
-          repeatDelay={1.25}
-          tokenScale={0.86}
-          fadeRouteHistory
-          onCueChange={setActiveCue}
-        />
-        <div className="mini-pitch__cue" aria-live="polite">{activeCue}</div>
-      </div>
-    </article>
   )
 }
 
@@ -101,7 +37,6 @@ export function HowWeTrainExamplesPage() {
   const activeExample = HOW_WE_TRAIN_EXAMPLES.find((item) => item.id === requestedId)
     ?? HOW_WE_TRAIN_EXAMPLES.find((item) => item.id === HOW_WE_TRAIN_DEFAULT_EXAMPLE_ID)
     ?? HOW_WE_TRAIN_EXAMPLES[0]
-  const visualPhases = useMemo(() => splitHowWeTrainVisualScenario(activeExample.visualScenario), [activeExample])
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const selectExample = (exampleId: HowWeTrainExampleId) => {
@@ -122,24 +57,16 @@ export function HowWeTrainExamplesPage() {
 
   return (
     <PresentationLayout pageId="how-we-train-session" noPadding>
-      <header className="how-we-train-detail-header">
+      <header className="how-we-train-detail-header how-we-train-detail-header--session">
         <div>
           <Link to="/presentation/how-we-train">← How We Train overview</Link>
-          <p className="presentation-eyebrow">Session design · Page 1 of 2</p>
+          <p className="presentation-eyebrow">Session design · Page 1 of 3</p>
           <h1 className="presentation-title">{activeExample.title}</h1>
           <p className="presentation-body">{activeExample.shortPurpose}</p>
         </div>
-        <div className="how-we-train-team-key" aria-label="Team colour and pitch direction key">
-          <span><i className="how-we-train-team-dot is-red" />Red — coached outfield</span>
-          <span><i className="how-we-train-team-dot is-grey" />Grey — opposition outfield</span>
-          <span><i className="how-we-train-team-dot is-yellow" />Yellow #1 — coached GK</span>
-          <span><i className="how-we-train-team-dot is-cyan" />Cyan #1 — opposition GK</span>
-          <strong>↑ RED ATTACKS ZONE 4 · RED DEFENDS ZONE 1 ↓</strong>
-          <small>Numbers show roles · token direction shows body orientation</small>
-        </div>
       </header>
 
-      <div className="how-we-train-tabs" role="tablist" aria-label="Training evidence examples">
+      <div className="how-we-train-tabs" role="tablist" aria-label="Training session examples">
         {HOW_WE_TRAIN_EXAMPLES.map((example, index) => (
           <button
             key={example.id}
@@ -166,51 +93,31 @@ export function HowWeTrainExamplesPage() {
         aria-labelledby={`how-we-train-tab-${activeExample.id}`}
         tabIndex={0}
       >
-        <div className="how-we-train-metadata" aria-label="Selected example metadata">
+        <div className="how-we-train-session-summary" aria-label="Selected session summary">
           <div><span>Moment</span><strong>{activeExample.moments.join(' + ')}</strong></div>
-          <div><span>Zone / Channel</span><strong>{activeExample.geography.join(' · ')}</strong></div>
-          <div><span>Primary</span><strong>{activeExample.primaryPlayers.join(' · ')}</strong></div>
-          <div><span>Secondary</span><strong>{activeExample.secondaryPlayers.join(' · ')}</strong></div>
-          <div><span>Session source</span><strong>{activeExample.sessionSource}</strong></div>
-          <div><span>Methodology</span><strong>{activeExample.methodology}</strong><small>{activeExample.methodologyStatus}</small></div>
-          <div><span>Evidence</span><strong>{activeExample.evidenceStrength}</strong></div>
+          <div><span>Session plan</span><strong>{activeExample.sessionSource}</strong></div>
+          <div><span>Key units</span><strong>{activeExample.primaryPlayers.join(' · ')}</strong></div>
+          <div><span>Method</span><strong>{activeExample.methodology}</strong></div>
         </div>
 
-        <div className="how-we-train-session-grid">
-          <section className="how-we-train-diagram-section" aria-labelledby="training-diagrams-title">
-            <header>
-              <span>GAME-REALISTIC PICTURES</span>
-              <h2 id="training-diagrams-title">Read both teams across two connected diagrams</h2>
-              <p>Diagram 2 begins from Diagram 1’s final positions and orientations.</p>
-            </header>
-            <div className="how-we-train-diagrams">
-              <TrainingPhaseCard key={`${activeExample.id}-0`} exampleId={activeExample.id} index={0} phase={visualPhases[0]} />
-              <TrainingPhaseCard key={`${activeExample.id}-1`} exampleId={activeExample.id} index={1} phase={visualPhases[1]} />
-            </div>
-            <p className="how-we-train-diagram-caption">{activeExample.visualScenario.caption}</p>
-          </section>
-
+        <div className="how-we-train-session-design">
           <section className="how-we-train-activity-detail" aria-label={`${activeExample.title} activity design`}>
             <div className="how-we-train-activity-heading">
-              <span>{activeExample.system} · {activeExample.principles.join(' · ')}</span>
-              <h2>ACTIVITY DESIGN</h2>
+              <div><span>{activeExample.system} · {activeExample.methodology}</span><h2>SESSION BLUEPRINT</h2></div>
+              <p>Set the game up clearly, reward the target behaviour, and let players solve the football problem.</p>
             </div>
             <dl className="how-we-train-hierarchy" aria-label="System strategy tactics and skill set">
-              <div><dt>System</dt><dd>{activeExample.system}</dd></div>
+              <div><dt>Game structure</dt><dd>{activeExample.system}</dd></div>
               <div><dt>Strategy</dt><dd>{activeExample.strategy}</dd></div>
-              <div><dt>Tactics</dt><dd>{activeExample.tactics.join(' · ')}</dd></div>
-              <div><dt>Skill Set</dt><dd>{activeExample.skillSet.join(' · ')}</dd></div>
+              <div><dt>Team actions</dt><dd>{activeExample.tactics.join(' · ')}</dd></div>
+              <div><dt>Player actions</dt><dd>{activeExample.skillSet.join(' · ')}</dd></div>
             </dl>
             <div className="how-we-train-environment">
-              <section><h3>DESIGN</h3><dl>{DESIGN_LABELS.map(({ key, label }) => <EvidenceRow key={key} label={label} detail={activeExample.design[key]} />)}</dl></section>
-              <section><h3>DEMANDS</h3><dl>{DEMAND_LABELS.map(({ key, label }) => <EvidenceRow key={key} label={label} detail={activeExample.demands[key]} />)}</dl></section>
+              <section><h3>DESIGN</h3><dl>{DESIGN_LABELS.map(({ key, label }) => <DetailRow key={key} label={label} detail={activeExample.design[key]} />)}</dl></section>
+              <section><h3>DEMANDS</h3><dl>{DEMAND_LABELS.map(({ key, label }) => <DetailRow key={key} label={label} detail={activeExample.demands[key]} />)}</dl></section>
             </div>
-            <div className="how-we-train-connections">
-              <div className="how-we-train-role-chips" aria-label="Related positional profiles">{activeExample.profileReferences.map((profile) => <span key={profile.profileId}>{profile.label}</span>)}</div>
-              <div className="how-we-train-link-row"><Link to="/presentation/players">View Positional Profiles</Link><Link to="/presentation/skills">Related Skill — {activeExample.relatedSkill}</Link></div>
-            </div>
-            <Link className="how-we-train-continue" to={`/presentation/how-we-train-transfer?example=${activeExample.id}`}>
-              Continue to match transfer <span aria-hidden="true">→</span>
+            <Link className="how-we-train-continue" to={`/presentation/how-we-train-pictures?example=${activeExample.id}`}>
+              Continue to game pictures <span aria-hidden="true">→</span>
             </Link>
           </section>
         </div>

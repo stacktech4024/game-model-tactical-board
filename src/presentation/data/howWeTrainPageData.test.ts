@@ -64,51 +64,70 @@ test('How We Train exposes four approved examples with Central to Wide as the de
   )
 })
 
-test('every example carries the complete Game Model to match-transfer chain and evidence fields', () => {
+test('every example carries the complete Game Model to match-transfer chain and sourced session detail', () => {
   HOW_WE_TRAIN_EXAMPLES.forEach((example) => {
     assert.ok(example.gameModelPrinciple.length > 0, `${example.id}: Game Model Principle`)
     assert.ok(example.positionalRequirement.length > 0, `${example.id}: Positional Requirement`)
     assert.ok(example.trainingDesign.length > 0, `${example.id}: Training Design`)
     assert.deepEqual(Object.keys(example.coachingDetail), ['who', 'what', 'when', 'where', 'why', 'how'])
     assert.ok(example.matchTransfer.length >= 4, `${example.id}: Match Transfer`)
-    assert.ok(example.evidenceStrength, `${example.id}: evidence strength`)
-    assert.equal(example.gameModelPrincipleEvidence, 'GAME MODEL REQUIREMENT')
+    Object.values(example.design).forEach((detail) => assert.ok(detail.value, `${example.id}: design detail`))
+    Object.values(example.demands).forEach((detail) => assert.ok(detail.value, `${example.id}: demand detail`))
     assert.ok(example.visualScenario.players.length > 0, `${example.id}: visual players`)
     assert.ok(example.visualScenario.steps.length > 0, `${example.id}: visual steps`)
     assert.ok(example.visualScenario.routes.length > 0, `${example.id}: visual routes`)
   })
 })
 
-test('MD+1 keeps confirmed load, format, methodology, and technical tactical reinforcement explicit', () => {
+test('MD+1 uses the authored Central to Wide activity dimensions, format, load, and scoring', () => {
   const mdPlusOne = getExample('central-wide')
   const parameters = mdPlusOne.design.parameters.value
 
-  assert.equal(mdPlusOne.sessionSource, 'MD+1')
+  assert.equal(mdPlusOne.sessionSource, 'MD+1 · 6v6+2')
   assert.match(parameters, /60–75 minutes/)
-  assert.match(parameters, /RPE 2–3/)
+  assert.match(parameters, /low physical load/i)
   assert.equal(mdPlusOne.methodology, 'Whole')
-  assert.equal(mdPlusOne.methodologyStatus, 'CONFIRMED')
-  assert.equal(mdPlusOne.design.players.value, '6v6+2')
-  assert.match(mdPlusOne.trainingDesign, /Recovery plus.*low-load technical\/tactical reinforcement/i)
-  assert.doesNotMatch(mdPlusOne.trainingDesign, /only recovery|recovery\/video only/i)
+  assert.match(mdPlusOne.design.pitch.value, /50m × 35m/)
+  assert.match(mdPlusOne.design.players.value, /6v6\+2/)
+  assert.match(mdPlusOne.design.organization.value, /Start and restart with a goalkeeper/)
+  assert.match(mdPlusOne.demands.reward.value, /2 points.*wide-player combination/i)
 })
 
-test('Practice Session 5 and 8 examples keep unsupported setup details marked for confirmation', () => {
-  const sessionExamples = HOW_WE_TRAIN_EXAMPLES.filter((example) => example.id !== 'central-wide')
+test('Practice Sessions 5 and 8 retain their authored progressions and competitive demands', () => {
+  const widePressure = getExample('wide-pressure')
+  const pressRegain = getExample('press-regain')
+  const lineBreak = getExample('line-break-react')
 
-  sessionExamples.forEach((example) => {
-    assert.equal(example.methodologyStatus, 'RECOMMENDATION — COACH CONFIRMATION NEEDED')
-    assert.equal(example.design.pitch.status, 'COACH CONFIRMATION NEEDED')
-    assert.equal(example.design.parameters.status, 'COACH CONFIRMATION NEEDED')
-    assert.equal(example.design.players.status, 'COACH CONFIRMATION NEEDED')
-    assert.match(example.design.players.value, /exact formal player count.*Coach confirmation needed/i)
-    assert.doesNotMatch(example.design.pitch.value, /\b\d+\s*[x×]\s*\d+\b/i)
-    assert.doesNotMatch(example.design.players.value, /\b\d+v\d+\b/i)
-    Object.values(example.demands).forEach((demand) => {
-      assert.equal(demand.status, 'COACH CONFIRMATION NEEDED')
-      assert.match(demand.value, /Coach confirmation needed/i)
-    })
-  })
+  assert.equal(widePressure.methodology, 'Progressive')
+  assert.match(widePressure.design.pitch.value, /15m × 10m.*52m × 68m/)
+  assert.match(widePressure.demands.reward.value, /Blue earns 1.*Green earns 2/i)
+  assert.match(pressRegain.design.pitch.value, /40m × 16m/)
+  assert.match(pressRegain.design.organization.value, /3 simple passes and switch/i)
+  assert.equal(lineBreak.methodology, 'Progressive')
+  assert.match(lineBreak.design.pitch.value, /40m × 20m.*65m × 45m/)
+  assert.match(lineBreak.design.organization.value, /Complete 4 passes.*break the central line/i)
+})
+
+test('user-facing How We Train copy omits audit and proof terminology', () => {
+  const userFacingCopy = HOW_WE_TRAIN_EXAMPLES.flatMap((example) => [
+    example.title,
+    example.shortPurpose,
+    ...example.geography,
+    example.system,
+    example.strategy,
+    ...example.tactics,
+    ...example.skillSet,
+    ...example.gameModelPrinciple,
+    ...example.positionalRequirement,
+    example.trainingDesign,
+    ...Object.values(example.coachingDetail),
+    ...Object.values(example.design).map((detail) => detail.value),
+    ...Object.values(example.demands).map((detail) => detail.value),
+    example.successIndicator,
+    example.visualScenario.caption,
+  ]).join(' ')
+
+  assert.doesNotMatch(userFacingCopy, /evidence(?:-based)?|proof|confirm(?:ed|ation)?|unconfirmed/i)
 })
 
 test('the four examples map to the approved Moments of the Game', () => {
@@ -145,32 +164,36 @@ test('the Canada Soccer decision framework appears only for Press to Regain', ()
   assert.doesNotMatch(JSON.stringify(getExample('press-regain').decisionFramework), /CONCEIVE|DECEIVE/i)
 })
 
-test('How We Train uses a three-page sequence before Microcycle and Training Methodology', () => {
+test('How We Train uses a four-page sequence before Microcycle and Training Methodology', () => {
   const appSource = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')
 
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-9), [
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(-10), [
     'players',
     'skills',
     'how-we-train',
     'how-we-train-session',
+    'how-we-train-pictures',
     'how-we-train-transfer',
     'microcycle',
     'microcycle-detail',
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 20)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 21)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train-session"/)
   assert.match(appSource, /element=\{<HowWeTrainExamplesPage \/>\}/)
+  assert.match(appSource, /path="\/presentation\/how-we-train-pictures"/)
+  assert.match(appSource, /element=\{<HowWeTrainPicturesPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train-transfer"/)
   assert.match(appSource, /element=\{<HowWeTrainTransferPage \/>\}/)
 })
 
-test('the overview, session design and transfer pages preserve concise accessible navigation', () => {
+test('the overview, session design, game pictures and transfer pages preserve concise accessible navigation', () => {
   const overviewSource = readFileSync(new URL('../pages/HowWeTrainPage.tsx', import.meta.url), 'utf8')
   const pageSource = readFileSync(new URL('../pages/HowWeTrainExamplesPage.tsx', import.meta.url), 'utf8')
+  const picturesSource = readFileSync(new URL('../pages/HowWeTrainPicturesPage.tsx', import.meta.url), 'utf8')
   const transferSource = readFileSync(new URL('../pages/HowWeTrainTransferPage.tsx', import.meta.url), 'utf8')
   const layoutSource = readFileSync(new URL('../PresentationLayout.tsx', import.meta.url), 'utf8')
 
@@ -188,25 +211,34 @@ test('the overview, session design and transfer pages preserve concise accessibl
   assert.match(pageSource, /event\.key === 'Home'/)
   assert.match(pageSource, /event\.key === 'End'/)
   assert.match(pageSource, /tabRefs\.current\[nextIndex\]\?\.focus\(\)/)
-  assert.match(pageSource, /function TrainingPhaseCard/)
-  assert.match(pageSource, /phase=\{visualPhases\[0\]\}/)
-  assert.match(pageSource, /phase=\{visualPhases\[1\]\}/)
-  assert.match(pageSource, /DIAGRAM \{index \+ 1\}/)
-  assert.match(pageSource, /Red attacks · Zone 4/)
-  assert.match(pageSource, /Red defends · Zone 1/)
-  assert.match(pageSource, /Yellow #1 — coached GK/)
-  assert.match(pageSource, /Cyan #1 — opposition GK/)
-  assert.match(pageSource, /to="\/presentation\/players"/)
-  assert.match(pageSource, /to="\/presentation\/skills"/)
+  assert.match(pageSource, /how-we-train-session-summary/)
+  assert.match(pageSource, /SESSION BLUEPRINT/)
+  assert.doesNotMatch(pageSource, /how-we-train-role-chips/)
+  assert.doesNotMatch(pageSource, /to="\/presentation\/(?:players|skills)"/)
   assert.match(pageSource, /<PresentationLayout pageId="how-we-train-session"/)
-  assert.match(pageSource, /Continue to match transfer/)
+  assert.match(pageSource, /Continue to game pictures/)
   assert.doesNotMatch(pageSource, /GAME MODEL → TRAINING → TRANSFER/)
+  assert.doesNotMatch(pageSource, /activeExample\.(?:methodologyStatus|evidenceStrength)/)
+  assert.doesNotMatch(pageSource, /detail\.status/)
+  assert.doesNotMatch(pageSource, /Training evidence examples/i)
+  assert.match(picturesSource, /<PresentationLayout pageId="how-we-train-pictures"/)
+  assert.match(picturesSource, /function TrainingPhaseCard/)
+  assert.match(picturesSource, /phase=\{visualPhases\[0\]\}/)
+  assert.match(picturesSource, /phase=\{visualPhases\[1\]\}/)
+  assert.match(picturesSource, /DIAGRAM \{index \+ 1\}/)
+  assert.match(picturesSource, /Red attacks · Zone 4/)
+  assert.match(picturesSource, /Red defends · Zone 1/)
+  assert.match(picturesSource, /Yellow #1 — coached GK/)
+  assert.match(picturesSource, /Cyan #1 — opposition GK/)
+  assert.match(picturesSource, /Continue to match transfer/)
   assert.match(transferSource, /<PresentationLayout pageId="how-we-train-transfer"/)
   assert.match(transferSource, /GAME MODEL → TRAINING → TRANSFER/)
   assert.match(transferSource, /SESSION TO MATCH TRANSFER/i)
   assert.match(transferSource, /role="tablist"/)
   assert.match(transferSource, /role="tabpanel"/)
-  assert.match(transferSource, /Review the session design/)
+  assert.match(transferSource, /Review the game pictures/)
+  assert.doesNotMatch(transferSource, /activeExample\.gameModelPrincipleEvidence/)
+  assert.doesNotMatch(`${pageSource}${picturesSource}${transferSource}`, /DIRECT SESSION EVIDENCE|COACH CONFIRMATION NEEDED|\bCONFIRMED\b|\bPROOF\b/i)
   assert.match(layoutSource, /preserveHowWeTrainExample/)
   assert.match(layoutSource, /location\.search/)
 })

@@ -14,6 +14,7 @@ export type PresentationPageId =
   | 'skills'
   | 'how-we-train'
   | 'how-we-train-session'
+  | 'how-we-train-pictures'
   | 'how-we-train-transfer'
   | 'microcycle'
   | 'microcycle-detail'
@@ -36,6 +37,7 @@ export const PRESENTATION_PAGE_ORDER: PresentationPageId[] = [
   'skills',
   'how-we-train',
   'how-we-train-session',
+  'how-we-train-pictures',
   'how-we-train-transfer',
   'microcycle',
   'microcycle-detail',
@@ -59,6 +61,7 @@ export const PRESENTATION_PAGE_LABELS: Record<PresentationPageId, string> = {
   skills: 'Skill development',
   'how-we-train': 'How we train',
   'how-we-train-session': 'Training session design',
+  'how-we-train-pictures': 'Training game pictures',
   'how-we-train-transfer': 'Session-to-match transfer',
   microcycle: 'Microcycle',
   'microcycle-detail': 'Microcycle day detail',

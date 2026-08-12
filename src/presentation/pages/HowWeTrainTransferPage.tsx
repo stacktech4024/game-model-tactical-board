@@ -36,8 +36,8 @@ export function HowWeTrainTransferPage() {
     <PresentationLayout pageId="how-we-train-transfer" noPadding>
       <header className="how-we-train-detail-header how-we-train-transfer-header">
         <div>
-          <Link to={`/presentation/how-we-train-session?example=${activeExample.id}`}>← Session design</Link>
-          <p className="presentation-eyebrow">Session to match transfer · Page 2 of 2</p>
+          <Link to={`/presentation/how-we-train-pictures?example=${activeExample.id}`}>← Game pictures</Link>
+          <p className="presentation-eyebrow">Session to match transfer · Page 3 of 3</p>
           <h1 className="presentation-title">{activeExample.title}</h1>
           <p className="presentation-body">
             Follow one concise line from the Game Model requirement to the behaviour we expect in the match.
@@ -84,7 +84,7 @@ export function HowWeTrainTransferPage() {
             <p>Each stage answers one question. Read left to right, then use the match outcome as the test.</p>
           </header>
           <ol className="how-we-train-chain how-we-train-chain--page">
-            <li><b>1</b><div><span>GAME MODEL PRINCIPLE</span><p>{activeExample.gameModelPrinciple.join(' · ')}</p><small>{activeExample.gameModelPrincipleEvidence}</small></div></li>
+            <li><b>1</b><div><span>GAME MODEL PRINCIPLE</span><p>{activeExample.gameModelPrinciple.join(' · ')}</p></div></li>
             <li><b>2</b><div><span>POSITIONAL REQUIREMENT</span><p>{activeExample.positionalRequirement.join(' · ')}</p></div></li>
             <li><b>3</b><div><span>TRAINING DESIGN</span><p>{activeExample.trainingDesign}</p></div></li>
             <li className="how-we-train-chain__coaching"><b>4</b><div><span>COACHING DETAIL</span><dl>{Object.entries(activeExample.coachingDetail).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div></li>
@@ -102,7 +102,8 @@ export function HowWeTrainTransferPage() {
         </section>
 
         <footer className="how-we-train-transfer-links">
-          <Link to={`/presentation/how-we-train-session?example=${activeExample.id}`}>← Review the session design</Link>
+          <Link to={`/presentation/how-we-train-pictures?example=${activeExample.id}`}>← Review the game pictures</Link>
+          <Link to={`/presentation/how-we-train-session?example=${activeExample.id}`}>Review the session design</Link>
           <Link to="/presentation/players">Connect positional profiles</Link>
           <Link to="/presentation/skills">Connect skill development</Link>
         </footer>
