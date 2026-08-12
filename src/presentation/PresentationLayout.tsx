@@ -126,7 +126,11 @@ export function PresentationLayout({ pageId, children, noPadding = false }: Pres
         ))}
       </div>
 
-      <main className={noPadding ? 'presentation-page presentation-page--no-padding' : 'presentation-page'}>
+      <main className={[
+        'presentation-page',
+        `presentation-page--${pageId}`,
+        noPadding ? 'presentation-page--no-padding' : '',
+      ].filter(Boolean).join(' ')}>
         {children}
       </main>
 
