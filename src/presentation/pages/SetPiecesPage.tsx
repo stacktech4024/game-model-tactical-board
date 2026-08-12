@@ -55,6 +55,11 @@ export function SetPieceRegimePage({
 
       <section className={`analysis-lab set-pieces-lab ${labClassName}`.trim()}>
         <div className="analysis-pitch-card set-pieces-pitch-card">
+          <div className="set-pieces-team-key" aria-label="Diagram teams and attacking direction">
+            <span><i className="set-pieces-team-key__dot set-pieces-team-key__dot--pickering" />Pickering</span>
+            <span><i className="set-pieces-team-key__dot set-pieces-team-key__dot--opponent" />Opponent</span>
+            <strong>Pickering attacks <b aria-hidden="true">↑</b></strong>
+          </div>
           <PixiPitchPreview
             key={activeCase.id}
             width={480}

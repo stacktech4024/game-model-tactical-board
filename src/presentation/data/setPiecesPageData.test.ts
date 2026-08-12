@@ -65,6 +65,63 @@ function distanceInMetres(
   return Math.hypot(xMetres, yMetres)
 }
 
+function assertAttackersOnsideAtTouch(
+  setPieceCase: SetPiecePageCase,
+  state: ReturnType<typeof replayUntil>,
+  attackerIds: string[],
+) {
+  const defenderGoalLineDistances = setPieceCase.preview.players
+    .filter((player) => player.side === 'away')
+    .map((player) => state.positions.get(player.id)?.y)
+    .filter((y): y is number => y !== undefined)
+    .sort((first, second) => first - second)
+  const secondLastDefenderY = defenderGoalLineDistances[1]
+
+  assert.ok(secondLastDefenderY !== undefined, `${setPieceCase.id}: second-last defender`)
+  const offsideLineY = Math.min(state.ball.y, secondLastDefenderY)
+
+  attackerIds.forEach((attackerId) => {
+    const attacker = state.positions.get(attackerId)
+
+    assert.ok(attacker, `${setPieceCase.id}: missing attacker ${attackerId}`)
+    assert.ok(
+      attacker.y >= offsideLineY,
+      `${setPieceCase.id}/${attackerId}: must be onside when the ball is touched`,
+    )
+  })
+}
+
+function facingAngleFromMovement(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+) {
+  return (Math.atan2(to.x - from.x, from.y - to.y) * 180) / Math.PI
+}
+
+function facingDifference(first: number, second: number) {
+  return Math.abs(((first - second + 540) % 360) - 180)
+}
+
+function assertMovementFacing(
+  setPieceCase: SetPiecePageCase,
+  stepId: string,
+  playerId: string,
+  tolerance = 2,
+) {
+  const step = setPieceCase.preview.steps.find((item) => item.id === stepId)
+  const move = step?.playerMoves?.find((item) => item.playerId === playerId)
+  const start = replayUntil(setPieceCase, stepId).positions.get(playerId)
+
+  assert.ok(step, `${setPieceCase.id}: missing step ${stepId}`)
+  assert.ok(move, `${setPieceCase.id}/${stepId}: missing movement for ${playerId}`)
+  assert.ok(start, `${setPieceCase.id}/${stepId}: missing start position for ${playerId}`)
+  assert.ok(Number.isFinite(move.facingAngle), `${setPieceCase.id}/${stepId}: missing facing for ${playerId}`)
+  assert.ok(
+    facingDifference(move.facingAngle!, facingAngleFromMovement(start, move.to)) <= tolerance,
+    `${setPieceCase.id}/${stepId}/${playerId}: body must follow the movement path`,
+  )
+}
+
 test('Set Pieces exposes the complete restart menu in presentation order', () => {
   assert.deepEqual(
     SET_PIECES_PAGE_CASES.map((item) => [item.id, item.tabLabel]),
@@ -101,15 +158,16 @@ test('every restart distinguishes organization, strategy, tactics, skills, princ
 
   assert.match(getCase('defending-corner').strategy, /first contact.*second ball.*transition/i)
   assert.match(getCase('wide-free-kick').strategy, /crossing angle.*#11.*hybrid defence/i)
-  assert.match(getCase('direct-free-kick').strategy, /Fernandes-to-Mount.*roll.*strike/i)
-  assert.match(getCase('indirect-free-kick').strategy, /Solano-to-Shearer.*fake.*shift/i)
+  assert.match(getCase('direct-free-kick').strategy, /disguise.*roll.*strike/i)
+  assert.match(getCase('indirect-free-kick').strategy, /false cues.*roll.*second touch/i)
   assert.match(getCase('throw-in').strategy, /free receiving option.*secure reset/i)
 })
 
-test('direct free kick legally changes the angle before #10 strikes and preserves rest defence', () => {
+test('direct free kick keeps rebound runners onside and uses realistic rest defence', () => {
   const direct = getCase('direct-free-kick')
   const roll = direct.preview.steps.find((step) => step.id === 'df-roll')
   const strike = direct.preview.steps.find((step) => step.id === 'df-strike')
+  const atFirstTouch = replayUntil(direct, 'df-roll')
   const atRoll = replayUntil(direct, 'df-roll')
   const atStrike = replayUntil(direct, 'df-strike')
   const wall = ['df-away-4', 'df-away-5', 'df-away-6', 'df-away-8'].map((id) => getPlayer(direct, id))
@@ -122,11 +180,23 @@ test('direct free kick legally changes the angle before #10 strikes and preserve
   assert.ok(distanceInMetres(atStrike.positions.get('df-home-10')!, strike!.ballFrom!) <= 2.1)
   wall.forEach((defender) => {
     assert.ok(distanceInMetres(defender, direct.preview.ballPosition) >= 9.15, `${defender.id}: wall distance`)
+    assert.ok(distanceInMetres(defender, getPlayer(direct, 'df-home-6')) >= 1, `${defender.id}: legal #6 screen distance`)
   })
-  ;['df-home-2', 'df-home-3', 'df-home-6'].forEach((id) => {
+  assertAttackersOnsideAtTouch(direct, atFirstTouch, ['df-home-9', 'df-home-11'])
+  assertAttackersOnsideAtTouch(direct, atStrike, ['df-home-6', 'df-home-9', 'df-home-11'])
+  ;['df-home-2', 'df-home-3'].forEach((id) => {
+    assert.ok(getPlayer(direct, id).y < 35, `${id}: wide rebound-support lane`)
+  })
+  ;['df-home-4', 'df-home-5'].forEach((id) => {
+    assert.ok(getPlayer(direct, id).y >= 50 && getPlayer(direct, id).y <= 65, `${id}: near-halfway rest defence`)
     assert.ok(strike?.playerMoves?.some((move) => move.playerId === id), `${id}: rest-defence adjustment`)
   })
-  assert.match(direct.realityReference, /Manchester United.*Bruno Fernandes.*Mason Mount/i)
+  assert.ok(Math.abs(getPlayer(direct, 'df-home-4').y - getPlayer(direct, 'df-home-5').y) >= 3, 'direct: #4/#5 stagger')
+  assert.ok(getPlayer(direct, 'df-away-9').y >= 45, 'direct: defending #9 remains a high outlet')
+  assert.ok(getPlayer(direct, 'df-away-10').y >= 45, 'direct: defending #10 remains a high outlet')
+  assert.ok(getPlayer(direct, 'df-home-4').y > getPlayer(direct, 'df-away-9').y, 'direct: #4 stays goal-side of #9')
+  assert.ok(getPlayer(direct, 'df-home-5').y > getPlayer(direct, 'df-away-10').y, 'direct: #5 stays goal-side of #10')
+  assert.match(direct.realityReference, /Elite-match principle.*onside.*one metre/i)
 })
 
 test('indirect free kick uses a legal screen, mandatory first touch, active wall, and second-player finish', () => {
@@ -158,7 +228,29 @@ test('indirect free kick uses a legal screen, mandatory first touch, active wall
   assert.equal(strike?.ballTo?.y, 0.4)
   assert.ok(distanceInMetres(atRoll.positions.get('if-home-10')!, roll!.ballFrom!) <= 3)
   assert.ok(distanceInMetres(atStrike.positions.get('if-home-7')!, strike!.ballFrom!) <= 1.5)
-  assert.match(indirect.realityReference, /Alan Shearer.*second touch.*one metre/i)
+  assertAttackersOnsideAtTouch(indirect, atRoll, ['if-home-9', 'if-home-11'])
+  assertAttackersOnsideAtTouch(indirect, atStrike, ['if-home-9', 'if-home-11'])
+  assert.ok(getPlayer(indirect, 'if-away-9').y >= 45, 'indirect: defending #9 remains a high outlet')
+  assert.ok(getPlayer(indirect, 'if-away-10').y >= 45, 'indirect: defending #10 remains a high outlet')
+  assert.ok(getPlayer(indirect, 'if-home-4').y > getPlayer(indirect, 'if-away-9').y, 'indirect: #4 stays goal-side of #9')
+  assert.ok(getPlayer(indirect, 'if-home-5').y > getPlayer(indirect, 'if-away-10').y, 'indirect: #5 stays goal-side of #10')
+  assert.ok(Math.abs(getPlayer(indirect, 'if-home-4').y - getPlayer(indirect, 'if-home-5').y) >= 3, 'indirect: #4/#5 stagger')
+  assert.match(indirect.realityReference, /Law-based elite-match principle.*second touch.*one metre/i)
+})
+
+test('direct and indirect free-kick copy contains no professional club or player references', () => {
+  const copy = ['direct-free-kick', 'indirect-free-kick']
+    .map((id) => getCase(id as SetPiecePageCase['id']))
+    .flatMap((setPieceCase) => [
+      setPieceCase.organization,
+      setPieceCase.strategy,
+      ...setPieceCase.tactics,
+      setPieceCase.caption,
+      setPieceCase.realityReference,
+    ])
+    .join(' ')
+
+  assert.doesNotMatch(copy, /Manchester United|Crystal Palace|Premier League|Fernandes|Mount|Solano|Shearer/i)
 })
 
 test('new free-kick ball actions use believable elite-match distances and speeds', () => {
@@ -195,6 +287,44 @@ test('new free-kick routines author body orientation for every player and moveme
         assert.ok(Number.isFinite(move.facingAngle), `${caseId}/${step.id}/${move.playerId}: movement facing`)
       })
     })
+  })
+})
+
+test('free-kick body orientation follows the ball, strike, and defensive charge', () => {
+  ;['direct-free-kick', 'indirect-free-kick'].forEach((caseId) => {
+    const freeKick = getCase(caseId as SetPiecePageCase['id'])
+
+    freeKick.preview.players.forEach((player) => {
+      const expected = facingAngleFromMovement(player, freeKick.preview.ballPosition)
+
+      assert.ok(
+        facingDifference(player.facingAngle!, expected) <= 2,
+        `${caseId}/${player.id}: setup body must see the ball`,
+      )
+    })
+  })
+
+  const direct = getCase('direct-free-kick')
+  const directStrike = direct.preview.steps.find((step) => step.id === 'df-strike')!
+  const indirect = getCase('indirect-free-kick')
+  const indirectStrike = indirect.preview.steps.find((step) => step.id === 'if-strike')!
+
+  assert.ok(facingDifference(
+    directStrike.facingAngle!,
+    facingAngleFromMovement(directStrike.ballFrom!, directStrike.ballTo!),
+  ) <= 2, 'direct striker must face the shot')
+  assert.ok(facingDifference(
+    indirectStrike.facingAngle!,
+    facingAngleFromMovement(indirectStrike.ballFrom!, indirectStrike.ballTo!),
+  ) <= 2, 'indirect striker must face the shot')
+
+  ;['df-away-4', 'df-away-5', 'df-away-6', 'df-away-8'].forEach((playerId) => {
+    assertMovementFacing(direct, 'df-roll', playerId)
+    assertMovementFacing(direct, 'df-strike', playerId)
+  })
+  ;['if-away-2', 'if-away-3', 'if-away-4', 'if-away-5', 'if-away-6', 'if-away-8'].forEach((playerId) => {
+    assertMovementFacing(indirect, 'if-roll', playerId)
+    assertMovementFacing(indirect, 'if-strike', playerId)
   })
 })
 
@@ -273,8 +403,12 @@ test('attacking corner keeps its connected cluster before #2 heads the far-post 
   assert.ok(corner.preview.ballPosition.x <= 2 && corner.preview.ballPosition.y <= 2, 'ball must start in the corner arc')
   assert.ok(Math.max(...clusterYs) - Math.min(...clusterYs) <= 1, 'main attackers must share a connected starting height')
   assert.ok(
-    clusterXs.slice(1).every((x, index) => x - clusterXs[index] <= 5),
-    'main attackers must begin in a recognizable cluster',
+    clusterXs.slice(1).every((x, index) => {
+      const gap = x - clusterXs[index]
+
+      return gap >= 5.5 && gap <= 6.5
+    }),
+    'main attackers must begin connected but visually separated',
   )
 
   const manipulation = corner.preview.steps.find((step) => step.id === 'ac-manipulation')
@@ -324,6 +458,31 @@ test('attacking corner keeps its connected cluster before #2 heads the far-post 
   assert.ok(getPlayer(corner, 'ac-home-2').x >= 85 && getPlayer(corner, 'ac-home-2').y < 42)
   assert.ok(getPlayer(corner, 'ac-home-6').y >= 57)
   assert.match(corner.strategy, /#2.*head back.*penalty spot.*#8.*second header/i)
+})
+
+test('attacking-corner finishers and rest defence never turn their backs on the live action', () => {
+  const corner = getCase('attacking-corner')
+  const finish = corner.preview.steps.find((step) => step.id === 'ac-finish')!
+  const eightFinish = finish.playerMoves?.find((move) => move.playerId === 'ac-home-8')
+
+  assertMovementFacing(corner, 'ac-header-across', 'ac-home-8')
+  assertMovementFacing(corner, 'ac-header-across', 'ac-home-9')
+  assertMovementFacing(corner, 'ac-finish', 'ac-home-6')
+  assert.ok(eightFinish)
+  assert.ok(facingDifference(
+    eightFinish.facingAngle!,
+    facingAngleFromMovement(finish.ballFrom!, finish.ballTo!),
+  ) <= 2, '#8 must face the headed finish')
+})
+
+test('set-piece presentation uses a centred professional card grid and an explicit team key', () => {
+  const pageSource = readFileSync(new URL('../pages/SetPiecesPage.tsx', import.meta.url), 'utf8')
+  const layoutCss = readFileSync(new URL('../PresentationLayout.css', import.meta.url), 'utf8')
+
+  assert.match(pageSource, /set-pieces-team-key[\s\S]*Pickering[\s\S]*Opponent[\s\S]*Pickering attacks/)
+  assert.match(layoutCss, /set-pieces-skills \.presentation-chip-row[\s\S]*repeat\(5, minmax\(0, 1fr\)\)/)
+  assert.match(layoutCss, /set-pieces-principles \.presentation-chip-row[\s\S]*repeat\(5, minmax\(0, 1fr\)\)/)
+  assert.match(layoutCss, /set-pieces-skills \.presentation-chip,[\s\S]*place-items: center;[\s\S]*text-align: center;/)
 })
 
 test('defending corner uses a hybrid block with active goalkeeper, first contact, edge cover, and outlet', () => {

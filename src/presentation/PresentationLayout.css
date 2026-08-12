@@ -760,6 +760,63 @@
   align-self: start;
 }
 
+.set-pieces-team-key {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 6px 12px;
+  width: 180px;
+  padding: 9px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.82);
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.28);
+}
+
+.set-pieces-team-key span,
+.set-pieces-team-key strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #e2e8f0;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.set-pieces-team-key strong {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  color: #fef08a;
+}
+
+.set-pieces-team-key strong b {
+  font-size: 1rem;
+  line-height: 0.7;
+}
+
+.set-pieces-team-key__dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: 50%;
+}
+
+.set-pieces-team-key__dot--pickering {
+  background: #ef4444;
+}
+
+.set-pieces-team-key__dot--opponent {
+  background: #94a3b8;
+}
+
 .set-pieces-tab-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -861,19 +918,44 @@
 .set-pieces-skills,
 .set-pieces-principles {
   display: grid;
+  align-self: start;
+  align-content: start;
   gap: 6px;
 }
 
 .set-pieces-skills .presentation-chip-row,
 .set-pieces-principles .presentation-chip-row {
+  display: grid;
+  align-items: stretch;
   gap: 6px;
   margin-top: 0;
 }
 
+.set-pieces-skills .presentation-chip-row {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.set-pieces-principles .presentation-chip-row {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .set-pieces-skills .presentation-chip,
 .set-pieces-principles .presentation-chip {
-  padding: 5px 8px;
+  display: grid;
+  width: 100%;
+  height: 40px;
+  place-items: center;
+  padding: 6px 8px;
+  border-radius: 9px;
   font-size: 0.7rem;
+  line-height: 1.18;
+  text-align: center;
+}
+
+.set-pieces-principles .presentation-chip {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(127, 29, 29, 0.13);
+  color: #fecaca;
 }
 
 @media (min-width: 1200px) {
@@ -896,6 +978,8 @@
   .set-pieces-panel__heading,
   .set-pieces-game-plan,
   .set-pieces-tactics,
+  .set-pieces-skills,
+  .set-pieces-principles,
   .set-pieces-panel > .presentation-link-button {
     grid-column: 1 / -1;
   }
@@ -906,6 +990,19 @@
 
   .free-kicks-lab .analysis-tab {
     padding-block: 11px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .set-pieces-team-key {
+    top: 10px;
+    left: 10px;
+    width: auto;
+  }
+
+  .set-pieces-skills .presentation-chip-row,
+  .set-pieces-principles .presentation-chip-row {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   }
 }
 
