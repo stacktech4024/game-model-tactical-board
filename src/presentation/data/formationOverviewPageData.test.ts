@@ -49,3 +49,22 @@ test('#11 and #9 use short inward runs toward the box', () => {
   assert.doesNotMatch(pageSource, /M40 30 C38 23 35 16 32 10/)
   assert.doesNotMatch(pageSource, /M60 30 C62 23 65 16 68 10/)
 })
+
+test('supporting players use short runs that stay relevant to their nearby space', () => {
+  const pageSource = readFileSync(new URL('../pages/FormationOverviewPage.tsx', import.meta.url), 'utf8')
+
+  const shortSupportingRuns = [
+    'M22 68 C21 62 22 56 25 50',
+    'M42 74 L42 60',
+    'M58 74 L58 60',
+    'M78 68 C79 62 78 56 75 50',
+    'M27 48 C27 42 29 37 32 33',
+    'M43 49 C43 44 44 40 46 36',
+    'M57 49 C57 44 56 40 54 36',
+    'M73 48 C73 42 71 37 68 33',
+  ]
+
+  shortSupportingRuns.forEach((run) => assert.ok(pageSource.includes(run)))
+  assert.doesNotMatch(pageSource, /M22 68 C20 54 23 34 31 15/)
+  assert.doesNotMatch(pageSource, /M78 68 C80 53 77 33 69 14/)
+})
