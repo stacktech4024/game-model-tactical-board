@@ -183,7 +183,7 @@ test('How We Train uses a four-page sequence before Microcycle and Training Meth
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 22)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 24)
   assert.match(appSource, /path="\/presentation\/how-we-train"/)
   assert.match(appSource, /element=\{<HowWeTrainPage \/>\}/)
   assert.match(appSource, /path="\/presentation\/how-we-train-session"/)

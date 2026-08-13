@@ -9,10 +9,12 @@ import {
   SET_PIECES_RELATIONSHIP,
 } from './momentsPageData.ts'
 
-test('Moments of the Game follows Pitch Geography and precedes Game Analysis', () => {
-  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(2, 7), [
+test('the two team-shape pages connect Pitch Geography to Moments and Game Analysis', () => {
+  assert.deepEqual(PRESENTATION_PAGE_ORDER.slice(2, 9), [
     'philosophy',
     'pitch-geography',
+    'attacking-formation',
+    'defensive-formation',
     'moments',
     'game-analysis',
     'attacking-transition',
@@ -77,4 +79,3 @@ test('App exposes a dedicated, static, accessible Moments relationship page', ()
   assert.match(pageSource, /Set Pieces connect to every Moment/)
   assert.doesNotMatch(pageSource, /PixiPitchPreview|players=|ballPosition/)
 })
-

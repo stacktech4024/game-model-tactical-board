@@ -248,7 +248,7 @@ test('the overview and day-detail routes are ordered between How We Train and Tr
     'methodology',
     'closing',
   ])
-  assert.equal(PRESENTATION_PAGE_ORDER.length, 22)
+  assert.equal(PRESENTATION_PAGE_ORDER.length, 24)
   assert.match(appSource, /path="\/presentation\/microcycle"/)
   assert.match(appSource, /element=\{<MicrocyclePage \/>\}/)
   assert.match(appSource, /path="\/presentation\/microcycle-detail"/)

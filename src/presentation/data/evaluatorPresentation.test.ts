@@ -22,16 +22,18 @@ const excludedWrittenModelPages = [
   'microcycle-detail',
 ]
 
-test('evaluator mode is an exact 20-minute AO-only sequence', () => {
+test('evaluator mode is an exact 20-minute sequence', () => {
   assert.equal(EVALUATOR_TOTAL_SECONDS, 20 * 60)
   assert.equal(formatPlannedTime(EVALUATOR_TOTAL_SECONDS), '20:00')
   assert.equal(new Set(EVALUATOR_PAGE_ORDER).size, EVALUATOR_PAGE_ORDER.length)
-  assert.equal(EVALUATOR_PAGE_ORDER.length, 12)
+  assert.equal(EVALUATOR_PAGE_ORDER.length, 14)
   assert.deepEqual(EVALUATOR_PAGE_ORDER, [
     'cover',
     'intro',
     'philosophy',
     'pitch-geography',
+    'attacking-formation',
+    'defensive-formation',
     'game-analysis',
     'skills',
     'how-we-train-session',
@@ -60,12 +62,18 @@ test('every evaluator step has a complete run-of-show entry', () => {
 })
 
 test('spoken script covers all evaluator-critical AO evidence', () => {
+  const attackingFormation = getEvaluatorStep('attacking-formation')?.script.join(' ') ?? ''
+  const defensiveFormation = getEvaluatorStep('defensive-formation')?.script.join(' ') ?? ''
   const gameAnalysis = getEvaluatorStep('game-analysis')?.script.join(' ') ?? ''
   const skills = getEvaluatorStep('skills')?.script.join(' ') ?? ''
   const transfer = getEvaluatorStep('how-we-train-transfer')?.script.join(' ') ?? ''
   const microcycle = getEvaluatorStep('microcycle')?.script.join(' ') ?? ''
   const methodology = getEvaluatorStep('methodology')?.script.join(' ') ?? ''
 
+  assert.match(attackingFormation, /1-4-4-2/)
+  assert.match(attackingFormation, /attacking/i)
+  assert.match(defensiveFormation, /1-4-2-3-1/)
+  assert.match(defensiveFormation, /defending/i)
   assert.match(gameAnalysis, /Attacking Organization/i)
   assert.match(gameAnalysis, /1-4-4-2/)
   assert.match(gameAnalysis, /#2/)

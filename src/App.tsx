@@ -4,6 +4,7 @@ import { CoverPage } from './presentation/pages/CoverPage'
 import { IntroPage } from './presentation/pages/IntroPage'
 import { PhilosophyPage } from './presentation/pages/PhilosophyPage'
 import { PitchGeographyPage } from './presentation/pages/PitchGeographyPage'
+import { AttackingFormationPage, DefensiveFormationPage } from './presentation/pages/FormationOverviewPage'
 import { MomentsPage } from './presentation/pages/MomentsPage'
 import { GameAnalysisPage } from './presentation/pages/GameAnalysisPage'
 import { AttackingTransitionPage } from './presentation/pages/AttackingTransitionPage'
@@ -34,6 +35,8 @@ function App() {
       <Route path="/presentation/intro" element={<IntroPage />} />
       <Route path="/presentation/philosophy" element={<PhilosophyPage />} />
       <Route path="/presentation/pitch-geography" element={<PitchGeographyPage />} />
+      <Route path="/presentation/attacking-formation" element={<AttackingFormationPage />} />
+      <Route path="/presentation/defensive-formation" element={<DefensiveFormationPage />} />
       <Route path="/presentation/moments" element={<MomentsPage />} />
       <Route path="/presentation/game-analysis" element={<GameAnalysisPage />} />
       <Route path="/presentation/attacking-transition" element={<AttackingTransitionPage />} />

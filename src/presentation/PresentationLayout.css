@@ -3327,8 +3327,341 @@
   padding: 4px 0 4px 12px;
 }
 
+.formation-overview-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 30px;
+  align-items: end;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto 18px;
+}
+
+.formation-overview-header .presentation-title {
+  margin-bottom: 8px;
+}
+
+.formation-overview-header .presentation-subtitle {
+  max-width: 760px;
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.formation-overview-system {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.6);
+  padding: 15px 18px;
+}
+
+.formation-overview-system--attacking {
+  border-top: 3px solid #cc0000;
+}
+
+.formation-overview-system--defensive {
+  border-top: 3px solid #fbbf24;
+}
+
+.formation-overview-system span,
+.formation-overview-explainer__moment,
+.formation-overview-bridge > span {
+  color: #aebdd1;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.formation-overview-system strong {
+  color: #f8fafc;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.formation-overview-system small {
+  color: #93a4bd;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.formation-overview-layout {
+  display: grid;
+  grid-template-columns: minmax(480px, 1.05fr) minmax(360px, 0.95fr);
+  gap: 22px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.formation-overview-pitch-card,
+.formation-overview-explainer {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.58);
+  box-shadow: 0 20px 55px rgba(2, 6, 23, 0.24);
+}
+
+.formation-overview-pitch-card {
+  display: grid;
+  justify-items: center;
+  margin: 0;
+  padding: 16px 20px 12px;
+}
+
+.formation-overview-pitch {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 560px);
+  aspect-ratio: 100 / 62;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.15);
+  border-radius: 9px;
+  background: #5c704f;
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.45);
+}
+
+.formation-overview-pitch-card--attacking .formation-overview-pitch {
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.45), 0 0 0 1px rgba(204, 0, 0, 0.18);
+}
+
+.formation-overview-pitch-card--defensive .formation-overview-pitch {
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.45), 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+.formation-overview-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.formation-overview-channel {
+  fill: rgba(15, 69, 42, 0.24);
+  stroke: rgba(16, 55, 35, 0.58);
+  stroke-width: 0.18;
+}
+
+.formation-overview-field-lines {
+  fill: none;
+  stroke: rgba(248, 250, 252, 0.9);
+  stroke-width: 0.24;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.formation-overview-field-lines .formation-overview-goal-net {
+  stroke: rgba(248, 250, 252, 0.42);
+  stroke-width: 0.13;
+}
+
+.formation-overview-coverage-zones polygon {
+  fill: rgba(239, 68, 68, 0.055);
+  stroke: rgba(248, 113, 113, 0.16);
+  stroke-width: 0.16;
+}
+
+.formation-overview-arrows path {
+  fill: none;
+  stroke: #ff2d2d;
+  stroke-width: 0.39;
+  stroke-dasharray: 1.25 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0.35px 0.25px rgba(69, 10, 10, 0.55));
+}
+
+.formation-overview-svg-players circle {
+  fill: #0bf13a;
+  stroke: #029d27;
+  stroke-width: 0.46;
+  filter: drop-shadow(0 1px 1.2px rgba(2, 20, 8, 0.68));
+}
+
+.formation-overview-svg-players text {
+  fill: #07120a;
+  font-family: Arial, sans-serif;
+  font-size: 2.55px;
+  font-weight: 900;
+}
+
+.formation-overview-pitch-card figcaption {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  margin-top: 8px;
+  color: #93a4bd;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.formation-overview-caption-key {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #fecaca;
+  white-space: nowrap;
+}
+
+.formation-overview-caption-key i {
+  position: relative;
+  display: block;
+  width: 22px;
+  border-top: 2px dashed #ff2d2d;
+}
+
+.formation-overview-pitch-card--defensive .formation-overview-caption-key i::after {
+  position: absolute;
+  top: -5px;
+  right: 0;
+  height: 8px;
+  border-right: 2px solid #ff2d2d;
+  content: '';
+}
+
+.formation-overview-explainer {
+  display: grid;
+  gap: 15px;
+  align-content: center;
+  padding: 26px;
+}
+
+.formation-overview-explainer__moment {
+  color: #cc0000;
+}
+
+.formation-overview-explainer h2 {
+  margin: -7px 0 0;
+  color: #f8fafc;
+  font-size: 1.6rem;
+}
+
+.formation-overview-explainer > p,
+.formation-overview-bridge p {
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.formation-overview-arrow-key {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(248, 113, 113, 0.18);
+  border-radius: 12px;
+  background: rgba(127, 29, 29, 0.11);
+  padding: 11px 13px;
+}
+
+.formation-overview-arrow-key > span {
+  position: relative;
+  display: flex;
+  width: 48px;
+  align-items: center;
+}
+
+.formation-overview-arrow-key > span i {
+  display: block;
+  width: 42px;
+  border-top: 2px dashed #ff2d2d;
+}
+
+.formation-overview-arrow-key > span b {
+  position: absolute;
+  right: 0;
+  color: #ff2d2d;
+  font-size: 1.55rem;
+  line-height: 0.7;
+  transform: translateY(-1px);
+}
+
+.formation-overview-arrow-key--defensive > span b {
+  right: 4px;
+  width: 0;
+  height: 16px;
+  overflow: hidden;
+  border-left: 2px solid #ff2d2d;
+  font-size: 0;
+  transform: none;
+}
+
+.formation-overview-arrow-key p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  color: #aebdd1;
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.formation-overview-arrow-key strong {
+  color: #f8fafc;
+  font-size: 0.74rem;
+}
+
+.formation-overview-principles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.formation-overview-principles div {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 11px;
+  background: rgba(2, 6, 23, 0.42);
+  padding: 11px;
+}
+
+.formation-overview-principles span {
+  color: #cc0000;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.formation-overview-principles strong {
+  color: #e5eef9;
+  font-size: 0.74rem;
+}
+
+.formation-overview-bridge {
+  border-left: 3px solid #fbbf24;
+  border-radius: 0 11px 11px 0;
+  background: rgba(251, 191, 36, 0.07);
+  padding: 13px 15px;
+}
+
+.formation-overview-bridge > span {
+  color: #fbbf24;
+}
+
+.formation-overview-bridge p {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 980px) {
   .pitch-geography-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .formation-overview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .formation-overview-header {
     grid-template-columns: 1fr;
   }
 

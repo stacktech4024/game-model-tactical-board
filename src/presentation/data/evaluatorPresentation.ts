@@ -50,19 +50,41 @@ export const EVALUATOR_PRESENTATION: EvaluatorPresentationStep[] = [
   {
     pageId: 'pitch-geography',
     section: 'INTRO / WHY',
-    plannedSeconds: 60,
+    plannedSeconds: 45,
     purpose: 'Make direction, zones, and channels unambiguous.',
     script: [
       'Canada Soccer geography gives the team one shared picture. We attack from Zone 1 toward Zone 4. The capping focus is Attacking Organization in Zones 2 and 3 into Zone 4.',
       'Horizontally, Zones 2 and 3 are where we secure, unbalance, and create. Vertically, we use the central and half-space channels to draw pressure before releasing Channel 1 width. The same labels appear in every diagram and training activity.',
     ],
     interaction: 'Show Zones, then Both. Point to the attacking-direction arrow.',
-    transition: 'Move from geography to the 1-4-4-2 team solution.',
+    transition: 'Use that shared map to establish our two reference team shapes.',
+  },
+  {
+    pageId: 'attacking-formation',
+    section: 'INTRO / WHY',
+    plannedSeconds: 30,
+    purpose: 'Show the team-only reference shape used in possession.',
+    script: [
+      'When we are attacking, our portfolio reference system is 1-4-4-2. The team expands to create width, the Fullbacks support progression, and #10 and #7 provide the starting width. #11 connects with #9 as the second forward, and both make short inward runs toward the box rather than pulling into the wide channels.',
+    ],
+    interaction: 'Point from the back four, through the midfield four, to the two forwards.',
+    transition: 'Contrast the attacking shape with how we organize when the opponent has the ball.',
+  },
+  {
+    pageId: 'defensive-formation',
+    section: 'INTRO / WHY',
+    plannedSeconds: 30,
+    purpose: 'Show the team-only reference shape used out of possession.',
+    script: [
+      'When we are defending, we recover into a compact 1-4-2-3-1. #6 and #8 protect the centre in front of the back four, #10, #11 and #7 form the next connected line, and #9 is the first defender and our counter outlet. The red T-capped coverage lines project away from our goal and show the space each player is responsible for controlling in front.',
+    ],
+    interaction: 'Point to the double pivot and the compact line of three.',
+    transition: 'Now apply the attacking shape to the selected game problem.',
   },
   {
     pageId: 'game-analysis',
     section: 'GAME ANALYSIS / WHAT',
-    plannedSeconds: 300,
+    plannedSeconds: 270,
     purpose: 'Explain System, Strategy, Tactics, and Skill Set as four distinct levels.',
     script: [
       'The Moment is Attacking Organization. Our attacking system is 1-4-4-2, with all eleven Pickering players and all eleven opponents visible. #2 is the right Fullback; the same relationships apply to #3 and #11 on the left.',
@@ -129,7 +151,7 @@ export const EVALUATOR_PRESENTATION: EvaluatorPresentationStep[] = [
   {
     pageId: 'microcycle',
     section: 'TRAINING METHODOLOGY / REASONING',
-    plannedSeconds: 120,
+    plannedSeconds: 105,
     purpose: 'Show when and why the same AO behaviour is trained.',
     script: [
       'The weekly objective is now one evaluator theme: Attacking Organization from Zones 2 and 3 into Zone 4. Each day includes the Moment, objective, duration, RPE, methodology, activity types, and physical load.',
