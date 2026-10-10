@@ -7,6 +7,7 @@ Checkpoint 1 establishes the clean project scaffold for the future tactical boar
 - Vite
 - React
 - TypeScript
+- CSS (`src/App.css`, `src/index.css`)
 - ESLint
 
 ## Project shape
